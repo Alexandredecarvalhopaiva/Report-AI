@@ -239,7 +239,7 @@ function setupLogin() {
       const demoUser = demoUsers[button.dataset.demoUser];
       const user = findUserByEmail(demoUser.email) || demoUser;
       document.querySelector("#loginEmail").value = user.email;
-      document.querySelector("#loginPassword").value = user.password;
+      document.querySelector("#loginPassword").value = demoUser.password;
       clearFormMessage("#loginMessage");
     });
   });
@@ -248,7 +248,8 @@ function setupLogin() {
     event.preventDefault();
     const email = normalizeEmail(document.querySelector("#loginEmail").value);
     const password = document.querySelector("#loginPassword").value;
-    const user = findUserByEmail(email);
+    const demoUser = findDemoUserByEmail(email);
+    let user = findUserByEmail(email);
 
     if (!email || !password) {
       setFormMessage("#loginMessage", "Informe e-mail e senha para continuar.", "error");
@@ -262,6 +263,11 @@ function setupLogin() {
         "error",
       );
       return;
+    }
+
+    if (demoUser && password === demoUser.password) {
+      user = restoreDemoUserAccess(demoUser, user);
+      resetLoginAttempts(email);
     }
 
     const lockout = getLoginLockout(email);
@@ -1203,13 +1209,26 @@ function ensureStateShape(savedState) {
   nextState.security.loginAttempts = nextState.security.loginAttempts || {};
 
   initialUsers.forEach((seedUser) => {
-    const existingUser = nextState.users.find((user) => user.email === seedUser.email);
+    const existingUser = nextState.users.find(
+      (user) => normalizeEmail(user.email) === normalizeEmail(seedUser.email),
+    );
     if (!existingUser) {
       nextState.users.push(structuredClone(seedUser));
       return;
     }
     existingUser.role = existingUser.role || seedUser.role;
     existingUser.status = existingUser.status || "Ativo";
+
+    const passwordIsUsable = validatePassword(existingUser.password, {
+      email: existingUser.email,
+      name: existingUser.name,
+    }).valid;
+
+    if (!passwordIsUsable) {
+      existingUser.password = seedUser.password;
+      existingUser.passwordUpdatedAt = nowIso();
+      delete nextState.security.loginAttempts[normalizeEmail(seedUser.email)];
+    }
   });
 
   return nextState;
@@ -1226,6 +1245,39 @@ function normalizeEmail(email) {
 function findUserByEmail(email) {
   const normalizedEmail = normalizeEmail(email);
   return state.users.find((user) => normalizeEmail(user.email) === normalizedEmail);
+}
+
+function findDemoUserByEmail(email) {
+  const normalizedEmail = normalizeEmail(email);
+  return Object.values(demoUsers).find((user) => normalizeEmail(user.email) === normalizedEmail);
+}
+
+function restoreDemoUserAccess(seedUser, existingUser = findUserByEmail(seedUser.email)) {
+  let user = existingUser;
+
+  if (!user) {
+    user = {
+      id: getNextId(state.users),
+      ...seedUser,
+      createdAt: today(),
+      lastLoginAt: null,
+    };
+    state.users.push(user);
+  }
+
+  user.name = user.name || seedUser.name;
+  user.email = seedUser.email;
+  user.password = seedUser.password;
+  user.role = seedUser.role;
+  user.status = "Ativo";
+  user.passwordUpdatedAt = user.passwordUpdatedAt || nowIso();
+
+  return user;
+}
+
+function getNextId(items) {
+  const ids = items.map((item) => Number(item.id)).filter(Number.isFinite);
+  return ids.length ? Math.max(...ids) + 1 : 1;
 }
 
 function isSuperAdmin() {

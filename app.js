@@ -31,6 +31,23 @@ const demoUsers = {
   },
 };
 
+const appRoutePrefix = "painel";
+const appRoutes = {
+  dashboard: "dashboard",
+  funcionarios: "employees",
+  empreendimentos: "clients",
+  eventos: "events",
+  frequencia: "frequency",
+  ponto: "timeclock",
+  atestados: "certificates",
+  calendario: "calendar",
+  marcas: "brands",
+  usuarios: "users",
+};
+const appViewRoutes = Object.fromEntries(
+  Object.entries(appRoutes).map(([route, view]) => [view, route]),
+);
+
 const initialUsers = Object.values(demoUsers).map((user, index) => ({
   id: index + 1,
   ...user,
@@ -105,6 +122,7 @@ const initialState = {
       address: "Manaíra, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 12,
+      coordinates: { lat: -7.1026, lng: -34.8333 },
     },
     {
       id: 2,
@@ -113,6 +131,7 @@ const initialState = {
       address: "Centro, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 8,
+      coordinates: { lat: -7.1195, lng: -34.8829 },
     },
     {
       id: 3,
@@ -121,6 +140,7 @@ const initialState = {
       address: "Centro de Convenções, João Pessoa - PB",
       manager: "Admin MS",
       activeEmployees: 18,
+      coordinates: { lat: -7.1577, lng: -34.8056 },
     },
     {
       id: 4,
@@ -129,6 +149,72 @@ const initialState = {
       address: "Bancários, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 4,
+      coordinates: { lat: -7.1518, lng: -34.8409 },
+    },
+  ],
+  brandSettings: {
+    speed: 36,
+  },
+  brandLogos: [
+    {
+      id: 1,
+      name: "Condomínio Atlântico",
+      initials: "CA",
+      logoUrl: "",
+      website: "",
+      color: "#006783",
+      active: true,
+      order: 1,
+    },
+    {
+      id: 2,
+      name: "Centro Empresarial Tambiá",
+      initials: "CT",
+      logoUrl: "",
+      website: "",
+      color: "#16a9d2",
+      active: true,
+      order: 2,
+    },
+    {
+      id: 3,
+      name: "Hospital Empresarial Sul",
+      initials: "HS",
+      logoUrl: "",
+      website: "",
+      color: "#2f8f83",
+      active: true,
+      order: 3,
+    },
+    {
+      id: 4,
+      name: "Expo Nordeste",
+      initials: "EN",
+      logoUrl: "",
+      website: "",
+      color: "#f2b531",
+      active: true,
+      order: 4,
+    },
+    {
+      id: 5,
+      name: "Residencial Cabo Branco",
+      initials: "RC",
+      logoUrl: "",
+      website: "",
+      color: "#34495e",
+      active: true,
+      order: 5,
+    },
+    {
+      id: 6,
+      name: "João Pessoa Business Center",
+      initials: "JP",
+      logoUrl: "",
+      website: "",
+      color: "#0b7a9c",
+      active: true,
+      order: 6,
     },
   ],
   events: [
@@ -187,6 +273,10 @@ const initialState = {
 let state = ensureStateShape(loadState());
 let activeUser = demoUsers.alexandre;
 let calendarCursor = new Date();
+let employeeFormMode = "create";
+let editingEmployeeId = null;
+let pendingDeleteEmployeeId = null;
+let expandedFrequencyEmployeeId = null;
 
 const publicSite = document.querySelector("#publicSite");
 const loginScreen = document.querySelector("#loginScreen");
@@ -195,6 +285,9 @@ const menuButton = document.querySelector("#menuButton");
 const siteNav = document.querySelector("#siteNav");
 const loginForm = document.querySelector("#loginForm");
 const employeeModal = document.querySelector("#employeeModal");
+const employeeDetailModal = document.querySelector("#employeeDetailModal");
+const deleteEmployeeModal = document.querySelector("#deleteEmployeeModal");
+const checkinModal = document.querySelector("#checkinModal");
 
 document.addEventListener("DOMContentLoaded", () => {
   saveState();
@@ -204,13 +297,20 @@ document.addEventListener("DOMContentLoaded", () => {
   setupForms();
   setupPasswordRecovery();
   setupUserManagement();
+  setupBrandManagement();
   renderAll();
 });
 
 function setupPublicSite() {
-  window.addEventListener("scroll", () => {
+  const updateHeaderState = () => {
     document.querySelector(".site-header").classList.toggle("scrolled", window.scrollY > 30);
-  });
+  };
+
+  window.addEventListener("scroll", updateHeaderState);
+  window.addEventListener("hashchange", () => setActiveSiteNavLink(window.location.hash));
+  updateHeaderState();
+  setupSiteNavObserver();
+  setActiveSiteNavLink(window.location.hash);
 
   menuButton.addEventListener("click", () => {
     const isOpen = siteNav.classList.toggle("open");
@@ -219,6 +319,7 @@ function setupPublicSite() {
 
   siteNav.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
+      setActiveSiteNavLink(link.getAttribute("href"));
       siteNav.classList.remove("open");
       menuButton.setAttribute("aria-expanded", "false");
     });
@@ -231,6 +332,46 @@ function setupPublicSite() {
   document.querySelectorAll("[data-close-login]").forEach((button) => {
     button.addEventListener("click", () => closeLogin());
   });
+}
+
+function getSiteNavLinks() {
+  return [...siteNav.querySelectorAll('.site-nav-links a[href^="#"]')];
+}
+
+function setActiveSiteNavLink(hash) {
+  const targetHash = String(hash || "");
+
+  getSiteNavLinks().forEach((link) => {
+    const isActive = link.getAttribute("href") === targetHash;
+    link.classList.toggle("active", isActive);
+    link.toggleAttribute("aria-current", isActive);
+  });
+}
+
+function setupSiteNavObserver() {
+  if (!("IntersectionObserver" in window)) return;
+
+  const sections = getSiteNavLinks()
+    .map((link) => document.querySelector(link.getAttribute("href")))
+    .filter(Boolean);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visibleEntry = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+      if (visibleEntry) {
+        setActiveSiteNavLink(`#${visibleEntry.target.id}`);
+      }
+    },
+    {
+      rootMargin: "-34% 0px -48% 0px",
+      threshold: [0.1, 0.24, 0.4],
+    },
+  );
+
+  sections.forEach((section) => observer.observe(section));
 }
 
 function setupLogin() {
@@ -317,6 +458,7 @@ function setupLogin() {
     appShell.hidden = true;
     publicSite.hidden = false;
     document.body.classList.remove("modal-open");
+    history.pushState(null, "", "#inicio");
   });
 }
 
@@ -324,19 +466,84 @@ function setupAppNavigation() {
   document.querySelectorAll(".app-nav button").forEach((button) => {
     button.addEventListener("click", () => {
       if (button.hidden) return;
-      const view = button.dataset.view;
-      document.querySelectorAll(".app-nav button").forEach((item) => item.classList.remove("active"));
-      document.querySelectorAll(".app-view").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      document.querySelector(`[data-panel="${view}"]`).classList.add("active");
-      document.querySelector("#viewTitle").textContent = button.textContent;
+      navigateToAppView(button.dataset.view);
     });
   });
+
+  window.addEventListener("hashchange", handleAppRouteChange);
+  window.addEventListener("popstate", handleAppRouteChange);
+  handleAppRouteChange();
+}
+
+function getCurrentAppRoute() {
+  const hash = decodeURIComponent(window.location.hash || "").replace(/^#/, "");
+  const [prefix, route] = hash.split("/");
+
+  if (prefix !== appRoutePrefix || !appRoutes[route]) return null;
+
+  return {
+    route,
+    view: appRoutes[route],
+  };
+}
+
+function navigateToAppView(view, options = {}) {
+  const updateHash = options.updateHash !== false;
+  const replace = Boolean(options.replace);
+  const button = document.querySelector(`.app-nav button[data-view="${view}"]`);
+  const panel = document.querySelector(`[data-panel="${view}"]`);
+
+  if (!button || !panel) return false;
+
+  if (button.hidden) {
+    const fallbackView = panel.classList.contains("admin-only") ? "dashboard" : null;
+    if (fallbackView) {
+      showToast("Apenas Super Admin pode acessar esta área.");
+      return navigateToAppView(fallbackView, { updateHash, replace: true });
+    }
+    return false;
+  }
+
+  document.querySelectorAll(".app-nav button").forEach((item) => item.classList.remove("active"));
+  document.querySelectorAll(".app-view").forEach((item) => item.classList.remove("active"));
+  button.classList.add("active");
+  panel.classList.add("active");
+  document.querySelector("#viewTitle").textContent = button.textContent.trim();
+
+  if (updateHash) {
+    const route = appViewRoutes[view] || "dashboard";
+    const nextHash = `#${appRoutePrefix}/${route}`;
+    if (window.location.hash !== nextHash) {
+      if (replace) {
+        history.replaceState(null, "", nextHash);
+      } else {
+        history.pushState(null, "", nextHash);
+      }
+    }
+  }
+
+  return true;
+}
+
+function handleAppRouteChange() {
+  const route = getCurrentAppRoute();
+  if (!route) return;
+
+  if (appShell.hidden) {
+    openLogin();
+    setFormMessage(
+      "#loginMessage",
+      "Entre no sistema para acessar esta área do painel.",
+      "info",
+    );
+    return;
+  }
+
+  navigateToAppView(route.view, { updateHash: false });
 }
 
 function setupPasswordRecovery() {
   const forgotButton = document.querySelector("#forgotPasswordButton");
-  const backButton = document.querySelector("#backToLoginButton");
   const resetRequestForm = document.querySelector("#resetRequestForm");
   const resetPasswordForm = document.querySelector("#resetPasswordForm");
   const resetNewPassword = document.querySelector("#resetNewPassword");
@@ -345,11 +552,15 @@ function setupPasswordRecovery() {
 
   forgotButton.addEventListener("click", () => {
     showResetRequest();
-    document.querySelector("#resetEmail").value = document.querySelector("#loginEmail").value;
+    const resetEmail = document.querySelector("#resetEmail");
+    resetEmail.value = document.querySelector("#loginEmail").value;
+    resetEmail.focus();
   });
 
-  backButton.addEventListener("click", () => {
-    showLoginForm();
+  document.querySelectorAll("[data-back-to-login]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showLoginForm();
+    });
   });
 
   resetNewPassword.addEventListener("input", () => {
@@ -372,10 +583,23 @@ function setupPasswordRecovery() {
     if (user && user.status === "Ativo") {
       const emailRecord = sendPasswordResetEmail(user, "Solicitação de redefinição de senha");
       saveState();
-      showResetEmailPreview(emailRecord);
       resetOwnerEmail.value = user.email;
       resetToken.value = emailRecord.token;
+      resetNewPassword.value = "";
+      document.querySelector("#resetConfirmPassword").value = "";
+      renderPasswordRules("#resetPasswordRules", "", {
+        email: user.email,
+        name: user.name,
+      });
       showResetPasswordForm();
+      showResetEmailPreview(emailRecord);
+      setFormMessage(
+        "#resetPasswordMessage",
+        "E-mail de redefinição gerado. Confira o código simulado e cadastre uma nova senha.",
+        "success",
+      );
+      resetNewPassword.focus();
+      return;
     }
 
     setFormMessage(
@@ -563,8 +787,108 @@ function setupUserManagement() {
   });
 }
 
+function setupBrandManagement() {
+  const brandForm = document.querySelector("#brandLogoForm");
+  const speedInput = document.querySelector("#brandCarouselSpeed");
+  const brandTable = document.querySelector("#brandLogoTable");
+
+  if (!brandForm || !speedInput || !brandTable) return;
+
+  speedInput.value = String(getBrandSpeed());
+  speedInput.addEventListener("input", () => {
+    state.brandSettings.speed = Number(speedInput.value);
+    saveState();
+    renderBrandShowcase();
+    renderBrandAdmin();
+  });
+
+  brandForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!isSuperAdmin()) {
+      setFormMessage("#brandLogoMessage", "Apenas Super Admin pode gerenciar marcas.", "error");
+      return;
+    }
+
+    const data = Object.fromEntries(new FormData(brandForm));
+    const name = String(data.name || "").trim();
+    const logoUrl = normalizeOptionalExternalUrl(data.logoUrl);
+    const website = normalizeOptionalExternalUrl(data.website);
+
+    if (!name) {
+      setFormMessage("#brandLogoMessage", "Informe o nome da empresa.", "error");
+      return;
+    }
+
+    if (logoUrl === null) {
+      setFormMessage("#brandLogoMessage", "Informe uma URL válida para a logomarca.", "error");
+      return;
+    }
+
+    if (website === null) {
+      setFormMessage("#brandLogoMessage", "Informe uma URL válida para o site do cliente.", "error");
+      return;
+    }
+
+    const nextOrder = getOrderedBrandLogos().length + 1;
+    state.brandLogos.push({
+      id: Date.now(),
+      name,
+      initials: normalizeBrandInitials(data.initials || getInitials(name)),
+      logoUrl,
+      website,
+      color: normalizeBrandColor(data.color),
+      active: Boolean(data.active),
+      order: nextOrder,
+    });
+
+    normalizeBrandOrders();
+    saveState();
+    brandForm.reset();
+    brandForm.querySelector('[name="color"]').value = "#006783";
+    brandForm.querySelector('[name="active"]').checked = true;
+    setFormMessage("#brandLogoMessage", "Marca adicionada ao carrossel.", "success");
+    renderBrandShowcase();
+    renderBrandAdmin();
+  });
+
+  brandTable.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-brand-action]");
+    if (!button || !isSuperAdmin()) return;
+
+    const brand = state.brandLogos.find((item) => String(item.id) === button.dataset.brandId);
+    if (!brand) return;
+
+    if (button.dataset.brandAction === "up") {
+      moveBrandLogo(brand.id, -1);
+      showToast("Marca movida para cima.");
+    }
+
+    if (button.dataset.brandAction === "down") {
+      moveBrandLogo(brand.id, 1);
+      showToast("Marca movida para baixo.");
+    }
+
+    if (button.dataset.brandAction === "toggle") {
+      brand.active = !brand.active;
+      showToast(brand.active ? "Marca ativada no site." : "Marca removida da vitrine pública.");
+    }
+
+    if (button.dataset.brandAction === "delete") {
+      state.brandLogos = state.brandLogos.filter((item) => item.id !== brand.id);
+      normalizeBrandOrders();
+      showToast("Marca removida do carrossel.");
+    }
+
+    saveState();
+    renderBrandShowcase();
+    renderBrandAdmin();
+  });
+}
+
 function setupForms() {
   document.querySelector("#openEmployeeForm").addEventListener("click", () => {
+    prepareEmployeeForm();
     employeeModal.showModal();
   });
 
@@ -572,7 +896,53 @@ function setupForms() {
     employeeModal.close();
   });
 
+  document.querySelector("#closeEmployeeDetail").addEventListener("click", () => {
+    employeeDetailModal.close();
+  });
+
+  document.querySelector("#closeDeleteEmployee").addEventListener("click", () => {
+    closeDeleteEmployeeModal();
+  });
+
+  document.querySelector("#cancelDeleteEmployee").addEventListener("click", () => {
+    closeDeleteEmployeeModal();
+  });
+
+  setupEmployeeMasks();
+  setupCheckinFlow();
   document.querySelector("#employeeSearch").addEventListener("input", renderEmployees);
+  document.querySelector("#employeeTable").addEventListener("click", handleEmployeeTableAction);
+  document.querySelector("#employeeDetailContent").addEventListener("click", handleEmployeeTableAction);
+  document.querySelector("#frequencyPeriod").addEventListener("change", renderFrequency);
+  document.querySelectorAll("[data-chart-period]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#frequencyPeriod").value = button.dataset.chartPeriod;
+      expandedFrequencyEmployeeId = null;
+      renderFrequency();
+    });
+  });
+  document.querySelector("#frequencyEmployee").addEventListener("change", renderFrequency);
+  document.querySelector("#frequencyClient").addEventListener("change", () => {
+    expandedFrequencyEmployeeId = null;
+    renderFrequency();
+  });
+  document.querySelector("#frequencyQuickFilter").addEventListener("change", () => {
+    expandedFrequencyEmployeeId = null;
+    renderFrequency();
+  });
+  document.querySelector("#frequencySearch").addEventListener("input", () => {
+    expandedFrequencyEmployeeId = null;
+    renderFrequency();
+  });
+  document.querySelector("#frequencyStartDate").addEventListener("change", renderFrequency);
+  document.querySelector("#frequencyEndDate").addEventListener("change", renderFrequency);
+  document.querySelector("#frequencyTable").addEventListener("click", handleFrequencyTableAction);
+  document.querySelector("#exportFrequencyPdf").addEventListener("click", () => {
+    showToast("Relatório em PDF preparado para exportação.");
+  });
+  document.querySelector("#exportFrequencyExcel").addEventListener("click", () => {
+    showToast("Planilha Excel preparada para exportação.");
+  });
   document.querySelector("#eventEmployeeSearch").addEventListener("input", renderTeamPicker);
   document.querySelector("#eventSelect").addEventListener("change", renderTeamPicker);
   document.querySelector("#prevMonth").addEventListener("click", () => {
@@ -586,16 +956,60 @@ function setupForms() {
 
   document.querySelector("#employeeForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    state.employees.unshift({
-      id: Date.now(),
-      ...data,
-    });
+    const wasEditing = employeeFormMode === "edit";
+    data.cpf = formatCpf(data.cpf);
+    data.phone = formatPhone(data.phone);
+    data.registration = data.registration || generateNextEmployeeRegistration();
+
+    if (onlyDigits(data.cpf).length !== 11) {
+      showToast("Informe um CPF com 11 dígitos.");
+      return;
+    }
+
+    if (onlyDigits(data.phone).length < 10) {
+      showToast("Informe um telefone com DDD.");
+      return;
+    }
+
+    if (wasEditing) {
+      const employee = findEmployeeById(editingEmployeeId);
+      if (!employee) {
+        showToast("Funcionário não encontrado para edição.");
+        return;
+      }
+
+      const oldName = employee.name;
+      Object.assign(employee, data);
+      updateEmployeeReferences(oldName, data.name);
+    } else {
+      state.employees.unshift({
+        id: Date.now(),
+        ...data,
+      });
+    }
+
     saveState();
-    event.currentTarget.reset();
+    form.reset();
     employeeModal.close();
+    employeeFormMode = "create";
+    editingEmployeeId = null;
     renderAll();
-    showToast("Funcionário cadastrado com sucesso.");
+    showToast(
+      wasEditing ? "Funcionário atualizado com sucesso." : "Funcionário cadastrado com sucesso.",
+    );
+  });
+
+  document.querySelector("#deleteEmployeeConfirmation").addEventListener("input", (event) => {
+    document.querySelector("#confirmDeleteEmployee").disabled =
+      normalizeDeleteConfirmation(event.target.value) !== "excluir";
+    clearFormMessage("#deleteEmployeeMessage");
+  });
+
+  document.querySelector("#deleteEmployeeForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    confirmEmployeeDeletion();
   });
 
   document.querySelector("#eventForm").addEventListener("submit", (event) => {
@@ -625,6 +1039,7 @@ function setupForms() {
       in: data.in,
       out: data.out,
       status: data.status,
+      source: "Manual",
     });
     saveState();
     event.currentTarget.reset();
@@ -655,6 +1070,401 @@ function setupForms() {
   });
 }
 
+function setupCheckinFlow() {
+  document.querySelectorAll("[data-open-checkin]").forEach((button) => {
+    button.addEventListener("click", openCheckinModal);
+  });
+  document.querySelector("#closeCheckinModal").addEventListener("click", () => {
+    checkinModal.close();
+  });
+  document.querySelector("#checkinCpf").addEventListener("input", (event) => {
+    event.target.value = formatCpf(event.target.value);
+    clearFormMessage("#checkinMessage");
+  });
+  document.querySelector("#checkinForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await registerQrCheckin();
+  });
+}
+
+function openCheckinModal() {
+  const now = new Date();
+  document.querySelector("#checkinForm").reset();
+  document.querySelector("#checkinQrTime").textContent = `Código ${now.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+  document.querySelector("#checkinGeoStatus").textContent =
+    "Aguardando validação de CPF e localização.";
+  clearFormMessage("#checkinMessage");
+  checkinModal.showModal();
+}
+
+async function registerQrCheckin() {
+  const cpf = document.querySelector("#checkinCpf").value;
+  const employee = findEmployeeByCpf(cpf);
+
+  if (!employee) {
+    setFormMessage("#checkinMessage", "CPF não localizado no cadastro de funcionários.", "error");
+    return;
+  }
+
+  if (employee.status !== "Ativo") {
+    setFormMessage(
+      "#checkinMessage",
+      `Check-in bloqueado. Funcionário com status ${employee.status}.`,
+      "error",
+    );
+    return;
+  }
+
+  const existingOpenPoint = state.points.find(
+    (point) => point.employee === employee.name && point.date === today() && !point.out,
+  );
+
+  if (existingOpenPoint) {
+    setFormMessage("#checkinMessage", "Já existe um check-in em aberto para hoje.", "error");
+    return;
+  }
+
+  const client = state.clients.find((item) => item.name === employee.client);
+  const clientCoordinates = getClientCoordinates(client);
+  if (!clientCoordinates) {
+    setFormMessage("#checkinMessage", "Local de trabalho sem coordenadas cadastradas.", "error");
+    return;
+  }
+
+  document.querySelector("#checkinGeoStatus").textContent = "Capturando localização...";
+
+  try {
+    const devicePosition = await getCheckinPosition(clientCoordinates);
+    const distance = Math.round(calculateDistanceMeters(devicePosition, clientCoordinates));
+
+    if (distance > 100) {
+      document.querySelector("#checkinGeoStatus").textContent = `Distância estimada: ${distance}m`;
+      setFormMessage(
+        "#checkinMessage",
+        "Check-in não autorizado. Você está fora da área permitida para registro de ponto.",
+        "error",
+      );
+      return;
+    }
+
+    state.points.unshift({
+      id: Date.now(),
+      employee: employee.name,
+      client: employee.client,
+      date: today(),
+      in: currentTime(),
+      out: "",
+      status: "Ponto normal",
+      source: "QR Code",
+      distance,
+      location: devicePosition,
+      createdAt: nowIso(),
+    });
+
+    saveState();
+    renderAll();
+    document.querySelector("#checkinGeoStatus").textContent = `Check-in autorizado a ${distance}m`;
+    setFormMessage("#checkinMessage", "Check-in registrado com sucesso.", "success");
+    setTimeout(() => {
+      if (checkinModal.open) checkinModal.close();
+    }, 900);
+  } catch (error) {
+    document.querySelector("#checkinGeoStatus").textContent = "Localização não validada.";
+    setFormMessage(
+      "#checkinMessage",
+      error.message || "Não foi possível validar a localização do dispositivo.",
+      "error",
+    );
+  }
+}
+
+function getCheckinPosition(clientCoordinates) {
+  if (document.querySelector("#checkinDemoLocation").checked) {
+    return Promise.resolve({
+      lat: clientCoordinates.lat,
+      lng: clientCoordinates.lng,
+    });
+  }
+
+  if (!navigator.geolocation) {
+    return Promise.reject(new Error("Geolocalização indisponível neste navegador."));
+  }
+
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      () => {
+        reject(new Error("Permita o acesso à localização para registrar o check-in."));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  });
+}
+
+function calculateDistanceMeters(origin, destination) {
+  const earthRadius = 6371000;
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const deltaLat = toRadians(destination.lat - origin.lat);
+  const deltaLng = toRadians(destination.lng - origin.lng);
+  const lat1 = toRadians(origin.lat);
+  const lat2 = toRadians(destination.lat);
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function setupEmployeeMasks() {
+  const employeeForm = document.querySelector("#employeeForm");
+  const cpfInput = employeeForm.querySelector('[name="cpf"]');
+  const phoneInput = employeeForm.querySelector('[name="phone"]');
+
+  cpfInput.addEventListener("input", () => {
+    cpfInput.value = formatCpf(cpfInput.value);
+  });
+
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = formatPhone(phoneInput.value);
+  });
+}
+
+function handleEmployeeTableAction(event) {
+  const button = event.target.closest("[data-employee-action]");
+  if (!button) return;
+
+  const employeeId = Number(button.dataset.employeeId);
+  const action = button.dataset.employeeAction;
+
+  if (action === "view") {
+    openEmployeeDetail(employeeId);
+    return;
+  }
+
+  if (action === "edit") {
+    openEmployeeEditor(employeeId);
+    return;
+  }
+
+  if (action === "delete") {
+    openDeleteEmployeeModal(employeeId);
+  }
+}
+
+function prepareEmployeeForm(employee = null) {
+  const form = document.querySelector("#employeeForm");
+  form.reset();
+  employeeFormMode = employee ? "edit" : "create";
+  editingEmployeeId = employee?.id ?? null;
+  document.querySelector("#employeeFormTitle").textContent = employee
+    ? "Editar funcionário"
+    : "Novo funcionário";
+  document.querySelector("#employeeFormSubmit").textContent = employee
+    ? "Salvar alterações"
+    : "Cadastrar funcionário";
+
+  if (!employee) {
+    form.querySelector('[name="registration"]').value = generateNextEmployeeRegistration();
+    return;
+  }
+
+  form.elements.name.value = employee.name;
+  form.elements.cpf.value = formatCpf(employee.cpf);
+  form.elements.phone.value = formatPhone(employee.phone);
+  form.elements.role.value = employee.role;
+  form.elements.registration.value = employee.registration;
+  form.elements.client.value = employee.client;
+  form.elements.status.value = employee.status;
+}
+
+function openEmployeeDetail(employeeId) {
+  const employee = findEmployeeById(employeeId);
+  if (!employee) {
+    showToast("Funcionário não encontrado.");
+    return;
+  }
+
+  document.querySelector("#employeeDetailContent").innerHTML = `
+    <article class="employee-profile">
+      <div class="employee-avatar">${escapeHtml(getInitials(employee.name))}</div>
+      <div>
+        <h3>${escapeHtml(employee.name)}</h3>
+        <p>${escapeHtml(employee.role)} · ${escapeHtml(employee.client)}</p>
+        <span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span>
+      </div>
+    </article>
+    <dl class="detail-grid">
+      <div><dt>CPF</dt><dd>${escapeHtml(employee.cpf)}</dd></div>
+      <div><dt>Telefone</dt><dd>${escapeHtml(employee.phone)}</dd></div>
+      <div><dt>Matrícula</dt><dd>${escapeHtml(employee.registration)}</dd></div>
+      <div><dt>Cargo</dt><dd>${escapeHtml(employee.role)}</dd></div>
+      <div><dt>Empreendimento</dt><dd>${escapeHtml(employee.client)}</dd></div>
+      <div><dt>Status</dt><dd>${escapeHtml(employee.status)}</dd></div>
+    </dl>
+    <div class="modal-actions">
+      <button class="button button-secondary" type="button" data-employee-action="edit" data-employee-id="${employee.id}">
+        Editar cadastro
+      </button>
+      <button class="button button-danger" type="button" data-employee-action="delete" data-employee-id="${employee.id}">
+        Excluir funcionário
+      </button>
+    </div>
+  `;
+
+  employeeDetailModal.showModal();
+}
+
+function openEmployeeEditor(employeeId) {
+  const employee = findEmployeeById(employeeId);
+  if (!employee) {
+    showToast("Funcionário não encontrado para edição.");
+    return;
+  }
+
+  if (employeeDetailModal.open) employeeDetailModal.close();
+  prepareEmployeeForm(employee);
+  employeeModal.showModal();
+}
+
+function openDeleteEmployeeModal(employeeId) {
+  const employee = findEmployeeById(employeeId);
+  if (!employee) {
+    showToast("Funcionário não encontrado para exclusão.");
+    return;
+  }
+
+  pendingDeleteEmployeeId = employeeId;
+  document.querySelector("#deleteEmployeeName").textContent = employee.name;
+  document.querySelector("#deleteEmployeeConfirmation").value = "";
+  document.querySelector("#confirmDeleteEmployee").disabled = true;
+  clearFormMessage("#deleteEmployeeMessage");
+  if (employeeDetailModal.open) employeeDetailModal.close();
+  deleteEmployeeModal.showModal();
+}
+
+function closeDeleteEmployeeModal() {
+  pendingDeleteEmployeeId = null;
+  if (deleteEmployeeModal.open) deleteEmployeeModal.close();
+}
+
+function confirmEmployeeDeletion() {
+  const confirmation = normalizeDeleteConfirmation(
+    document.querySelector("#deleteEmployeeConfirmation").value,
+  );
+
+  if (confirmation !== "excluir") {
+    setFormMessage(
+      "#deleteEmployeeMessage",
+      'Digite "excluir" para confirmar a remoção do funcionário.',
+      "error",
+    );
+    return;
+  }
+
+  const employee = findEmployeeById(pendingDeleteEmployeeId);
+  if (!employee) {
+    setFormMessage("#deleteEmployeeMessage", "Funcionário não encontrado.", "error");
+    return;
+  }
+
+  removeEmployee(employee);
+  saveState();
+  closeDeleteEmployeeModal();
+  renderAll();
+  showToast("Funcionário excluído com sucesso.");
+}
+
+function findEmployeeById(employeeId) {
+  return state.employees.find((employee) => Number(employee.id) === Number(employeeId));
+}
+
+function findEmployeeByCpf(cpf) {
+  const digits = onlyDigits(cpf);
+  return state.employees.find((employee) => onlyDigits(employee.cpf) === digits);
+}
+
+function getClientCoordinates(client) {
+  if (client?.coordinates) return client.coordinates;
+
+  const seededClient = initialState.clients.find((item) => item.name === client?.name);
+  return seededClient?.coordinates || null;
+}
+
+function updateEmployeeReferences(oldName, newName) {
+  if (!oldName || oldName === newName) return;
+
+  state.points.forEach((point) => {
+    if (point.employee === oldName) point.employee = newName;
+  });
+
+  state.certificates.forEach((certificate) => {
+    if (certificate.employee === oldName) certificate.employee = newName;
+  });
+}
+
+function removeEmployee(employee) {
+  const employeeId = Number(employee.id);
+  state.employees = state.employees.filter((item) => Number(item.id) !== employeeId);
+  state.events.forEach((event) => {
+    event.team = event.team.filter((memberId) => Number(memberId) !== employeeId);
+  });
+  state.points = state.points.filter((point) => point.employee !== employee.name);
+  state.certificates = state.certificates.filter(
+    (certificate) => certificate.employee !== employee.name,
+  );
+}
+
+function normalizeDeleteConfirmation(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function onlyDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function formatCpf(value) {
+  const digits = onlyDigits(value).slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+}
+
+function formatPhone(value) {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  if (digits.length <= 2) return digits ? `(${digits}` : "";
+  if (digits.length <= 6) return digits.replace(/^(\d{2})(\d+)/, "($1) $2");
+  if (digits.length <= 10) {
+    return digits.replace(/^(\d{2})(\d{4})(\d+)/, "($1) $2-$3");
+  }
+
+  return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+}
+
+function generateNextEmployeeRegistration() {
+  const highestNumber = state.employees.reduce((highest, employee) => {
+    const match = String(employee.registration || "").match(/^MS-(\d+)$/i);
+    if (!match) return highest;
+    return Math.max(highest, Number(match[1]));
+  }, 0);
+
+  return `MS-${String(highestNumber + 1).padStart(3, "0")}`;
+}
+
 function openLogin() {
   loginScreen.hidden = false;
   document.body.classList.add("modal-open");
@@ -678,6 +1488,10 @@ function enterApp(user) {
   appShell.hidden = false;
   document.body.classList.remove("modal-open");
   updateAccessControl();
+  const currentRoute = getCurrentAppRoute();
+  navigateToAppView(currentRoute?.view || "dashboard", {
+    replace: !currentRoute,
+  });
   renderAll();
 }
 
@@ -687,8 +1501,11 @@ function renderAll() {
   renderDashboard();
   renderEmployees();
   renderClients();
+  renderBrandShowcase();
+  renderBrandAdmin();
   renderEvents();
   renderTimeList();
+  renderFrequency();
   renderCertificates();
   renderCalendar();
   renderUsers();
@@ -697,32 +1514,32 @@ function renderAll() {
 
 function renderDashboard() {
   const activeCount = state.employees.filter((employee) => employee.status === "Ativo").length;
-  const absentCount = state.employees.filter((employee) =>
-    ["Atestado", "Férias", "Afastado"].includes(employee.status),
-  ).length;
+  const unavailableEmployees = state.employees.filter((employee) => employee.status !== "Ativo");
+  const absentCount = unavailableEmployees.length;
   const weekEvents = state.events.filter((event) => daysFromToday(event.date) <= 7).length;
 
   document.querySelector("#dashboardCards").innerHTML = [
     card("Funcionários ativos", activeCount, "Equipe disponível"),
-    card("Ausentes hoje", absentCount, "Atestado, férias ou afastamento"),
+    card("Indisponíveis", absentCount, "Status diferente de ativo"),
     card("Atestados", state.certificates.length, "Registros no sistema"),
     card("Eventos da semana", weekEvents, "Demandas programadas"),
   ].join("");
 
-  document.querySelector("#statusBoard").innerHTML = state.employees
-    .slice(0, 5)
-    .map(
-      (employee) => `
-        <article class="status-row">
-          <div>
-            <strong>${employee.name}</strong>
-            <small>${employee.role} · ${employee.client}</small>
-          </div>
-          <span class="badge ${employee.status}">${employee.status}</span>
-        </article>
-      `,
-    )
-    .join("");
+  document.querySelector("#statusBoard").innerHTML = unavailableEmployees.length
+    ? unavailableEmployees
+        .map(
+          (employee) => `
+            <article class="status-row">
+              <div>
+                <strong>${escapeHtml(employee.name)}</strong>
+                <small>${escapeHtml(employee.role)} · ${escapeHtml(employee.client)}</small>
+              </div>
+              <span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span>
+            </article>
+          `,
+        )
+        .join("")
+    : `<article class="empty-state">Todos os funcionários estão ativos.</article>`;
 
   document.querySelector("#dashboardEvents").innerHTML = state.events
     .slice(0, 4)
@@ -743,7 +1560,7 @@ function renderDashboard() {
 function renderEmployees() {
   const search = document.querySelector("#employeeSearch")?.value.toLowerCase() || "";
   const employees = state.employees.filter((employee) => {
-    return [employee.name, employee.cpf, employee.role, employee.client, employee.status]
+    return [employee.name, employee.cpf, employee.registration, employee.role, employee.client, employee.status]
       .join(" ")
       .toLowerCase()
       .includes(search);
@@ -753,14 +1570,88 @@ function renderEmployees() {
     .map(
       (employee) => `
         <tr>
-          <td><strong>${employee.name}</strong><br><small>${employee.cpf}</small></td>
-          <td>${employee.role}</td>
-          <td>${employee.client}</td>
-          <td><span class="badge ${employee.status}">${employee.status}</span></td>
-          <td>${employee.phone}</td>
+          <td>
+            <strong>${escapeHtml(employee.name)}</strong><br>
+            <small>${escapeHtml(employee.cpf)} · ${escapeHtml(employee.registration)}</small>
+          </td>
+          <td>${escapeHtml(employee.role)}</td>
+          <td>${escapeHtml(employee.client)}</td>
+          <td><span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span></td>
+          <td>${escapeHtml(employee.phone)}</td>
+          <td>
+            <div class="employee-actions" aria-label="Ações de ${escapeHtml(employee.name)}">
+              <button
+                class="icon-action-button"
+                type="button"
+                data-employee-action="view"
+                data-employee-id="${employee.id}"
+                aria-label="Visualizar funcionário"
+                title="Visualizar"
+              >
+                ${renderIcon("eye")}
+              </button>
+              <button
+                class="icon-action-button"
+                type="button"
+                data-employee-action="edit"
+                data-employee-id="${employee.id}"
+                aria-label="Editar funcionário"
+                title="Editar"
+              >
+                ${renderIcon("edit")}
+              </button>
+              <button
+                class="icon-action-button danger"
+                type="button"
+                data-employee-action="delete"
+                data-employee-id="${employee.id}"
+                aria-label="Excluir funcionário"
+                title="Excluir"
+              >
+                ${renderIcon("trash")}
+              </button>
+            </div>
+          </td>
         </tr>
       `,
     )
+    .join("");
+}
+
+function renderIcon(name) {
+  const icons = {
+    eye: `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    `,
+    edit: `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 20h9"></path>
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+      </svg>
+    `,
+    trash: `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18"></path>
+        <path d="M8 6V4h8v2"></path>
+        <path d="M19 6l-1 14H6L5 6"></path>
+        <path d="M10 11v5"></path>
+        <path d="M14 11v5"></path>
+      </svg>
+    `,
+  };
+
+  return icons[name] || "";
+}
+
+function getInitials(name) {
+  return String(name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
     .join("");
 }
 
@@ -779,6 +1670,168 @@ function renderClients() {
       `,
     )
     .join("");
+}
+
+function renderBrandShowcase() {
+  const carousel = document.querySelector("#publicBrandCarousel");
+  if (!carousel) return;
+
+  const activeBrands = getOrderedBrandLogos().filter((brand) => brand.active);
+  carousel.style.setProperty("--brand-speed", `${getBrandSpeed()}s`);
+
+  if (!activeBrands.length) {
+    carousel.style.animation = "none";
+    carousel.style.width = "auto";
+    carousel.innerHTML = `
+      <div class="brand-empty">
+        Nenhuma marca ativa no momento.
+      </div>
+    `;
+    return;
+  }
+
+  carousel.style.animation = "";
+  carousel.style.width = "";
+  const loopBrands = repeatBrandLogos(activeBrands, 12);
+  const group = loopBrands.map(renderPublicBrandLogo).join("");
+  carousel.innerHTML = `
+    <div class="brand-marquee-group">${group}</div>
+    <div class="brand-marquee-group" aria-hidden="true">${group}</div>
+  `;
+}
+
+function renderPublicBrandLogo(brand) {
+  const content = `
+    ${renderBrandVisual(brand)}
+    <strong>${escapeHtml(brand.name)}</strong>
+  `;
+
+  if (brand.website) {
+    return `
+      <a class="brand-logo-item" href="${escapeHtml(brand.website)}" target="_blank" rel="noopener">
+        ${content}
+      </a>
+    `;
+  }
+
+  return `
+    <span class="brand-logo-item">
+      ${content}
+    </span>
+  `;
+}
+
+function renderBrandVisual(brand) {
+  const name = escapeHtml(brand.name);
+  const color = escapeHtml(normalizeBrandColor(brand.color));
+  const initials = escapeHtml(normalizeBrandInitials(brand.initials || getInitials(brand.name)));
+
+  if (brand.logoUrl) {
+    return `
+      <span class="brand-logo-frame">
+        <img src="${escapeHtml(brand.logoUrl)}" alt="Logo ${name}" loading="lazy" />
+      </span>
+    `;
+  }
+
+  return `
+    <span class="brand-logo-fallback" style="--brand-logo-color: ${color};">
+      ${initials}
+    </span>
+  `;
+}
+
+function renderBrandAdmin() {
+  const brandTable = document.querySelector("#brandLogoTable");
+  if (!brandTable) return;
+
+  const speedInput = document.querySelector("#brandCarouselSpeed");
+  const speedValue = document.querySelector("#brandSpeedValue");
+  const preview = document.querySelector("#brandAdminPreview");
+  const orderedBrands = getOrderedBrandLogos();
+
+  if (speedInput && Number(speedInput.value) !== getBrandSpeed()) {
+    speedInput.value = String(getBrandSpeed());
+  }
+
+  if (speedValue) {
+    speedValue.textContent = `${getBrandSpeed()}s por volta`;
+  }
+
+  document.querySelector("#brandLogoCount").textContent = `${orderedBrands.length} marcas`;
+
+  if (!orderedBrands.length) {
+    brandTable.innerHTML = `
+      <tr>
+        <td colspan="5">Nenhuma marca cadastrada.</td>
+      </tr>
+    `;
+  } else {
+    brandTable.innerHTML = orderedBrands
+      .map(
+        (brand, index) => `
+          <tr>
+            <td><strong>${index + 1}</strong></td>
+            <td>
+              <div class="brand-table-logo">
+                ${renderBrandVisual(brand)}
+                <div>
+                  <strong>${escapeHtml(brand.name)}</strong>
+                  <small>${brand.logoUrl ? "Logomarca por imagem" : "Marca textual provisória"}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              ${
+                brand.website
+                  ? `<a class="inline-link" href="${escapeHtml(
+                      brand.website,
+                    )}" target="_blank" rel="noopener">Abrir site</a>`
+                  : `<span class="muted-text">Sem link</span>`
+              }
+            </td>
+            <td>
+              <span class="badge ${brand.active ? "active" : "danger"}">
+                ${brand.active ? "Ativa" : "Inativa"}
+              </span>
+            </td>
+            <td>
+              <div class="brand-actions">
+                <button type="button" data-brand-action="up" data-brand-id="${brand.id}" ${
+                  index === 0 ? "disabled" : ""
+                }>Subir</button>
+                <button type="button" data-brand-action="down" data-brand-id="${brand.id}" ${
+                  index === orderedBrands.length - 1 ? "disabled" : ""
+                }>Descer</button>
+                <button type="button" data-brand-action="toggle" data-brand-id="${brand.id}">
+                  ${brand.active ? "Desativar" : "Ativar"}
+                </button>
+                <button class="danger" type="button" data-brand-action="delete" data-brand-id="${brand.id}">
+                  Remover
+                </button>
+              </div>
+            </td>
+          </tr>
+        `,
+      )
+      .join("");
+  }
+
+  if (preview) {
+    const previewBrands = orderedBrands.filter((brand) => brand.active).slice(0, 4);
+    preview.innerHTML = previewBrands.length
+      ? previewBrands
+          .map(
+            (brand) => `
+              <span>
+                ${renderBrandVisual(brand)}
+                <strong>${escapeHtml(brand.name)}</strong>
+              </span>
+            `,
+          )
+          .join("")
+      : `<article class="empty-state">Ative pelo menos uma marca para exibir no site.</article>`;
+  }
 }
 
 function renderEvents() {
@@ -865,16 +1918,494 @@ function renderTimeList() {
       (point) => `
         <article class="list-item">
           <div>
-            <strong>${point.employee}</strong>
-            <small>${formatDate(point.date)} · ${point.in} às ${point.out || "em aberto"}</small>
+            <strong>${escapeHtml(point.employee)}</strong>
+            <small>${formatDate(point.date)} · ${escapeHtml(point.in)} às ${escapeHtml(
+              point.out || "em aberto",
+            )}</small>
           </div>
           <span class="badge ${point.status === "Ponto normal" ? "active" : "warning"}">
-            ${point.status}
+            ${escapeHtml(point.status)}
           </span>
         </article>
       `,
     )
     .join("");
+}
+
+function renderFrequency() {
+  const range = getFrequencyRange();
+  const employeeFilter = document.querySelector("#frequencyEmployee")?.value || "all";
+  const clientFilter = document.querySelector("#frequencyClient")?.value || "all";
+  const quickFilter = document.querySelector("#frequencyQuickFilter")?.value || "all";
+  const search = document.querySelector("#frequencySearch")?.value || "";
+  const activeEmployees = state.employees.filter(
+    (employee) => employee.status === "Ativo" || isJustifiedAbsenceStatus(employee.status),
+  );
+  const employeeRecords = state.employees.map((employee) =>
+    getEmployeeFrequencyRecord(employee, range),
+  );
+  const filteredEmployees = employeeRecords.filter((record) =>
+    employeeMatchesFrequencyFilters(record, { employeeFilter, clientFilter, quickFilter, search }),
+  );
+  const periodPoints = getFrequencyPoints({
+    start: range.start,
+    end: range.end,
+    employee: employeeFilter,
+    client: clientFilter,
+  });
+  const presentToday = employeeRecords.filter((record) =>
+    ["present", "manual"].includes(record.statusKey),
+  );
+  const absentUnjustified = employeeRecords.filter(
+    (record) => record.statusKey === "absent-unjustified",
+  );
+  const absentJustified = employeeRecords.filter(
+    (record) => record.statusKey === "absent-justified",
+  );
+  const manualRecords = employeeRecords.filter((record) => record.manualCount > 0);
+  const presencePercent = activeEmployees.length
+    ? Math.round((presentToday.length / activeEmployees.length) * 100)
+    : 0;
+
+  document.querySelector("#frequencyCards").innerHTML = [
+    card("Presentes hoje", presentToday.length, "Presença registrada"),
+    card("Sem justificativa", absentUnjustified.length, "Atenção operacional"),
+    card("Com justificativa", absentJustified.length, "Atestado, licença ou férias"),
+    card("Registros no período", periodPoints.length, range.label),
+  ].join("");
+
+  document.querySelector("#frequencyChartCaption").textContent = `Acompanhamento ${range.label.toLowerCase()}`;
+  document.querySelector("#presencePercentLabel").textContent = `${presencePercent}% de presença`;
+  document.querySelector("#frequencyHistoryCount").textContent = `${filteredEmployees.length} funcionários`;
+
+  syncChartPeriodTabs();
+  renderFrequencyChart(range, employeeFilter, clientFilter);
+  renderFrequencySummary({
+    presentToday,
+    absentUnjustified,
+    absentJustified,
+    manualRecords,
+    periodPoints,
+    presencePercent,
+  });
+  renderFrequencyTable(filteredEmployees, range);
+}
+
+function syncChartPeriodTabs() {
+  const selectedPeriod = document.querySelector("#frequencyPeriod")?.value || "7";
+
+  document.querySelectorAll("[data-chart-period]").forEach((button) => {
+    const isActive = button.dataset.chartPeriod === selectedPeriod;
+    button.classList.toggle("active", isActive);
+    button.toggleAttribute("aria-pressed", isActive);
+  });
+}
+
+function getFrequencyRange() {
+  const periodValue = document.querySelector("#frequencyPeriod")?.value || "7";
+  const customRange = document.querySelector("#frequencyCustomRange");
+  const startInput = document.querySelector("#frequencyStartDate");
+  const endInput = document.querySelector("#frequencyEndDate");
+  const periodLabels = {
+    7: "Semanal",
+    15: "Quinzenal",
+    30: "Mensal",
+    365: "Anual",
+  };
+
+  if (customRange) customRange.hidden = periodValue !== "custom";
+
+  if (periodValue === "custom") {
+    const fallbackStart = nextDate(-6);
+    const fallbackEnd = today();
+    if (startInput && !startInput.value) startInput.value = fallbackStart;
+    if (endInput && !endInput.value) endInput.value = fallbackEnd;
+
+    const orderedRange = orderDateRange(
+      startInput?.value || fallbackStart,
+      endInput?.value || fallbackEnd,
+    );
+
+    return {
+      ...orderedRange,
+      days: countDateRangeDays(orderedRange.start, orderedRange.end),
+      label: "personalizado",
+    };
+  }
+
+  const days = Number(periodValue) || 7;
+  const start = nextDate(-(days - 1));
+  return {
+    start,
+    end: today(),
+    days,
+    label: periodLabels[days] || `${days} dias`,
+  };
+}
+
+function orderDateRange(start, end) {
+  return start <= end ? { start, end } : { start: end, end: start };
+}
+
+function countDateRangeDays(start, end) {
+  const first = new Date(`${start}T12:00:00`);
+  const last = new Date(`${end}T12:00:00`);
+  return Math.max(1, Math.round((last - first) / 86400000) + 1);
+}
+
+function getFrequencyPoints({ start, end, employee = "all", client = "all" }) {
+  return state.points
+    .filter((point) => point.date >= start && point.date <= end)
+    .filter((point) => employee === "all" || point.employee === employee)
+    .filter((point) => client === "all" || point.client === client)
+    .sort((a, b) => `${b.date}${b.in}`.localeCompare(`${a.date}${a.in}`));
+}
+
+function getFrequencyDates(range) {
+  const dates = [];
+  const current = new Date(`${range.start}T12:00:00`);
+  const last = new Date(`${range.end}T12:00:00`);
+
+  while (current <= last) {
+    dates.push(toDateKey(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
+function getEmployeeFrequencyRecord(employee, range) {
+  const todayPoints = getFrequencyPoints({
+    start: today(),
+    end: today(),
+    employee: employee.name,
+  }).filter((point) => point.status !== "Falta");
+  const todayPoint = todayPoints[0];
+  const periodPoints = getFrequencyPoints({
+    start: range.start,
+    end: range.end,
+    employee: employee.name,
+  });
+  const latestPoint = getFrequencyPoints({
+    start: "1900-01-01",
+    end: today(),
+    employee: employee.name,
+  })[0];
+  const manualCount = periodPoints.filter(isManualPoint).length;
+  const justification = getEmployeeJustification(employee);
+  const periodAttendanceCount = periodPoints.filter((point) => point.status !== "Falta").length;
+  const lowFrequency =
+    employee.status === "Ativo" &&
+    range.days >= 7 &&
+    periodAttendanceCount <= Math.max(1, Math.floor(range.days * 0.25));
+
+  let statusKey = "absent-unjustified";
+  let statusLabel = "Ausência sem justificativa";
+
+  if (todayPoint) {
+    statusKey = isManualPoint(todayPoint) ? "manual" : "present";
+    statusLabel = isManualPoint(todayPoint)
+      ? "Registro manual aprovado"
+      : "Presença registrada";
+  } else if (isNoScheduleStatus(employee.status)) {
+    statusKey = "no-schedule";
+    statusLabel = "Sem escala no dia";
+  } else if (justification) {
+    statusKey = "absent-justified";
+    statusLabel = "Ausência justificada";
+  }
+
+  return {
+    employee,
+    periodPoints,
+    latestPoint,
+    manualCount,
+    lowFrequency,
+    statusKey,
+    statusLabel,
+    justification,
+  };
+}
+
+function getEmployeeJustification(employee) {
+  const certificate = state.certificates.find(
+    (item) => item.employee === employee.name && item.start <= today() && item.end >= today(),
+  );
+
+  if (certificate) {
+    return `Atestado até ${formatDate(certificate.end)}`;
+  }
+
+  if (isJustifiedAbsenceStatus(employee.status)) {
+    return employee.status;
+  }
+
+  return "";
+}
+
+function isJustifiedAbsenceStatus(status) {
+  return [
+    "Atestado",
+    "Afastado",
+    "Férias",
+    "Licença",
+    "Licença maternidade",
+    "Licença paternidade",
+    "Suspenso",
+  ].includes(status);
+}
+
+function isNoScheduleStatus(status) {
+  return ["Inativo", "Desligado"].includes(status);
+}
+
+function isManualPoint(point) {
+  return point.status === "Ajuste manual" || point.source === "Manual";
+}
+
+function employeeMatchesFrequencyFilters(record, filters) {
+  const { employee } = record;
+  const normalizedSearch = String(filters.search || "").trim().toLowerCase();
+  const searchableText = [
+    employee.name,
+    employee.cpf,
+    employee.role,
+    employee.client,
+    employee.status,
+    record.statusLabel,
+    record.justification,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (filters.employeeFilter !== "all" && employee.name !== filters.employeeFilter) return false;
+  if (filters.clientFilter !== "all" && employee.client !== filters.clientFilter) return false;
+  if (normalizedSearch && !searchableText.includes(normalizedSearch)) return false;
+
+  if (filters.quickFilter === "present-today") {
+    return ["present", "manual"].includes(record.statusKey);
+  }
+
+  if (filters.quickFilter === "absent-unjustified") {
+    return record.statusKey === "absent-unjustified";
+  }
+
+  if (filters.quickFilter === "absent-justified") {
+    return record.statusKey === "absent-justified";
+  }
+
+  if (filters.quickFilter === "manual") {
+    return record.manualCount > 0;
+  }
+
+  if (filters.quickFilter === "low-frequency") {
+    return record.lowFrequency;
+  }
+
+  if (filters.quickFilter === "no-schedule") {
+    return record.statusKey === "no-schedule";
+  }
+
+  return true;
+}
+
+function renderFrequencyChart(range, employeeFilter, clientFilter) {
+  const dates = getFrequencyDates(range);
+  const counts = dates.map((date) => {
+    const points = getFrequencyPoints({
+      start: date,
+      end: date,
+      employee: employeeFilter,
+      client: clientFilter,
+    });
+    return points.length;
+  });
+  const maxCount = Math.max(...counts, 1);
+
+  document.querySelector("#frequencyChart").innerHTML = dates
+    .map((date, index) => {
+      const count = counts[index];
+      const height = Math.max((count / maxCount) * 100, count ? 14 : 3);
+      return `
+        <article class="frequency-bar ${date === today() ? "today" : ""}">
+          <div class="frequency-bar-track">
+            <span style="height: ${height}%"></span>
+          </div>
+          <strong>${count}</strong>
+          <small>${date === today() ? "Hoje" : dayNumber(date)}</small>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderFrequencySummary({
+  presentToday,
+  absentUnjustified,
+  absentJustified,
+  manualRecords,
+  periodPoints,
+  presencePercent,
+}) {
+  document.querySelector("#frequencySummary").innerHTML = [
+    {
+      title: "Funcionários presentes hoje",
+      detail: `${presentToday.length} colaborador(es) com presença registrada`,
+      badge: "active",
+    },
+    {
+      title: "Ausências sem justificativa",
+      detail: absentUnjustified.length
+        ? absentUnjustified.map((record) => record.employee.name).join(", ")
+        : "Nenhuma ausência crítica hoje",
+      badge: absentUnjustified.length ? "danger" : "active",
+    },
+    {
+      title: "Ausências justificadas",
+      detail: `${absentJustified.length} funcionário(s) com justificativa cadastrada`,
+      badge: "warning",
+    },
+    {
+      title: "Registros manuais no período",
+      detail: `${manualRecords.length} funcionário(s) com ajuste manual`,
+      badge: manualRecords.length ? "manual" : "active",
+    },
+    {
+      title: "Percentual de presença",
+      detail: `${presencePercent}% de presença registrada hoje · ${periodPoints.length} check-in(s) no período`,
+      badge: "active",
+    },
+  ]
+    .map(
+      (item) => `
+        <article class="list-item">
+          <div>
+            <strong>${escapeHtml(item.title)}</strong>
+            <small>${escapeHtml(item.detail)}</small>
+          </div>
+          <span class="badge ${item.badge}">${escapeHtml(
+            item.badge === "danger" ? "Atenção" : item.badge === "manual" ? "Manual" : "OK",
+          )}</span>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderFrequencyTable(records, range) {
+  document.querySelector("#frequencyTable").innerHTML = records.length
+    ? records
+        .map(
+          (record) => `
+            <tr>
+              <td>
+                <strong>${escapeHtml(record.employee.name)}</strong><br>
+                <small>${escapeHtml(record.employee.cpf)} · ${escapeHtml(record.employee.role)}</small>
+              </td>
+              <td>${escapeHtml(record.employee.client)}</td>
+              <td>
+                <span class="presence-status ${record.statusKey}">
+                  <i></i>${escapeHtml(record.statusLabel)}
+                </span>
+              </td>
+              <td>${record.periodPoints.length}</td>
+              <td>${renderLatestFrequencyPoint(record.latestPoint)}</td>
+              <td>
+                <button
+                  class="table-action-button"
+                  type="button"
+                  data-frequency-action="toggle-history"
+                  data-employee-id="${record.employee.id}"
+                >
+                  ${expandedFrequencyEmployeeId === record.employee.id ? "Ocultar" : "Ver histórico"}
+                </button>
+              </td>
+            </tr>
+            ${
+              expandedFrequencyEmployeeId === record.employee.id
+                ? renderEmployeeFrequencyDetail(record, range)
+                : ""
+            }
+          `,
+        )
+        .join("")
+    : `<tr><td colspan="6">Nenhum funcionário encontrado para o filtro selecionado.</td></tr>`;
+}
+
+function renderLatestFrequencyPoint(point) {
+  if (!point) return `<span class="muted-text">Sem registro</span>`;
+
+  return `
+    <strong>${formatDate(point.date)}</strong><br>
+    <small>${escapeHtml(point.in || "-")} · ${escapeHtml(point.client)}</small>
+  `;
+}
+
+function renderEmployeeFrequencyDetail(record, range) {
+  const history = record.periodPoints;
+  const detailRows = history.length
+    ? history
+        .map(
+          (point) => `
+            <article>
+              <div>
+                <strong>${formatDate(point.date)} · ${escapeHtml(point.in || "-")} às ${escapeHtml(
+                  point.out || "em aberto",
+                )}</strong>
+                <small>${escapeHtml(point.client)} · ${escapeHtml(
+                  point.source === "QR Code" ? "QR Code" : "Registro manual",
+                )}</small>
+              </div>
+              <span class="badge ${isManualPoint(point) ? "manual" : point.status === "Ponto normal" ? "active" : "warning"}">
+                ${escapeHtml(point.status)}
+              </span>
+            </article>
+          `,
+        )
+        .join("")
+    : `<article class="empty-state">Nenhum registro no período selecionado.</article>`;
+
+  return `
+    <tr class="frequency-detail-row">
+      <td colspan="6">
+        <div class="frequency-detail">
+          <div class="frequency-detail-header">
+            <div>
+              <strong>Histórico individual de ${escapeHtml(record.employee.name)}</strong>
+              <small>${formatDate(range.start)} até ${formatDate(range.end)}</small>
+            </div>
+            <span>${record.periodPoints.length} check-in(s)</span>
+          </div>
+          <div class="frequency-detail-metrics">
+            <article>
+              <span>Total de visitas</span>
+              <strong>${record.periodPoints.length}</strong>
+            </article>
+            <article>
+              <span>Registros manuais</span>
+              <strong>${record.manualCount}</strong>
+            </article>
+            <article>
+              <span>Justificativa atual</span>
+              <strong>${escapeHtml(record.justification || "Sem justificativa")}</strong>
+            </article>
+          </div>
+          <div class="frequency-detail-list">
+            ${detailRows}
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function handleFrequencyTableAction(event) {
+  const button = event.target.closest("[data-frequency-action]");
+  if (!button) return;
+
+  const employeeId = Number(button.dataset.employeeId);
+  expandedFrequencyEmployeeId = expandedFrequencyEmployeeId === employeeId ? null : employeeId;
+  renderFrequency();
 }
 
 function renderCertificates() {
@@ -1090,36 +2621,36 @@ function updateAccessControl() {
     element.hidden = !isSuperAdmin();
   });
 
-  if (!isSuperAdmin() && document.querySelector('[data-panel="users"]')?.classList.contains("active")) {
-    document.querySelector('[data-view="dashboard"]').click();
+  if (!isSuperAdmin() && document.querySelector(".app-view.admin-only.active")) {
+    navigateToAppView("dashboard", { replace: true });
   }
 }
 
 function showLoginForm() {
   document.querySelector("#loginForm").hidden = false;
-  document.querySelector(".demo-users").hidden = false;
   document.querySelector(".login-actions").hidden = false;
   document.querySelector("#resetRequestForm").hidden = true;
   document.querySelector("#resetPasswordForm").hidden = true;
   document.querySelector("#resetEmailPreview").hidden = true;
   clearFormMessage("#loginMessage");
+  clearFormMessage("#resetRequestMessage");
+  clearFormMessage("#resetPasswordMessage");
 }
 
 function showResetRequest() {
   document.querySelector("#loginForm").hidden = true;
-  document.querySelector(".demo-users").hidden = true;
   document.querySelector(".login-actions").hidden = true;
   document.querySelector("#resetRequestForm").hidden = false;
   document.querySelector("#resetPasswordForm").hidden = true;
   document.querySelector("#resetEmailPreview").hidden = true;
   clearFormMessage("#resetRequestMessage");
+  clearFormMessage("#resetPasswordMessage");
 }
 
 function showResetPasswordForm() {
   document.querySelector("#loginForm").hidden = true;
-  document.querySelector(".demo-users").hidden = true;
   document.querySelector(".login-actions").hidden = true;
-  document.querySelector("#resetRequestForm").hidden = false;
+  document.querySelector("#resetRequestForm").hidden = true;
   document.querySelector("#resetPasswordForm").hidden = false;
 }
 
@@ -1137,8 +2668,9 @@ function showResetEmailPreview(emailRecord) {
 }
 
 function handleResetHash() {
+  if (!window.location.hash.startsWith("#reset-")) return;
   const token = decodeURIComponent(window.location.hash.replace("#reset-", "")).toUpperCase();
-  if (!token || token === window.location.hash.toUpperCase()) return;
+  if (!token) return;
 
   const resetToken = state.resetTokens.find((item) => item.token === token && !item.used);
   openLogin();
@@ -1155,12 +2687,26 @@ function handleResetHash() {
 }
 
 function populateSelects() {
+  const selectedFrequencyEmployee = document.querySelector("#frequencyEmployee")?.value || "all";
+  const selectedFrequencyClient = document.querySelector("#frequencyClient")?.value || "all";
   const clientOptions = state.clients
     .map((client) => `<option value="${client.name}">${client.name}</option>`)
     .join("");
   const employeeOptions = state.employees
     .map((employee) => `<option value="${employee.id}">${employee.name}</option>`)
     .join("");
+  const frequencyEmployeeOptions = [
+    `<option value="all">Todos os funcionários</option>`,
+    ...state.employees.map(
+      (employee) => `<option value="${escapeHtml(employee.name)}">${escapeHtml(employee.name)}</option>`,
+    ),
+  ].join("");
+  const frequencyClientOptions = [
+    `<option value="all">Todos os clientes/locais</option>`,
+    ...state.clients.map(
+      (client) => `<option value="${escapeHtml(client.name)}">${escapeHtml(client.name)}</option>`,
+    ),
+  ].join("");
   const eventOptions = state.events
     .map((event) => `<option value="${event.id}">${event.name}</option>`)
     .join("");
@@ -1173,6 +2719,14 @@ function populateSelects() {
     document.querySelector(selector).innerHTML = employeeOptions;
   });
 
+  document.querySelector("#frequencyEmployee").innerHTML = frequencyEmployeeOptions;
+  if (state.employees.some((employee) => employee.name === selectedFrequencyEmployee)) {
+    document.querySelector("#frequencyEmployee").value = selectedFrequencyEmployee;
+  }
+  document.querySelector("#frequencyClient").innerHTML = frequencyClientOptions;
+  if (state.clients.some((client) => client.name === selectedFrequencyClient)) {
+    document.querySelector("#frequencyClient").value = selectedFrequencyClient;
+  }
   document.querySelector("#eventSelect").innerHTML = eventOptions;
 }
 
@@ -1184,6 +2738,77 @@ function card(title, value, subtitle) {
       <small>${subtitle}</small>
     </article>
   `;
+}
+
+function getOrderedBrandLogos(source = state.brandLogos) {
+  return [...(Array.isArray(source) ? source : [])].sort((a, b) => {
+    const orderA = Number.isFinite(Number(a.order)) ? Number(a.order) : 0;
+    const orderB = Number.isFinite(Number(b.order)) ? Number(b.order) : 0;
+    return orderA - orderB || String(a.name).localeCompare(String(b.name), "pt-BR");
+  });
+}
+
+function normalizeBrandOrders(source = state.brandLogos) {
+  getOrderedBrandLogos(source).forEach((brand, index) => {
+    brand.order = index + 1;
+  });
+}
+
+function moveBrandLogo(brandId, direction) {
+  const orderedBrands = getOrderedBrandLogos();
+  const currentIndex = orderedBrands.findIndex((brand) => brand.id === brandId);
+  const nextIndex = currentIndex + direction;
+
+  if (currentIndex < 0 || nextIndex < 0 || nextIndex >= orderedBrands.length) return;
+
+  const currentOrder = orderedBrands[currentIndex].order;
+  orderedBrands[currentIndex].order = orderedBrands[nextIndex].order;
+  orderedBrands[nextIndex].order = currentOrder;
+  normalizeBrandOrders();
+}
+
+function repeatBrandLogos(brands, minimumLength) {
+  if (!brands.length) return [];
+
+  const repeatedBrands = [];
+  while (repeatedBrands.length < minimumLength) {
+    repeatedBrands.push(...brands);
+  }
+  return repeatedBrands;
+}
+
+function getBrandSpeed() {
+  return getSafeBrandSpeed(state.brandSettings?.speed);
+}
+
+function getSafeBrandSpeed(speed) {
+  const parsedSpeed = Number(speed);
+  if (!Number.isFinite(parsedSpeed)) return initialState.brandSettings.speed;
+  return Math.min(80, Math.max(18, parsedSpeed));
+}
+
+function normalizeBrandInitials(value) {
+  return String(value || "MS")
+    .replace(/[^a-zA-ZÀ-ÿ0-9]/g, "")
+    .slice(0, 4)
+    .toUpperCase();
+}
+
+function normalizeBrandColor(value) {
+  const color = String(value || "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#006783";
+}
+
+function normalizeOptionalExternalUrl(value) {
+  const url = String(value || "").trim();
+  if (!url) return "";
+
+  try {
+    const parsedUrl = new URL(url);
+    return ["http:", "https:"].includes(parsedUrl.protocol) ? parsedUrl.href : null;
+  } catch {
+    return null;
+  }
 }
 
 function loadState() {
@@ -1207,6 +2832,29 @@ function ensureStateShape(savedState) {
   nextState.mailbox = Array.isArray(savedState.mailbox) ? savedState.mailbox : [];
   nextState.security = savedState.security || { loginAttempts: {} };
   nextState.security.loginAttempts = nextState.security.loginAttempts || {};
+  nextState.brandSettings = {
+    ...structuredClone(initialState.brandSettings),
+    ...(savedState.brandSettings || {}),
+  };
+  nextState.brandSettings.speed = getSafeBrandSpeed(nextState.brandSettings.speed);
+  nextState.brandLogos = Array.isArray(savedState.brandLogos)
+    ? savedState.brandLogos.map((brand, index) => {
+        const logoUrl = normalizeOptionalExternalUrl(brand.logoUrl);
+        const website = normalizeOptionalExternalUrl(brand.website);
+
+        return {
+          id: brand.id || Date.now() + index,
+          name: String(brand.name || `Marca ${index + 1}`).trim(),
+          initials: normalizeBrandInitials(brand.initials || getInitials(brand.name)),
+          logoUrl: logoUrl || "",
+          website: website || "",
+          color: normalizeBrandColor(brand.color),
+          active: brand.active !== false,
+          order: Number.isFinite(Number(brand.order)) ? Number(brand.order) : index + 1,
+        };
+      })
+    : structuredClone(initialState.brandLogos);
+  normalizeBrandOrders(nextState.brandLogos);
 
   initialUsers.forEach((seedUser) => {
     const existingUser = nextState.users.find(
@@ -1228,6 +2876,13 @@ function ensureStateShape(savedState) {
       existingUser.password = seedUser.password;
       existingUser.passwordUpdatedAt = nowIso();
       delete nextState.security.loginAttempts[normalizeEmail(seedUser.email)];
+    }
+  });
+
+  nextState.clients.forEach((client) => {
+    const seededClient = initialState.clients.find((item) => item.name === client.name);
+    if (seededClient?.coordinates && !client.coordinates) {
+      client.coordinates = structuredClone(seededClient.coordinates);
     }
   });
 
@@ -1472,6 +3127,14 @@ function nowIso() {
 
 function today() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function currentTime() {
+  return new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date());
 }
 
 function nextDate(offset) {

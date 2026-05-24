@@ -182,6 +182,20 @@
           </div>
         </section>
 
+        <section class="brand-showcase" id="marcas" aria-labelledby="brandShowcaseTitle">
+          <div class="section brand-showcase-heading">
+            <p class="eyebrow">Clientes e parceiros</p>
+            <h2 id="brandShowcaseTitle">Empresas que confiam em nossa operação.</h2>
+            <p>
+              Um fluxo contínuo de marcas reforça a credibilidade da Multi Serv e apresenta
+              visualmente os clientes, parceiros e segmentos atendidos pela empresa.
+            </p>
+          </div>
+          <div class="brand-marquee" aria-label="Logomarcas de clientes e parceiros">
+            <div class="brand-marquee-track" id="publicBrandCarousel"></div>
+          </div>
+        </section>
+
         <section class="testimonials-section" id="depoimentos">
           <div class="section testimonials-layout">
             <div class="section-copy">
@@ -274,6 +288,16 @@
         <span>João Pessoa, PB</span>
         <button class="text-button" type="button" data-open-login>Acesso interno</button>
       </footer>
+
+      <button
+        class="public-checkin-button"
+        type="button"
+        data-open-checkin
+        aria-label="Registrar ponto do funcionário"
+        title="Registrar ponto"
+      >
+        <span aria-hidden="true"></span>
+      </button>
     </div>
 
     <section class="login-screen" id="loginScreen" hidden>
@@ -284,7 +308,29 @@
         <img class="login-logo" src="assets/ms-logo-wide.png" alt="MS Multi Serv Terceirizações" />
         <h2>Acesso interno</h2>
         <p>Entre como Supervisor ou Super Admin para visualizar o painel demonstrativo.</p>
-        <form id="loginForm">
+        <form class="login-form" id="loginForm">
+          <button class="button button-google" type="button" id="googleLogin">
+            <svg class="google-icon" viewBox="0 0 18 18" aria-hidden="true">
+              <path
+                fill="#4285f4"
+                d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"
+              />
+              <path
+                fill="#34a853"
+                d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.72H.94v2.33A9 9 0 0 0 9 18z"
+              />
+              <path
+                fill="#fbbc05"
+                d="M3.96 10.7A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.16.28-1.7V4.97H.94A9 9 0 0 0 0 9c0 1.45.34 2.82.94 4.03l3.02-2.33z"
+              />
+              <path
+                fill="#ea4335"
+                d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .94 4.97L3.96 7.3C4.67 5.16 6.66 3.58 9 3.58z"
+              />
+            </svg>
+            Continuar com Google
+          </button>
+          <div class="auth-divider"><span>ou entre com e-mail</span></div>
           <label>
             E-mail
             <input
@@ -305,9 +351,6 @@
           </label>
           <div class="form-message" id="loginMessage" hidden></div>
           <button class="button button-primary" type="submit">Entrar no painel</button>
-          <button class="button button-google" type="button" id="googleLogin">
-            Entrar com Google
-          </button>
         </form>
         <div class="login-actions">
           <button class="text-button" type="button" id="forgotPasswordButton">
@@ -326,7 +369,12 @@
           </label>
           <div class="form-message" id="resetRequestMessage" hidden></div>
           <button class="button button-primary" type="submit">Enviar e-mail de redefinição</button>
-          <button class="button button-google" type="button" id="backToLoginButton">
+          <button
+            class="button button-secondary"
+            type="button"
+            id="backToLoginButton"
+            data-back-to-login
+          >
             Voltar ao login
           </button>
         </form>
@@ -350,18 +398,17 @@
           <ul class="password-rules" id="resetPasswordRules"></ul>
           <div class="form-message" id="resetPasswordMessage" hidden></div>
           <button class="button button-primary" type="submit">Redefinir senha</button>
+          <button class="button button-secondary" type="button" data-back-to-login>
+            Voltar ao login
+          </button>
         </form>
         <div class="email-preview" id="resetEmailPreview" hidden></div>
-        <div class="demo-users">
-          <button type="button" data-demo-user="alexandre">Super Admin</button>
-          <button type="button" data-demo-user="supervisor">Supervisor</button>
-        </div>
       </div>
     </section>
 
     <section class="app-shell" id="appShell" hidden>
       <aside class="sidebar">
-        <a class="brand app-brand" href="#dashboard">
+        <a class="brand app-brand" href="#painel/dashboard">
           <img class="brand-logo app-logo" src="assets/ms-logo-mark.png" alt="MS" />
           <span>
             <strong>Painel Multi Serv</strong>
@@ -373,9 +420,11 @@
           <button type="button" data-view="employees">Funcionários</button>
           <button type="button" data-view="clients">Empreendimentos</button>
           <button type="button" data-view="events">Eventos</button>
+          <button type="button" data-view="frequency">Frequência</button>
           <button type="button" data-view="timeclock">Ponto</button>
           <button type="button" data-view="certificates">Atestados</button>
           <button type="button" data-view="calendar">Calendário</button>
+          <button class="admin-only" type="button" data-view="brands">Marcas</button>
           <button class="admin-only" type="button" data-view="users">Usuários</button>
         </nav>
         <button class="button button-light logout-button" type="button" id="logoutButton">
@@ -439,6 +488,7 @@
                   <th>Empreendimento</th>
                   <th>Status</th>
                   <th>Telefone</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="employeeTable"></tbody>
@@ -557,6 +607,116 @@
               <div class="compact-list" id="timeList"></div>
             </section>
           </div>
+        </section>
+
+        <section class="app-view" data-panel="frequency">
+          <div class="dashboard-grid frequency-metrics" id="frequencyCards"></div>
+          <section class="workspace-panel frequency-toolbar">
+            <div class="panel-heading">
+              <h2>Controle de frequência</h2>
+              <span>Relatórios por período</span>
+            </div>
+            <div class="frequency-filters">
+              <label>
+                Busca rápida
+                <input
+                  id="frequencySearch"
+                  type="search"
+                  placeholder="Nome, CPF, cargo, local, empresa ou status"
+                />
+              </label>
+              <label>
+                Filtro rápido
+                <select id="frequencyQuickFilter">
+                  <option value="all">Todos os funcionários</option>
+                  <option value="present-today">Presentes hoje</option>
+                  <option value="absent-unjustified">Ausentes sem justificativa</option>
+                  <option value="absent-justified">Ausentes com justificativa</option>
+                  <option value="manual">Registros manuais</option>
+                  <option value="low-frequency">Baixa frequência</option>
+                  <option value="no-schedule">Sem escala no dia</option>
+                </select>
+              </label>
+              <label>
+                Período
+                <select id="frequencyPeriod">
+                  <option value="7">Semanal</option>
+                  <option value="15">Quinzenal</option>
+                  <option value="30">Últimos 30 dias</option>
+                  <option value="365">Anual</option>
+                  <option value="custom">Personalizado</option>
+                </select>
+              </label>
+              <label>
+                Funcionário
+                <select id="frequencyEmployee"></select>
+              </label>
+              <label>
+                Cliente/local
+                <select id="frequencyClient"></select>
+              </label>
+              <div class="frequency-custom-range" id="frequencyCustomRange" hidden>
+                <label>
+                  Data inicial
+                  <input id="frequencyStartDate" type="date" />
+                </label>
+                <label>
+                  Data final
+                  <input id="frequencyEndDate" type="date" />
+                </label>
+              </div>
+              <div class="export-actions">
+                <button class="button button-secondary" type="button" id="exportFrequencyPdf">
+                  Exportar PDF
+                </button>
+                <button class="button button-secondary" type="button" id="exportFrequencyExcel">
+                  Exportar Excel
+                </button>
+              </div>
+            </div>
+          </section>
+          <div class="app-columns frequency-columns">
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Gráfico de frequência</h2>
+                <span id="frequencyChartCaption">Últimos 7 dias</span>
+              </div>
+              <div class="chart-period-tabs" aria-label="Filtros do gráfico de frequência">
+                <button class="active" type="button" data-chart-period="7">Semanal</button>
+                <button type="button" data-chart-period="30">Mensal</button>
+                <button type="button" data-chart-period="365">Anual</button>
+              </div>
+              <div class="frequency-chart" id="frequencyChart"></div>
+            </section>
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Resumo diário</h2>
+                <span id="presencePercentLabel">0%</span>
+              </div>
+              <div class="compact-list" id="frequencySummary"></div>
+            </section>
+          </div>
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Histórico de presença</h2>
+              <span id="frequencyHistoryCount">0 funcionários</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Funcionário</th>
+                    <th>Local/cliente</th>
+                    <th>Status hoje</th>
+                    <th>Registros no período</th>
+                    <th>Último registro</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="frequencyTable"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
         <section class="app-view" data-panel="certificates">
@@ -714,13 +874,96 @@
             </div>
           </section>
         </section>
+
+        <section class="app-view admin-only" data-panel="brands">
+          <div class="app-columns brand-admin-columns">
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Nova marca</h2>
+                <span>Carrossel público</span>
+              </div>
+              <form class="stack-form" id="brandLogoForm">
+                <label>
+                  Nome da empresa
+                  <input name="name" required placeholder="Nome do cliente ou parceiro" />
+                </label>
+                <div class="form-row">
+                  <label>
+                    Sigla
+                    <input name="initials" maxlength="4" placeholder="MS" />
+                  </label>
+                  <label>
+                    Cor da marca
+                    <input name="color" type="color" value="#006783" />
+                  </label>
+                </div>
+                <label>
+                  URL da logomarca
+                  <input name="logoUrl" type="url" placeholder="https://site.com/logo.png" />
+                </label>
+                <label>
+                  Link do cliente
+                  <input name="website" type="url" placeholder="https://site-do-cliente.com.br" />
+                </label>
+                <label class="checkbox-row">
+                  <input name="active" type="checkbox" checked />
+                  Exibir esta marca no site público
+                </label>
+                <div class="form-message" id="brandLogoMessage" hidden></div>
+                <button class="button button-primary" type="submit">Adicionar marca</button>
+              </form>
+            </section>
+
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Configuração do carrossel</h2>
+                <span id="brandSpeedValue">36s por volta</span>
+              </div>
+              <form class="stack-form" id="brandSettingsForm">
+                <label>
+                  Velocidade da animação
+                  <input id="brandCarouselSpeed" name="speed" type="range" min="18" max="80" step="2" />
+                </label>
+                <p class="form-note">
+                  Quanto maior o tempo, mais lento e premium fica o movimento das marcas.
+                </p>
+              </form>
+              <div class="brand-admin-preview" id="brandAdminPreview"></div>
+            </section>
+          </div>
+
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Marcas cadastradas</h2>
+              <span id="brandLogoCount">0 marcas</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ordem</th>
+                    <th>Marca</th>
+                    <th>Link</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="brandLogoTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
       </main>
+      <button class="floating-checkin" type="button" id="floatingCheckinButton" data-open-checkin>
+        <span aria-hidden="true"></span>
+        Check-in
+      </button>
     </section>
 
     <dialog class="modal" id="employeeModal">
       <form class="modal-content" id="employeeForm" method="dialog">
         <div class="panel-heading">
-          <h2>Novo funcionário</h2>
+          <h2 id="employeeFormTitle">Novo funcionário</h2>
           <button class="close-button" type="button" id="closeEmployeeForm" aria-label="Fechar">
             ×
           </button>
@@ -732,11 +975,25 @@
         <div class="form-row">
           <label>
             CPF
-            <input name="cpf" required placeholder="000.000.000-00" />
+            <input
+              name="cpf"
+              required
+              inputmode="numeric"
+              maxlength="14"
+              autocomplete="off"
+              placeholder="000.000.000-00"
+            />
           </label>
           <label>
             Telefone
-            <input name="phone" required placeholder="(83) 99999-9999" />
+            <input
+              name="phone"
+              required
+              inputmode="tel"
+              maxlength="15"
+              autocomplete="tel"
+              placeholder="(83) 99999-9999"
+            />
           </label>
         </div>
         <div class="form-row">
@@ -746,7 +1003,7 @@
           </label>
           <label>
             Matrícula
-            <input name="registration" required placeholder="MS-001" />
+            <input name="registration" required readonly placeholder="MS-001" />
           </label>
         </div>
         <div class="form-row">
@@ -758,16 +1015,111 @@
             Status
             <select name="status">
               <option>Ativo</option>
+              <option>Inativo</option>
               <option>Férias</option>
               <option>Afastado</option>
               <option>Atestado</option>
+              <option>Suspenso</option>
+              <option>Licença</option>
               <option>Licença maternidade</option>
               <option>Licença paternidade</option>
               <option>Desligado</option>
             </select>
           </label>
         </div>
-        <button class="button button-primary" type="submit">Cadastrar funcionário</button>
+        <button class="button button-primary" type="submit" id="employeeFormSubmit">
+          Cadastrar funcionário
+        </button>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="employeeDetailModal">
+      <div class="modal-content">
+        <div class="panel-heading">
+          <h2>Detalhes do funcionário</h2>
+          <button class="close-button" type="button" id="closeEmployeeDetail" aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div id="employeeDetailContent"></div>
+      </div>
+    </dialog>
+
+    <dialog class="modal" id="deleteEmployeeModal">
+      <form class="modal-content delete-modal-content" id="deleteEmployeeForm" method="dialog">
+        <div class="panel-heading">
+          <h2>Excluir funcionário</h2>
+          <button class="close-button" type="button" id="closeDeleteEmployee" aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div class="delete-warning">
+          <strong id="deleteEmployeeName">Funcionário</strong>
+          <p>
+            Tem certeza que deseja excluir esse funcionário? Essa ação remove o cadastro do
+            painel e não pode ser desfeita neste protótipo.
+          </p>
+        </div>
+        <label>
+          Para confirmar, digite excluir
+          <input
+            id="deleteEmployeeConfirmation"
+            type="text"
+            autocomplete="off"
+            placeholder="excluir"
+          />
+        </label>
+        <div class="form-message" id="deleteEmployeeMessage" hidden></div>
+        <div class="modal-actions">
+          <button class="button button-secondary" type="button" id="cancelDeleteEmployee">
+            Cancelar
+          </button>
+          <button class="button button-danger" type="submit" id="confirmDeleteEmployee" disabled>
+            Excluir funcionário
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="checkinModal">
+      <form class="modal-content checkin-modal-content" id="checkinForm" method="dialog">
+        <div class="panel-heading">
+          <h2>Check-in por QR Code</h2>
+          <button class="close-button" type="button" id="closeCheckinModal" aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div class="checkin-layout">
+          <div class="qr-card">
+            <div class="qr-code" aria-label="QR Code de autenticação"></div>
+            <strong>MS CHECK-IN</strong>
+            <small id="checkinQrTime">Código ativo</small>
+          </div>
+          <div class="stack-form">
+            <label>
+              CPF do funcionário
+              <input
+                id="checkinCpf"
+                type="text"
+                inputmode="numeric"
+                maxlength="14"
+                placeholder="000.000.000-00"
+                required
+              />
+            </label>
+            <label class="checkbox-row">
+              <input id="checkinDemoLocation" type="checkbox" />
+              Usar localização demonstrativa
+            </label>
+            <div class="geo-status" id="checkinGeoStatus">
+              Aguardando validação de CPF e localização.
+            </div>
+            <div class="form-message" id="checkinMessage" hidden></div>
+            <button class="button button-primary" type="submit">
+              Validar localização e registrar
+            </button>
+          </div>
+        </div>
       </form>
     </dialog>
 

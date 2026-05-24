@@ -27,19 +27,34 @@ Abra o arquivo `index.html` no navegador.
 - Super Admin: `admin@ms.com` / `Mserv@2026`
 - Supervisor: `supervisor@ms.com` / `Equipe@2026`
 
+## Rotas internas do painel
+
+- Dashboard: `#painel/dashboard`
+- Funcionários: `#painel/funcionarios`
+- Empreendimentos: `#painel/empreendimentos`
+- Eventos: `#painel/eventos`
+- Frequência: `#painel/frequencia`
+- Ponto: `#painel/ponto`
+- Atestados: `#painel/atestados`
+- Calendário: `#painel/calendario`
+- Marcas: `#painel/marcas`
+- Usuários: `#painel/usuarios`
+
 ## O que o protótipo contém
 
-- Site institucional com apresentação, serviços, portfólio e contato.
+- Site institucional com apresentação, serviços, portfólio, carrossel de marcas e contato.
 - Login demonstrativo com senha e botão Google.
 - Painel interno com dashboard.
 - Validação forte de senha e tratamento de erro no login.
 - Redefinição de senha com e-mail simulado.
 - Gestão de usuários para Super Admin.
+- Gestão de marcas/clientes para Super Admin, com ordem, link, status e velocidade do carrossel.
 - Cadastro de funcionários.
 - Lista de empreendimentos.
 - Cadastro de eventos.
 - Seleção de funcionários para eventos.
 - Controle de ponto manual.
+- Dashboard de frequência com filtros, gráfico, histórico e check-in por QR Code.
 - Lançamento de atestados com nome do arquivo.
 - Calendário operacional.
 

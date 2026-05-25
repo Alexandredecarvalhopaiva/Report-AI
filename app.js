@@ -1,4 +1,5 @@
 const storageKey = "ms-demo-state-v1";
+const sidebarStateKey = "ms-sidebar-collapsed";
 
 const passwordPolicy = {
   minLength: 8,
@@ -283,6 +284,10 @@ const loginScreen = document.querySelector("#loginScreen");
 const appShell = document.querySelector("#appShell");
 const menuButton = document.querySelector("#menuButton");
 const siteNav = document.querySelector("#siteNav");
+const appMenuButton = document.querySelector("#appMenuButton");
+const appMenuOverlay = document.querySelector("#appMenuOverlay");
+const sidebarCollapseButton = document.querySelector("#sidebarCollapseButton");
+const mobileFooterNav = document.querySelector("#mobileFooterNav");
 const loginForm = document.querySelector("#loginForm");
 const employeeModal = document.querySelector("#employeeModal");
 const employeeDetailModal = document.querySelector("#employeeDetailModal");
@@ -458,21 +463,109 @@ function setupLogin() {
     appShell.hidden = true;
     publicSite.hidden = false;
     document.body.classList.remove("modal-open");
+    document.body.classList.remove("is-logged-in");
+    closeMobileAppMenu();
     history.pushState(null, "", "#inicio");
   });
 }
 
 function setupAppNavigation() {
+  buildMobileFooterShortcuts();
+  applySavedSidebarState();
+
   document.querySelectorAll(".app-nav button").forEach((button) => {
     button.addEventListener("click", () => {
       if (button.hidden) return;
       navigateToAppView(button.dataset.view);
+      closeMobileAppMenu();
     });
+  });
+
+  mobileFooterNav.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-view]");
+    if (!button) return;
+    navigateToAppView(button.dataset.view);
+    closeMobileAppMenu();
+  });
+
+  sidebarCollapseButton.addEventListener("click", () => {
+    const isCollapsed = !appShell.classList.contains("sidebar-collapsed");
+    setSidebarCollapsed(isCollapsed);
+    localStorage.setItem(sidebarStateKey, String(isCollapsed));
+  });
+
+  appMenuButton.addEventListener("click", () => {
+    const isOpen = appShell.classList.contains("mobile-menu-open");
+    setMobileAppMenuOpen(!isOpen);
+  });
+
+  appMenuOverlay.addEventListener("click", () => closeMobileAppMenu());
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMobileAppMenu();
+  });
+
+  window.matchMedia("(min-width: 781px)").addEventListener("change", (event) => {
+    if (event.matches) closeMobileAppMenu();
   });
 
   window.addEventListener("hashchange", handleAppRouteChange);
   window.addEventListener("popstate", handleAppRouteChange);
   handleAppRouteChange();
+}
+
+function buildMobileFooterShortcuts() {
+  const shortcutButtons = [...document.querySelectorAll(".app-nav button")]
+    .filter((button) => !button.classList.contains("admin-only"))
+    .slice(0, 4);
+
+  mobileFooterNav.innerHTML = shortcutButtons
+    .map((button) => {
+      const icon = button.querySelector(".nav-icon")?.outerHTML || "";
+      const label = button.dataset.shortLabel || button.dataset.label || button.textContent.trim();
+      const view = button.dataset.view;
+
+      return `
+        <button type="button" data-view="${escapeHtml(view)}" aria-label="${escapeHtml(
+          button.dataset.label || label,
+        )}">
+          ${icon}
+          <span>${escapeHtml(label)}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function applySavedSidebarState() {
+  const savedValue = localStorage.getItem(sidebarStateKey);
+  setSidebarCollapsed(savedValue === "true");
+}
+
+function setSidebarCollapsed(isCollapsed) {
+  appShell.classList.toggle("sidebar-collapsed", isCollapsed);
+  sidebarCollapseButton.setAttribute("aria-pressed", String(isCollapsed));
+  sidebarCollapseButton.setAttribute(
+    "aria-label",
+    isCollapsed ? "Expandir menu lateral" : "Recolher menu lateral",
+  );
+  sidebarCollapseButton.title = isCollapsed ? "Expandir menu" : "Recolher menu";
+}
+
+function setMobileAppMenuOpen(isOpen) {
+  appShell.classList.toggle("mobile-menu-open", isOpen);
+  appMenuOverlay.hidden = !isOpen;
+  appMenuOverlay.setAttribute("aria-hidden", String(!isOpen));
+  appMenuButton.setAttribute("aria-expanded", String(isOpen));
+  appMenuButton.setAttribute(
+    "aria-label",
+    isOpen ? "Fechar menu do sistema" : "Abrir menu do sistema",
+  );
+  document.body.classList.toggle("app-menu-open", isOpen);
+}
+
+function closeMobileAppMenu() {
+  setMobileAppMenuOpen(false);
 }
 
 function getCurrentAppRoute() {
@@ -504,11 +597,18 @@ function navigateToAppView(view, options = {}) {
     return false;
   }
 
-  document.querySelectorAll(".app-nav button").forEach((item) => item.classList.remove("active"));
+  document.querySelectorAll(".app-nav button, .mobile-footer-nav button").forEach((item) => {
+    const isActive = item.dataset.view === view;
+    item.classList.toggle("active", isActive);
+    if (isActive) {
+      item.setAttribute("aria-current", "page");
+    } else {
+      item.removeAttribute("aria-current");
+    }
+  });
   document.querySelectorAll(".app-view").forEach((item) => item.classList.remove("active"));
-  button.classList.add("active");
   panel.classList.add("active");
-  document.querySelector("#viewTitle").textContent = button.textContent.trim();
+  document.querySelector("#viewTitle").textContent = button.dataset.label || button.textContent.trim();
 
   if (updateHash) {
     const route = appViewRoutes[view] || "dashboard";
@@ -1487,6 +1587,7 @@ function enterApp(user) {
   loginScreen.hidden = true;
   appShell.hidden = false;
   document.body.classList.remove("modal-open");
+  document.body.classList.add("is-logged-in");
   updateAccessControl();
   const currentRoute = getCurrentAppRoute();
   navigateToAppView(currentRoute?.view || "dashboard", {

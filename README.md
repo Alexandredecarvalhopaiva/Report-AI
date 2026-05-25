@@ -1,6 +1,6 @@
-# Protótipo MS Multi Serv
+# Protótipo MS Multserv
 
-Este projeto é um protótipo estático para apresentação da MS Multi Serv Terceirizações ao cliente.
+Este projeto é um protótipo estático para apresentação da MS Multserv Terceirizações ao cliente.
 
 ## Arquivos da marca
 

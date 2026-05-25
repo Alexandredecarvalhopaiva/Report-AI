@@ -3191,7 +3191,7 @@ function sendWelcomeEmail(user, temporaryPassword) {
   state.mailbox.unshift({
     id: Date.now(),
     to: user.email,
-    subject: "Bem-vindo ao painel Multi Serv",
+    subject: "Bem-vindo ao painel Multserv",
     token: "",
     createdAt: nowIso(),
     preview: `Usuário criado com perfil ${user.role}. Senha temporária: ${temporaryPassword}.`,

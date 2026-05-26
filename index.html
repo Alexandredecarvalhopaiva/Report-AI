@@ -3,13 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MS Multserv | Limpeza profissional e terceirizações</title>
+    <title>MS Multserv | Limpeza profissional e terceirizações em João Pessoa</title>
     <meta
       name="description"
-      content="Site institucional e painel demonstrativo da MS Multserv Terceirizações, empresa de limpeza profissional para empresas, condomínios e eventos em João Pessoa."
+      content="Conheça a MS Multserv Terceirizações: limpeza profissional para empresas, condomínios e eventos em João Pessoa, com supervisão, equipe treinada e atendimento eficiente."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#006783" />
+    <link rel="canonical" href="https://alexandredecarvalhopaiva.github.io/Saas---Ms/" />
+    <meta
+      property="og:title"
+      content="MS Multserv | Limpeza profissional e terceirizações"
+    />
+    <meta
+      property="og:description"
+      content="Soluções de limpeza terceirizada para empresas, condomínios e eventos em João Pessoa."
+    />
+    <meta
+      property="og:image"
+      content="https://alexandredecarvalhopaiva.github.io/Saas---Ms/assets/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Imagem institucional da MS Multserv Terceirizações"
+    />
+    <meta property="og:url" content="https://alexandredecarvalhopaiva.github.io/Saas---Ms/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MS Multserv Terceirizações" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="MS Multserv | Limpeza profissional e terceirizações"
+    />
+    <meta
+      name="twitter:description"
+      content="Conheça as soluções da MS Multserv e solicite atendimento para sua empresa."
+    />
+    <meta
+      name="twitter:image"
+      content="https://alexandredecarvalhopaiva.github.io/Saas---Ms/assets/og-image.png"
     />
     <link rel="icon" href="assets/ms-logo-mark.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260526-menu-popover" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "MS Multserv Terceirizações",
+        "image": "https://alexandredecarvalhopaiva.github.io/Saas---Ms/assets/og-image.png",
+        "description": "Limpeza profissional terceirizada para empresas, condomínios e eventos em João Pessoa.",
+        "telephone": "+55 83 99802-4125",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Avenida Aderbal Piragibe, 135, Sala A",
+          "addressLocality": "João Pessoa",
+          "addressRegion": "PB",
+          "postalCode": "58015-000",
+          "addressCountry": "BR"
+        },
+        "areaServed": "João Pessoa, Paraíba",
+        "url": "https://alexandredecarvalhopaiva.github.io/Saas---Ms/",
+        "sameAs": []
+      }
+    </script>
   </head>
   <body>
     <svg class="svg-sprite" aria-hidden="true" focusable="false">
@@ -72,6 +130,25 @@
       <symbol id="icon-collapse" viewBox="0 0 24 24">
         <path d="M15 6l-6 6 6 6"></path>
       </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <path d="M12 9v4"></path>
+        <path d="M12 17h.01"></path>
+        <path d="M10.3 4.4 2.8 17.5A2 2 0 0 0 4.5 20h15a2 2 0 0 0 1.7-2.5L13.7 4.4a2 2 0 0 0-3.4 0z"></path>
+      </symbol>
+      <symbol id="icon-report" viewBox="0 0 24 24">
+        <path d="M5 20V4"></path>
+        <path d="M19 20V10"></path>
+        <path d="M12 20V7"></path>
+        <path d="M3 20h18"></path>
+      </symbol>
+      <symbol id="icon-log" viewBox="0 0 24 24">
+        <path d="M5 5h14"></path>
+        <path d="M5 12h14"></path>
+        <path d="M5 19h14"></path>
+        <path d="M3 5h.01"></path>
+        <path d="M3 12h.01"></path>
+        <path d="M3 19h.01"></path>
+      </symbol>
     </svg>
     <div id="publicSite">
       <header class="site-header">
@@ -96,13 +173,19 @@
         </button>
 
         <nav class="site-nav" id="siteNav" aria-label="Navegação principal">
-          <div class="site-nav-links">
-            <a href="#servicos">Serviços</a>
-            <a href="#clientes">Clientes</a>
-            <a href="#depoimentos">Depoimentos</a>
-            <a href="#contato">Orçamento</a>
+          <div class="site-nav-panel">
+            <div class="site-nav-panel-heading" aria-hidden="true">
+              <span>Navegação</span>
+              <strong>Multserv</strong>
+            </div>
+            <div class="site-nav-links">
+              <a href="#servicos">Serviços</a>
+              <a href="#clientes">Clientes</a>
+              <a href="#depoimentos">Depoimentos</a>
+              <a href="#contato">Orçamento</a>
+            </div>
+            <button class="button button-dark" type="button" data-open-login>Entrar</button>
           </div>
-          <button class="button button-dark" type="button" data-open-login>Entrar</button>
         </nav>
       </header>
 
@@ -119,7 +202,14 @@
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#contato">Solicite seu orçamento</a>
-              <a class="button button-light" href="#servicos">Conheça os serviços</a>
+              <a
+                class="button button-light"
+                href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20servi%C3%A7os%20da%20Multserv."
+                target="_blank"
+                rel="noreferrer"
+              >
+                Fale pelo WhatsApp
+              </a>
             </div>
           </div>
           <div class="hero-metrics" aria-label="Indicadores da operação">
@@ -196,6 +286,8 @@
               <img
                 src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80"
                 alt="Ambiente corporativo moderno"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <span>Empresas</span>
@@ -206,6 +298,8 @@
               <img
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=80"
                 alt="Área comum de condomínio"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <span>Condomínios</span>
@@ -216,6 +310,8 @@
               <img
                 src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=80"
                 alt="Espaço de evento corporativo"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <span>Eventos</span>
@@ -308,19 +404,27 @@
           <form class="contact-form">
             <label>
               Nome
-              <input type="text" placeholder="Seu nome" />
+              <input type="text" name="nome" placeholder="Seu nome" autocomplete="name" maxlength="90" required />
             </label>
             <label>
               Empresa
-              <input type="text" placeholder="Nome da empresa" />
+              <input type="text" name="empresa" placeholder="Nome da empresa" autocomplete="organization" maxlength="120" />
             </label>
             <label>
               Telefone
-              <input type="tel" placeholder="(83) 99999-9999" />
+              <input
+                type="tel"
+                name="telefone"
+                placeholder="(83) 99999-9999"
+                autocomplete="tel"
+                inputmode="tel"
+                maxlength="15"
+                required
+              />
             </label>
             <label>
               Serviço desejado
-              <select>
+              <select name="servico" required>
                 <option>Limpeza empresarial</option>
                 <option>Condomínio</option>
                 <option>Equipe para evento</option>
@@ -329,11 +433,18 @@
             </label>
             <label class="full-field">
               Mensagem
-              <textarea rows="4" placeholder="Conte rapidamente o que você precisa"></textarea>
+              <textarea
+                rows="4"
+                name="mensagem"
+                placeholder="Conte rapidamente o que você precisa"
+                maxlength="600"
+              ></textarea>
             </label>
             <a
               class="button button-primary full-field"
-              href="https://wa.me/5583998024125"
+              href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20servi%C3%A7os%20da%20Multserv."
+              aria-label="Falar pelo WhatsApp no número (83) 99802-4125"
+              title="WhatsApp: (83) 99802-4125"
               target="_blank"
               rel="noreferrer"
             >
@@ -341,14 +452,96 @@
             </a>
           </form>
         </section>
+
       </main>
 
       <footer class="site-footer">
-        <img class="footer-logo" src="assets/ms-logo-wide.png" alt="MS Multserv Terceirizações" />
-        <strong>MS Multserv Terceirizações</strong>
-        <span>João Pessoa, PB</span>
-        <button class="text-button" type="button" data-open-login>Acesso interno</button>
+        <div class="footer-brand-block">
+          <img class="footer-logo" src="assets/ms-logo-wide.png" alt="MS Multserv Terceirizações" />
+          <address class="footer-address">
+            Avenida Aderbal Piragibe, 135, Sala A - Jaguaribe, João Pessoa - PB
+            <a
+              href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20servi%C3%A7os%20da%20Multserv."
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp: (83) 99802-4125
+            </a>
+          </address>
+        </div>
+
+        <section class="footer-location" id="localizacao" aria-labelledby="footerLocationTitle">
+          <h2 id="footerLocationTitle">Como chegar</h2>
+          <address>
+            Avenida Aderbal Piragibe, 135, Sala A, Jaguaribe, João Pessoa - PB
+          </address>
+          <div class="footer-map-card">
+            <iframe
+              title="Prévia do mapa da sede da Multserv"
+              src="https://www.google.com/maps?q=Avenida%20Aderbal%20Piragibe%2C%20135%2C%20Sala%20A%2C%20Jaguaribe%2C%20Jo%C3%A3o%20Pessoa%20-%20PB%2C%2058015-000&output=embed"
+              loading="lazy"
+              tabindex="-1"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+            <button
+              class="footer-map-expand"
+              type="button"
+              data-open-location
+              aria-label="Ampliar mapa de localização da Multserv"
+            >
+              Abrir mapa
+            </button>
+          </div>
+        </section>
       </footer>
+
+      <dialog class="modal location-modal" id="locationModal">
+        <div class="modal-content location-modal-content">
+          <button
+            class="close-button"
+            type="button"
+            data-close-location
+            aria-label="Fechar localização"
+          >
+            ×
+          </button>
+          <div class="location-modal-header">
+            <p class="eyebrow">Localização</p>
+            <h2>Onde estamos</h2>
+            <address>
+              Avenida Aderbal Piragibe, 135, Sala A, Jaguaribe, João Pessoa - PB,
+              CEP 58.015-000
+            </address>
+          </div>
+          <div class="location-modal-map">
+            <iframe
+              title="Mapa ampliado da sede da Multserv em João Pessoa"
+              src="https://www.google.com/maps?q=Avenida%20Aderbal%20Piragibe%2C%20135%2C%20Sala%20A%2C%20Jaguaribe%2C%20Jo%C3%A3o%20Pessoa%20-%20PB%2C%2058015-000&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="location-modal-actions">
+            <a
+              class="button button-primary"
+              href="https://www.google.com/maps/dir/?api=1&destination=Avenida%20Aderbal%20Piragibe%2C%20135%2C%20Sala%20A%2C%20Jaguaribe%2C%20Jo%C3%A3o%20Pessoa%20-%20PB%2C%2058015-000"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Abrir no Maps
+            </a>
+            <a
+              class="button button-light"
+              href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20servi%C3%A7os%20da%20Multserv."
+              target="_blank"
+              rel="noreferrer"
+            >
+              Fale conosco
+            </a>
+          </div>
+        </div>
+      </dialog>
 
       <button
         class="public-checkin-button"
@@ -488,47 +681,79 @@
           <svg class="nav-icon" aria-hidden="true"><use href="#icon-collapse"></use></svg>
           <span class="nav-text">Recolher</span>
         </button>
+        <div class="sidebar-user-card" aria-label="Usuário logado">
+          <span id="sidebarUserInitial">A</span>
+          <div>
+            <strong id="sidebarUserName">Alexandre</strong>
+            <small id="sidebarUserEmail">alexandre_cp@hotmail.com</small>
+          </div>
+        </div>
         <nav class="app-nav" aria-label="Navegação do sistema">
-          <button class="active" type="button" data-view="dashboard" data-label="Dashboard" data-short-label="Painel" aria-current="page">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-dashboard"></use></svg>
-            <span class="nav-text">Dashboard</span>
-          </button>
-          <button type="button" data-view="employees" data-label="Funcionários" data-short-label="Equipe">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
-            <span class="nav-text">Funcionários</span>
-          </button>
-          <button type="button" data-view="clients" data-label="Empreendimentos" data-short-label="Locais">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
-            <span class="nav-text">Empreendimentos</span>
-          </button>
-          <button type="button" data-view="events" data-label="Eventos" data-short-label="Eventos">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-            <span class="nav-text">Eventos</span>
-          </button>
-          <button type="button" data-view="frequency" data-label="Frequência" data-short-label="Frequência">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-activity"></use></svg>
-            <span class="nav-text">Frequência</span>
-          </button>
-          <button type="button" data-view="timeclock" data-label="Ponto" data-short-label="Ponto">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-clock"></use></svg>
-            <span class="nav-text">Ponto</span>
-          </button>
-          <button type="button" data-view="certificates" data-label="Atestados" data-short-label="Atestados">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-file"></use></svg>
-            <span class="nav-text">Atestados</span>
-          </button>
-          <button type="button" data-view="calendar" data-label="Calendário" data-short-label="Agenda">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-            <span class="nav-text">Calendário</span>
-          </button>
-          <button class="admin-only" type="button" data-view="brands" data-label="Marcas" data-short-label="Marcas">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-award"></use></svg>
-            <span class="nav-text">Marcas</span>
-          </button>
-          <button class="admin-only" type="button" data-view="users" data-label="Usuários" data-short-label="Usuários">
-            <svg class="nav-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
-            <span class="nav-text">Usuários</span>
-          </button>
+          <div class="nav-section">
+            <span class="nav-section-title">Operacional</span>
+            <button class="active" type="button" data-view="dashboard" data-label="Dashboard" data-short-label="Painel" aria-current="page">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-dashboard"></use></svg>
+              <span class="nav-text">Dashboard</span>
+            </button>
+            <button type="button" data-view="employees" data-label="Funcionários" data-short-label="Equipe">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
+              <span class="nav-text">Funcionários</span>
+            </button>
+            <button type="button" data-view="clients" data-label="Empreendimentos" data-short-label="Locais">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
+              <span class="nav-text">Empreendimentos</span>
+            </button>
+            <button type="button" data-view="events" data-label="Eventos" data-short-label="Eventos">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+              <span class="nav-text">Eventos</span>
+            </button>
+            <button type="button" data-view="calendar" data-label="Calendário" data-short-label="Agenda">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+              <span class="nav-text">Calendário</span>
+            </button>
+          </div>
+          <div class="nav-section">
+            <span class="nav-section-title">Gestão</span>
+            <button type="button" data-view="frequency" data-label="Frequência" data-short-label="Frequência">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-activity"></use></svg>
+              <span class="nav-text">Frequência</span>
+            </button>
+            <button type="button" data-view="timeclock" data-label="Ponto" data-short-label="Ponto">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-clock"></use></svg>
+              <span class="nav-text">Ponto</span>
+            </button>
+            <button type="button" data-view="certificates" data-label="Atestados" data-short-label="Atestados">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-file"></use></svg>
+              <span class="nav-text">Atestados</span>
+            </button>
+            <button type="button" data-view="absences" data-label="Faltas" data-short-label="Faltas">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-alert"></use></svg>
+              <span class="nav-text">Faltas</span>
+            </button>
+            <button type="button" data-view="reports" data-label="Relatórios" data-short-label="Relatórios">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-report"></use></svg>
+              <span class="nav-text">Relatórios</span>
+            </button>
+          </div>
+          <div class="nav-section admin-only">
+            <span class="nav-section-title">Sistema</span>
+            <button class="admin-only" type="button" data-view="brands" data-label="Marcas" data-short-label="Marcas">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-award"></use></svg>
+              <span class="nav-text">Marcas</span>
+            </button>
+            <button class="admin-only" type="button" data-view="users" data-label="Usuários" data-short-label="Usuários">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
+              <span class="nav-text">Usuários</span>
+            </button>
+            <button class="admin-only" type="button" data-view="settings" data-label="Configurações" data-short-label="Ajustes">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+              <span class="nav-text">Configurações</span>
+            </button>
+            <button class="admin-only" type="button" data-view="logs" data-label="Logs" data-short-label="Logs">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-log"></use></svg>
+              <span class="nav-text">Logs</span>
+            </button>
+          </div>
         </nav>
         <button class="button button-light logout-button" type="button" id="logoutButton">
           <svg class="nav-icon" aria-hidden="true"><use href="#icon-logout"></use></svg>
@@ -833,6 +1058,82 @@
           </section>
         </section>
 
+        <section class="app-view" data-panel="absences">
+          <div class="dashboard-grid dashboard-grid-compact">
+            <article class="dashboard-card">
+              <span>Faltas sem justificativa</span>
+              <strong>2</strong>
+              <small>Exigem análise do supervisor</small>
+            </article>
+            <article class="dashboard-card">
+              <span>Justificadas</span>
+              <strong>3</strong>
+              <small>Atestados e ocorrências lançadas</small>
+            </article>
+            <article class="dashboard-card">
+              <span>Baixa frequência</span>
+              <strong>1</strong>
+              <small>Acompanhamento recomendado</small>
+            </article>
+          </div>
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Controle de faltas</h2>
+              <span>Resumo operacional</span>
+            </div>
+            <div class="quick-status-grid">
+              <article>
+                <strong>Ausência sem justificativa</strong>
+                <p>Funcionários sem check-in e sem atestado registrado no dia.</p>
+              </article>
+              <article>
+                <strong>Ausência justificada</strong>
+                <p>Funcionários com atestado, licença, férias ou ocorrência aprovada.</p>
+              </article>
+              <article>
+                <strong>Registro manual</strong>
+                <p>Pontos lançados por supervisor para correção ou auditoria.</p>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="app-view" data-panel="reports">
+          <div class="app-columns">
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Relatórios por período</h2>
+                <span>PDF e Excel</span>
+              </div>
+              <div class="quick-status-grid">
+                <article>
+                  <strong>Frequência mensal</strong>
+                  <p>Resumo de presença, atrasos, faltas e justificativas por funcionário.</p>
+                </article>
+                <article>
+                  <strong>Operação por cliente</strong>
+                  <p>Visão por empreendimento com quantidade de funcionários e ocorrências.</p>
+                </article>
+                <article>
+                  <strong>Auditoria de ponto</strong>
+                  <p>Histórico de check-ins, localização, tentativas inválidas e ajustes manuais.</p>
+                </article>
+              </div>
+            </section>
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <h2>Exportações rápidas</h2>
+                <span>Protótipo</span>
+              </div>
+              <div class="stack-form">
+                <button class="button button-secondary" type="button">Relatório semanal</button>
+                <button class="button button-secondary" type="button">Relatório mensal</button>
+                <button class="button button-secondary" type="button">Relatório por cliente</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
         <section class="app-view" data-panel="certificates">
           <div class="app-columns">
             <section class="workspace-panel">
@@ -894,6 +1195,61 @@
               <span><i class="legend-dot point"></i>Ponto/ocorrência</span>
             </div>
             <div class="month-calendar" id="calendarGrid"></div>
+          </section>
+        </section>
+
+        <section class="app-view admin-only" data-panel="settings">
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Configurações do sistema</h2>
+              <span>Apenas Super Admin</span>
+            </div>
+            <div class="quick-status-grid">
+              <article>
+                <strong>Raio de check-in</strong>
+                <p>Validação demonstrativa configurada para até 100 metros do local de trabalho.</p>
+              </article>
+              <article>
+                <strong>Perfis de acesso</strong>
+                <p>Super Admin gerencia usuários, marcas e módulos administrativos.</p>
+              </article>
+              <article>
+                <strong>Experiência mobile</strong>
+                <p>Menu lateral recolhível, atalhos inferiores e áreas de toque ampliadas.</p>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="app-view admin-only" data-panel="logs">
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Logs e auditoria</h2>
+              <span>Eventos recentes</span>
+            </div>
+            <div class="compact-list">
+              <article class="list-item">
+                <div>
+                  <strong>Login administrativo</strong>
+                  <small>Registro demonstrativo de acesso ao painel</small>
+                </div>
+                <span class="badge active">OK</span>
+              </article>
+              <article class="list-item">
+                <div>
+                  <strong>Tentativa de check-in</strong>
+                  <small>Validação por CPF e localização preparada para auditoria</small>
+                </div>
+                <span class="badge manual">Monitorado</span>
+              </article>
+              <article class="list-item">
+                <div>
+                  <strong>Alteração cadastral</strong>
+                  <small>Histórico planejado para edições de funcionários e usuários</small>
+                </div>
+                <span class="badge warning">Protótipo</span>
+              </article>
+            </div>
           </section>
         </section>
 
@@ -1238,6 +1594,6 @@
       </form>
     </dialog>
 
-    <script src="app.js" defer></script>
+    <script src="app.js?v=20260526-menu-popover" defer></script>
   </body>
 </html>

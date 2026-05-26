@@ -41,9 +41,13 @@ const appRoutes = {
   frequencia: "frequency",
   ponto: "timeclock",
   atestados: "certificates",
+  faltas: "absences",
+  relatorios: "reports",
   calendario: "calendar",
   marcas: "brands",
   usuarios: "users",
+  configuracoes: "settings",
+  logs: "logs",
 };
 const appViewRoutes = Object.fromEntries(
   Object.entries(appRoutes).map(([route, view]) => [view, route]),
@@ -317,25 +321,94 @@ function setupPublicSite() {
   setupSiteNavObserver();
   setActiveSiteNavLink(window.location.hash);
 
-  menuButton.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("open");
+  const setPublicMenuOpen = (isOpen) => {
+    siteNav.classList.toggle("open", isOpen);
+    menuButton.classList.toggle("is-open", isOpen);
     menuButton.setAttribute("aria-expanded", String(isOpen));
+    menuButton.setAttribute("aria-label", isOpen ? "Fechar menu" : "Abrir menu");
+  };
+
+  menuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setPublicMenuOpen(!siteNav.classList.contains("open"));
+  });
+
+  siteNav.addEventListener("click", (event) => {
+    if (event.target === siteNav) {
+      setPublicMenuOpen(false);
+    }
   });
 
   siteNav.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       setActiveSiteNavLink(link.getAttribute("href"));
-      siteNav.classList.remove("open");
-      menuButton.setAttribute("aria-expanded", "false");
+      setPublicMenuOpen(false);
     });
   });
 
   document.querySelectorAll("[data-open-login]").forEach((button) => {
-    button.addEventListener("click", () => openLogin());
+    button.addEventListener("click", () => {
+      setPublicMenuOpen(false);
+      openLogin();
+    });
   });
 
   document.querySelectorAll("[data-close-login]").forEach((button) => {
     button.addEventListener("click", () => closeLogin());
+  });
+
+  const locationModal = document.querySelector("#locationModal");
+  const openLocationModal = () => {
+    if (!locationModal) return;
+    if (typeof locationModal.showModal === "function") {
+      locationModal.showModal();
+    } else {
+      locationModal.setAttribute("open", "");
+    }
+    document.body.classList.add("modal-open");
+  };
+  const closeLocationModal = () => {
+    if (!locationModal) return;
+    if (typeof locationModal.close === "function") {
+      locationModal.close();
+    } else {
+      locationModal.removeAttribute("open");
+    }
+    document.body.classList.remove("modal-open");
+  };
+
+  document.querySelectorAll("[data-open-location]").forEach((button) => {
+    button.addEventListener("click", openLocationModal);
+  });
+
+  document.querySelectorAll("[data-close-location]").forEach((button) => {
+    button.addEventListener("click", closeLocationModal);
+  });
+
+  locationModal?.addEventListener("click", (event) => {
+    if (event.target === locationModal) {
+      closeLocationModal();
+    }
+  });
+
+  locationModal?.addEventListener("close", () => {
+    document.body.classList.remove("modal-open");
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && siteNav.classList.contains("open")) {
+      setPublicMenuOpen(false);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      siteNav.classList.contains("open") &&
+      !siteNav.contains(event.target) &&
+      !menuButton.contains(event.target)
+    ) {
+      setPublicMenuOpen(false);
+    }
   });
 }
 
@@ -472,8 +545,10 @@ function setupLogin() {
 function setupAppNavigation() {
   buildMobileFooterShortcuts();
   applySavedSidebarState();
+  setMobileAppMenuOpen(false);
 
   document.querySelectorAll(".app-nav button").forEach((button) => {
+    button.title = button.dataset.label || button.textContent.trim();
     button.addEventListener("click", () => {
       if (button.hidden) return;
       navigateToAppView(button.dataset.view);
@@ -482,6 +557,12 @@ function setupAppNavigation() {
   });
 
   mobileFooterNav.addEventListener("click", (event) => {
+    const menuButton = event.target.closest("button[data-menu-trigger]");
+    if (menuButton) {
+      setMobileAppMenuOpen(true);
+      return;
+    }
+
     const button = event.target.closest("button[data-view]");
     if (!button) return;
     navigateToAppView(button.dataset.view);
@@ -489,6 +570,12 @@ function setupAppNavigation() {
   });
 
   sidebarCollapseButton.addEventListener("click", () => {
+    if (isMobileNavigation()) {
+      const isOpen = appShell.classList.contains("mobile-menu-open");
+      setMobileAppMenuOpen(!isOpen);
+      return;
+    }
+
     const isCollapsed = !appShell.classList.contains("sidebar-collapsed");
     setSidebarCollapsed(isCollapsed);
     localStorage.setItem(sidebarStateKey, String(isCollapsed));
@@ -515,15 +602,22 @@ function setupAppNavigation() {
 }
 
 function buildMobileFooterShortcuts() {
-  const shortcutButtons = [...document.querySelectorAll(".app-nav button")]
-    .filter((button) => !button.classList.contains("admin-only"))
-    .slice(0, 4);
+  const shortcutOrder = ["dashboard", "calendar", "certificates", "employees"];
+  const shortcutLabels = {
+    dashboard: "Dashboard",
+    calendar: "Agenda",
+    certificates: "Atestados",
+    employees: "Equipe",
+  };
+  const shortcutButtons = shortcutOrder
+    .map((view) => document.querySelector(`.app-nav button[data-view="${view}"]`))
+    .filter(Boolean);
 
-  mobileFooterNav.innerHTML = shortcutButtons
+  const shortcutMarkup = shortcutButtons
     .map((button) => {
       const icon = button.querySelector(".nav-icon")?.outerHTML || "";
-      const label = button.dataset.shortLabel || button.dataset.label || button.textContent.trim();
       const view = button.dataset.view;
+      const label = shortcutLabels[view] || button.dataset.shortLabel || button.dataset.label || "";
 
       return `
         <button type="button" data-view="${escapeHtml(view)}" aria-label="${escapeHtml(
@@ -535,6 +629,14 @@ function buildMobileFooterShortcuts() {
       `;
     })
     .join("");
+
+  mobileFooterNav.innerHTML = `
+    ${shortcutMarkup}
+    <button type="button" data-menu-trigger aria-label="Abrir menu completo">
+      <svg class="nav-icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+      <span>Menu</span>
+    </button>
+  `;
 }
 
 function applySavedSidebarState() {
@@ -550,6 +652,8 @@ function setSidebarCollapsed(isCollapsed) {
     isCollapsed ? "Expandir menu lateral" : "Recolher menu lateral",
   );
   sidebarCollapseButton.title = isCollapsed ? "Expandir menu" : "Recolher menu";
+  const label = sidebarCollapseButton.querySelector(".nav-text");
+  if (label) label.textContent = isCollapsed ? "Expandir" : "Recolher";
 }
 
 function setMobileAppMenuOpen(isOpen) {
@@ -561,11 +665,28 @@ function setMobileAppMenuOpen(isOpen) {
     "aria-label",
     isOpen ? "Fechar menu do sistema" : "Abrir menu do sistema",
   );
+  sidebarCollapseButton.setAttribute("aria-expanded", String(isOpen));
+  mobileFooterNav
+    .querySelector("[data-menu-trigger]")
+    ?.classList.toggle("active", isOpen);
+  if (isMobileNavigation()) {
+    sidebarCollapseButton.setAttribute(
+      "aria-label",
+      isOpen ? "Fechar menu lateral" : "Expandir menu lateral",
+    );
+    sidebarCollapseButton.title = isOpen ? "Fechar menu" : "Expandir menu";
+    const label = sidebarCollapseButton.querySelector(".nav-text");
+    if (label) label.textContent = isOpen ? "Fechar menu" : "Abrir menu";
+  }
   document.body.classList.toggle("app-menu-open", isOpen);
 }
 
 function closeMobileAppMenu() {
   setMobileAppMenuOpen(false);
+}
+
+function isMobileNavigation() {
+  return window.matchMedia("(max-width: 780px)").matches;
 }
 
 function getCurrentAppRoute() {
@@ -1581,6 +1702,9 @@ function enterApp(user) {
   document.querySelector("#activeUserName").textContent = user.name;
   document.querySelector("#activeUserEmail").textContent = user.email;
   document.querySelector("#activeUserInitial").textContent = user.name.charAt(0);
+  document.querySelector("#sidebarUserName").textContent = user.name;
+  document.querySelector("#sidebarUserEmail").textContent = user.email;
+  document.querySelector("#sidebarUserInitial").textContent = user.name.charAt(0);
   document.querySelector("#activeRole").textContent = user.role;
   window.scrollTo({ top: 0, left: 0 });
   publicSite.hidden = true;
@@ -2557,15 +2681,39 @@ function renderCalendar() {
     const visibleActivities = activities.slice(0, 3);
     const extraCount = activities.length - visibleActivities.length;
     const activityClasses = [...new Set(activities.map((activity) => activity.kind))].join(" ");
+    const activityDots = visibleActivities
+      .map(
+        (activity) => `
+          <span
+            class="calendar-dot ${activity.kind}"
+            title="${escapeHtml(activity.label)}: ${escapeHtml(activity.title)}"
+          ></span>
+        `,
+      )
+      .join("");
+    const activityLabel = activities.length
+      ? `${activities.length} atividade${activities.length > 1 ? "s" : ""}: ${activities
+          .map((activity) => `${activity.label} - ${activity.title}`)
+          .join(", ")}`
+      : "Sem atividades";
 
     return `
       <article class="calendar-day ${activities.length ? "has-activity" : ""} ${
         dateKey === todayKey ? "today" : ""
-      } ${activityClasses}">
+      } ${activityClasses}" aria-label="${dayNumberInMonth} de ${escapeHtml(
+        document.querySelector("#calendarMonthTitle").textContent,
+      )}. ${escapeHtml(activityLabel)}">
         <div class="calendar-day-head">
           <strong>${dayNumberInMonth}</strong>
           ${activities.length ? `<span>${activities.length}</span>` : ""}
         </div>
+        ${
+          activities.length
+            ? `<div class="calendar-dots">${activityDots}${
+                extraCount > 0 ? `<small>+${extraCount}</small>` : ""
+              }</div>`
+            : ""
+        }
         <div class="calendar-activities">
           ${visibleActivities
             .map(

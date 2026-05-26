@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alexandredecarvalhopaiva.github.io/Saas---Ms/sitemap.xml

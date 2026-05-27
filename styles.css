@@ -217,6 +217,10 @@ button:focus-visible {
   display: none;
 }
 
+.site-nav a svg {
+  display: none;
+}
+
 .site-nav .button {
   position: relative;
   z-index: 2;
@@ -239,6 +243,10 @@ button:focus-visible {
   transition:
     color 180ms ease,
     opacity 180ms ease;
+}
+
+.site-nav .mobile-menu-link {
+  display: none;
 }
 
 .site-nav a::before,
@@ -320,13 +328,93 @@ button:focus-visible {
 }
 
 .button-dark {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   color: #ffffff;
-  background: rgba(22, 35, 45, 0.88);
+  background: rgba(22, 35, 45, 0.9);
+  box-shadow:
+    0 12px 26px rgba(7, 20, 25, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.button-dark::before {
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(110deg, transparent 0 28%, rgba(255, 255, 255, 0.22) 42%, transparent 58%),
+    linear-gradient(135deg, rgba(22, 169, 210, 0.12), rgba(255, 255, 255, 0));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-58%);
+  transition:
+    opacity 180ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.button-dark:hover,
+.button-dark:focus-visible {
+  background: rgba(13, 31, 41, 0.96);
+  box-shadow:
+    0 16px 34px rgba(7, 20, 25, 0.24),
+    0 0 0 1px rgba(22, 169, 210, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.button-dark:hover::before,
+.button-dark:focus-visible::before {
+  opacity: 1;
+  transform: translateX(58%);
+}
+
+.button-dark:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.login-entry-button {
+  min-width: 92px;
+}
+
+.login-entry-button span {
+  position: relative;
+  z-index: 1;
+}
+
+.login-entry-button::after {
+  position: relative;
+  z-index: 1;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--brand-cyan);
+  box-shadow: 0 0 0 0 rgba(22, 169, 210, 0.36);
+  content: "";
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.login-entry-button:hover::after,
+.login-entry-button:focus-visible::after {
+  transform: scale(1.15);
+  animation: loginPulse 960ms ease-out;
 }
 
 .button-light {
   color: var(--ink);
   background: #ffffff;
+}
+
+@keyframes loginPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 169, 210, 0.38);
+  }
+
+  100% {
+    box-shadow: 0 0 0 12px rgba(22, 169, 210, 0);
+  }
 }
 
 .button-google {
@@ -1607,6 +1695,10 @@ input[readonly] {
   transition: transform 180ms ease;
 }
 
+.sidebar-collapse-button .close-icon {
+  display: none;
+}
+
 .app-shell.sidebar-collapsed .sidebar-collapse-button svg {
   transform: rotate(180deg);
 }
@@ -1771,7 +1863,32 @@ input[readonly] {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0 13px;
+  color: rgba(255, 255, 255, 0.76);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   margin-top: auto;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.logout-button:hover,
+.logout-button:focus-visible {
+  color: #ffffff;
+  border-color: rgba(217, 95, 73, 0.42);
+  background:
+    linear-gradient(135deg, rgba(217, 95, 73, 0.17), rgba(255, 255, 255, 0.04));
+}
+
+.logout-button:hover {
+  transform: translateX(2px);
 }
 
 .app-main {
@@ -3152,13 +3269,13 @@ tbody tr:hover {
 
   .site-nav {
     position: fixed;
-    top: 82px;
-    right: 18px;
+    top: 76px;
+    right: 14px;
     bottom: auto;
     left: auto;
     z-index: 70;
     display: block;
-    width: min(260px, calc(100vw - 36px));
+    width: min(248px, calc(100vw - 28px));
     padding: 0;
     overflow: visible;
     color: var(--ink);
@@ -3195,10 +3312,10 @@ tbody tr:hover {
     z-index: 1;
     display: grid;
     width: 100%;
-    gap: 8px;
+    gap: 5px;
     border: 1px solid rgba(0, 103, 131, 0.12);
-    border-radius: 18px;
-    padding: 10px;
+    border-radius: 16px;
+    padding: 8px;
     background: rgba(255, 255, 255, 0.96);
     box-shadow:
       0 18px 44px rgba(4, 25, 32, 0.18),
@@ -3215,9 +3332,8 @@ tbody tr:hover {
     z-index: 1;
     display: grid;
     width: 100%;
-    gap: 4px;
-    margin-bottom: 4px;
-    padding: 4px 6px 6px;
+    margin-bottom: 0;
+    padding: 4px 8px 6px;
     opacity: 0;
     transform: translateY(-4px);
     transition:
@@ -3226,17 +3342,11 @@ tbody tr:hover {
   }
 
   .site-nav-panel-heading span {
-    color: var(--muted);
-    font-size: 0.68rem;
+    color: var(--brand-deep);
+    font-size: 0.64rem;
     font-weight: 900;
-    letter-spacing: 0.13em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-  }
-
-  .site-nav-panel-heading strong {
-    color: var(--ink);
-    font-size: 1.02rem;
-    line-height: 1.1;
   }
 
   .site-nav.open .site-nav-panel-heading {
@@ -3248,14 +3358,22 @@ tbody tr:hover {
     display: grid;
     grid-column: auto;
     width: 100%;
-    gap: 4px;
+    gap: 1px;
     position: relative;
     z-index: 1;
   }
 
+  .site-nav .mobile-menu-link {
+    display: flex;
+  }
+
+  .site-nav .desktop-menu-link {
+    display: none;
+  }
+
   .site-nav a {
-    min-height: 44px;
-    border-radius: 12px;
+    min-height: 38px;
+    border-radius: 10px;
     opacity: 0;
     transform: translateY(-4px);
     transition:
@@ -3270,10 +3388,31 @@ tbody tr:hover {
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    gap: 9px;
     border: 1px solid transparent;
-    padding: 0 12px;
+    padding: 0 10px;
     background: transparent;
-    font-size: 0.92rem;
+    font-size: 0.86rem;
+  }
+
+  .site-nav a svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: var(--brand-deep);
+    stroke: currentColor;
+    stroke-width: 1.9;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.82;
+  }
+
+  .site-nav a span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .site-nav a.active,
@@ -3312,8 +3451,47 @@ tbody tr:hover {
     transition-delay: 180ms;
   }
 
+  .site-nav.open .site-nav-links a:nth-child(5) {
+    transition-delay: 210ms;
+  }
+
+  .site-nav.open .site-nav-links a:nth-child(6) {
+    transition-delay: 240ms;
+  }
+
+  .site-nav.open .site-nav-links a:nth-child(7) {
+    transition-delay: 270ms;
+  }
+
+  .whatsapp-menu-link {
+    color: var(--green-dark);
+  }
+
+  .whatsapp-menu-link svg {
+    color: var(--green-dark);
+  }
+
   .site-nav .button {
-    display: none;
+    display: inline-flex;
+    grid-column: auto;
+    justify-self: stretch;
+    width: 100%;
+    min-height: 42px;
+    margin-top: 6px;
+    justify-content: center;
+    border-radius: 12px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity 180ms ease 300ms,
+      transform 220ms ease 300ms,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .site-nav.open .button {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .hero {
@@ -3431,6 +3609,7 @@ tbody tr:hover {
   }
 
   .sidebar {
+    position: fixed;
     width: min(86vw, 324px);
     max-width: 324px;
     gap: 12px;
@@ -3482,8 +3661,46 @@ tbody tr:hover {
   }
 
   .sidebar-collapse-button {
-    display: inline-flex;
-    min-height: 46px;
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    display: inline-grid;
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    place-items: center;
+    gap: 0;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.82);
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  .sidebar-collapse-button:hover,
+  .sidebar-collapse-button:focus-visible {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .sidebar-collapse-button .collapse-icon {
+    display: none;
+  }
+
+  .sidebar-collapse-button .close-icon {
+    display: block;
+    width: 19px;
+    height: 19px;
+  }
+
+  .sidebar-collapse-button .nav-text {
+    display: none;
+  }
+
+  .app-brand {
+    padding-right: 48px;
   }
 
   .app-shell.mobile-menu-open .sidebar-user-card {
@@ -3503,7 +3720,6 @@ tbody tr:hover {
 
   .app-shell.mobile-menu-open .app-brand,
   .app-shell.mobile-menu-open .sidebar-user-card,
-  .app-shell.mobile-menu-open .sidebar-collapse-button,
   .app-shell.mobile-menu-open .app-nav button,
   .app-shell.mobile-menu-open .logout-button {
     justify-content: flex-start;

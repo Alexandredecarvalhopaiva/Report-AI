@@ -2668,6 +2668,16 @@ tbody tr:hover {
   padding: 18px;
   background: #f7fbfd;
   text-align: center;
+  transition:
+    opacity 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.qr-card.disabled {
+  border-color: rgba(0, 103, 131, 0.08);
+  background: #f9fcfd;
+  opacity: 0.72;
 }
 
 .qr-scanner {
@@ -2728,6 +2738,15 @@ tbody tr:hover {
   display: grid;
   width: 100%;
   gap: 8px;
+}
+
+.field-hint {
+  display: block;
+  margin-top: -4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 .scanner-actions .button {
@@ -3685,6 +3704,7 @@ tbody tr:hover {
     transition:
       transform 220ms ease,
       box-shadow 220ms ease;
+    will-change: transform;
   }
 
   .app-shell.mobile-menu-open .sidebar {
@@ -3730,6 +3750,7 @@ tbody tr:hover {
     position: absolute;
     top: 18px;
     right: 14px;
+    z-index: 2;
     display: inline-grid;
     width: 38px;
     min-width: 38px;
@@ -3743,6 +3764,7 @@ tbody tr:hover {
     color: rgba(255, 255, 255, 0.82);
     background: transparent;
     backdrop-filter: none;
+    touch-action: manipulation;
   }
 
   .sidebar-collapse-button:hover,
@@ -3804,6 +3826,7 @@ tbody tr:hover {
 
   .app-menu-button {
     display: none;
+    touch-action: manipulation;
   }
 
   .app-title-block {
@@ -3885,6 +3908,7 @@ tbody tr:hover {
     background: transparent;
     font-size: 0.72rem;
     font-weight: 900;
+    touch-action: manipulation;
   }
 
   .mobile-footer-nav button.active,

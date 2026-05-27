@@ -9,7 +9,8 @@ const passwordPolicy = {
 };
 
 const checkinRules = {
-  defaultRadiusMeters: 50,
+  defaultRadiusMeters: 100,
+  maxRadiusMeters: 100,
   maxAccuracyMeters: 100,
   duplicateWindowMinutes: 2,
   geolocationTimeoutMs: 15000,
@@ -136,7 +137,7 @@ const initialState = {
       manager: "Carla Supervisor",
       activeEmployees: 12,
       coordinates: { lat: -7.1026, lng: -34.8333 },
-      allowedRadiusMeters: 50,
+      allowedRadiusMeters: 100,
     },
     {
       id: 2,
@@ -147,7 +148,7 @@ const initialState = {
       manager: "Carla Supervisor",
       activeEmployees: 8,
       coordinates: { lat: -7.1195, lng: -34.8829 },
-      allowedRadiusMeters: 50,
+      allowedRadiusMeters: 100,
     },
     {
       id: 3,
@@ -158,7 +159,7 @@ const initialState = {
       manager: "Admin MS",
       activeEmployees: 18,
       coordinates: { lat: -7.1577, lng: -34.8056 },
-      allowedRadiusMeters: 80,
+      allowedRadiusMeters: 100,
     },
     {
       id: 4,
@@ -169,7 +170,7 @@ const initialState = {
       manager: "Carla Supervisor",
       activeEmployees: 4,
       coordinates: { lat: -7.1518, lng: -34.8409 },
-      allowedRadiusMeters: 50,
+      allowedRadiusMeters: 100,
     },
   ],
   qrCodes: [
@@ -341,11 +342,14 @@ let editingEmployeeId = null;
 let pendingDeleteEmployeeId = null;
 let expandedFrequencyEmployeeId = null;
 let checkinSession = {
+  employee: null,
+  cpf: "",
   qrPayload: null,
   qrCode: null,
   stream: null,
   scanTimer: null,
   scannerActive: false,
+  registering: false,
 };
 
 const publicSite = document.querySelector("#publicSite");
@@ -624,7 +628,7 @@ function setupAppNavigation() {
   mobileFooterNav.addEventListener("click", (event) => {
     const menuButton = event.target.closest("button[data-menu-trigger]");
     if (menuButton) {
-      setMobileAppMenuOpen(true);
+      toggleMobileAppMenu();
       return;
     }
 
@@ -634,10 +638,11 @@ function setupAppNavigation() {
     closeMobileAppMenu();
   });
 
-  sidebarCollapseButton.addEventListener("click", () => {
+  sidebarCollapseButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+
     if (isMobileNavigation()) {
-      const isOpen = appShell.classList.contains("mobile-menu-open");
-      setMobileAppMenuOpen(!isOpen);
+      toggleMobileAppMenu();
       return;
     }
 
@@ -646,15 +651,15 @@ function setupAppNavigation() {
     localStorage.setItem(sidebarStateKey, String(isCollapsed));
   });
 
-  appMenuButton.addEventListener("click", () => {
-    const isOpen = appShell.classList.contains("mobile-menu-open");
-    setMobileAppMenuOpen(!isOpen);
+  appMenuButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleMobileAppMenu();
   });
 
   appMenuOverlay.addEventListener("click", () => closeMobileAppMenu());
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMobileAppMenu();
+    if (event.key === "Escape" && isMobileAppMenuOpen()) closeMobileAppMenu();
   });
 
   window.matchMedia("(min-width: 781px)").addEventListener("change", (event) => {
@@ -697,7 +702,7 @@ function buildMobileFooterShortcuts() {
 
   mobileFooterNav.innerHTML = `
     ${shortcutMarkup}
-    <button type="button" data-menu-trigger aria-label="Abrir menu completo">
+    <button type="button" data-menu-trigger aria-label="Abrir menu completo" aria-controls="appSidebar" aria-expanded="false">
       <svg class="nav-icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
       <span>Menu</span>
     </button>
@@ -722,32 +727,47 @@ function setSidebarCollapsed(isCollapsed) {
 }
 
 function setMobileAppMenuOpen(isOpen) {
-  appShell.classList.toggle("mobile-menu-open", isOpen);
-  appMenuOverlay.hidden = !isOpen;
-  appMenuOverlay.setAttribute("aria-hidden", String(!isOpen));
-  appMenuButton.setAttribute("aria-expanded", String(isOpen));
+  const shouldOpen = Boolean(isOpen);
+  const footerMenuButton = mobileFooterNav.querySelector("[data-menu-trigger]");
+
+  appShell.classList.toggle("mobile-menu-open", shouldOpen);
+  appMenuOverlay.hidden = !shouldOpen;
+  appMenuOverlay.setAttribute("aria-hidden", String(!shouldOpen));
+  appMenuButton.setAttribute("aria-expanded", String(shouldOpen));
   appMenuButton.setAttribute(
     "aria-label",
-    isOpen ? "Encolher menu do sistema" : "Expandir menu do sistema",
+    shouldOpen ? "Fechar menu do sistema" : "Abrir menu do sistema",
   );
-  sidebarCollapseButton.setAttribute("aria-expanded", String(isOpen));
-  mobileFooterNav
-    .querySelector("[data-menu-trigger]")
-    ?.classList.toggle("active", isOpen);
+  sidebarCollapseButton.setAttribute("aria-expanded", String(shouldOpen));
+  footerMenuButton?.classList.toggle("active", shouldOpen);
+  footerMenuButton?.setAttribute("aria-expanded", String(shouldOpen));
+  footerMenuButton?.setAttribute(
+    "aria-label",
+    shouldOpen ? "Fechar menu completo" : "Abrir menu completo",
+  );
+
   if (isMobileNavigation()) {
     sidebarCollapseButton.setAttribute(
       "aria-label",
-      isOpen ? "Encolher menu lateral" : "Expandir menu lateral",
+      shouldOpen ? "Fechar menu lateral" : "Abrir menu lateral",
     );
-    sidebarCollapseButton.title = isOpen ? "Encolher menu" : "Expandir menu";
+    sidebarCollapseButton.title = shouldOpen ? "Fechar menu" : "Abrir menu";
     const label = sidebarCollapseButton.querySelector(".nav-text");
-    if (label) label.textContent = isOpen ? "Encolher menu" : "Expandir menu";
+    if (label) label.textContent = shouldOpen ? "Fechar menu" : "Abrir menu";
   }
-  document.body.classList.toggle("app-menu-open", isOpen);
+  document.body.classList.toggle("app-menu-open", shouldOpen);
 }
 
 function closeMobileAppMenu() {
   setMobileAppMenuOpen(false);
+}
+
+function toggleMobileAppMenu() {
+  setMobileAppMenuOpen(!isMobileAppMenuOpen());
+}
+
+function isMobileAppMenuOpen() {
+  return appShell.classList.contains("mobile-menu-open");
 }
 
 function isMobileNavigation() {
@@ -812,6 +832,8 @@ function navigateToAppView(view, options = {}) {
 }
 
 function handleAppRouteChange() {
+  if (isMobileAppMenuOpen()) closeMobileAppMenu();
+
   const route = getCurrentAppRoute();
   if (!route) return;
 
@@ -1372,9 +1394,19 @@ function setupCheckinFlow() {
   });
   document.querySelector("#checkinCpf").addEventListener("input", (event) => {
     event.target.value = formatCpf(event.target.value);
+    resetCheckinAfterCpfChange();
     clearFormMessage("#checkinMessage");
   });
   document.querySelector("#simulateQrScan").addEventListener("click", () => {
+    if (!checkinSession.employee) {
+      setFormMessage(
+        "#checkinMessage",
+        "Informe e valide o CPF antes de liberar a leitura do QR Code.",
+        "error",
+      );
+      return;
+    }
+
     const selectedQrCode = getQrCodeById(document.querySelector("#checkinQrSelect").value);
     if (!selectedQrCode) {
       setFormMessage("#checkinMessage", "Selecione um QR Code demonstrativo válido.", "error");
@@ -1385,15 +1417,17 @@ function setupCheckinFlow() {
   document.querySelector("#checkinQrSelect").addEventListener("change", () => {
     checkinSession.qrPayload = null;
     checkinSession.qrCode = null;
-    updateCheckinSteps("qr");
+    if (checkinSession.employee) updateCheckinSteps("qr");
     document.querySelector("#checkinScanStatus").textContent =
-      "Selecione o QR e confirme a leitura demonstrativa.";
+      checkinSession.employee
+        ? "Selecione o QR e confirme a leitura demonstrativa."
+        : "Informe o CPF para liberar a leitura do QR Code.";
     document.querySelector("#checkinGeoStatus").textContent = "Aguardando leitura do QR Code.";
     clearFormMessage("#checkinMessage");
   });
   document.querySelector("#checkinForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    await registerQrCheckin();
+    await handleCheckinSubmit();
   });
   checkinModal.addEventListener("close", stopCheckinScanner);
 }
@@ -1401,83 +1435,187 @@ function setupCheckinFlow() {
 function openCheckinModal() {
   const now = new Date();
   stopCheckinScanner();
-  checkinSession.qrPayload = null;
-  checkinSession.qrCode = null;
+  resetCheckinSession();
   document.querySelector("#checkinForm").reset();
   populateCheckinQrSelect();
   document.querySelector("#checkinQrTime").textContent = `Código ${now.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   })}`;
-  document.querySelector("#checkinQrTitle").textContent = "Aponte a câmera para o QR Code";
-  document.querySelector("#checkinScanStatus").textContent = "Solicitando acesso à câmera...";
-  document.querySelector("#checkinGeoStatus").textContent = "Aguardando leitura do QR Code.";
+  document.querySelector("#checkinQrTitle").textContent = "CPF obrigatório para iniciar";
+  document.querySelector("#checkinScanStatus").textContent =
+    "Câmera bloqueada até a validação do CPF.";
+  document.querySelector("#checkinGeoStatus").textContent = "Aguardando validação do CPF.";
   document.querySelector("#checkinVideo").hidden = true;
   document.querySelector("#checkinQrPreview").hidden = false;
-  updateCheckinSteps("qr");
+  document.querySelector("#checkinCpfStatus").textContent =
+    "Informe o CPF para liberar a leitura do QR Code.";
+  setCheckinQrControls(false);
+  updateCheckinPrimaryButton("Validar CPF e iniciar leitura", false);
+  updateCheckinSteps("cpf");
   clearFormMessage("#checkinMessage");
   checkinModal.showModal();
-  window.setTimeout(startCheckinScanner, 150);
+}
+
+function resetCheckinSession() {
+  checkinSession.employee = null;
+  checkinSession.cpf = "";
+  checkinSession.qrPayload = null;
+  checkinSession.qrCode = null;
+  checkinSession.registering = false;
+}
+
+function resetCheckinAfterCpfChange() {
+  if (!checkinSession.employee && !checkinSession.qrCode && !checkinSession.registering) return;
+
+  stopCheckinScanner();
+  checkinSession.employee = null;
+  checkinSession.cpf = "";
+  checkinSession.qrPayload = null;
+  checkinSession.qrCode = null;
+  checkinSession.registering = false;
+  document.querySelector("#checkinQrTitle").textContent = "CPF obrigatório para iniciar";
+  document.querySelector("#checkinQrTime").textContent = "Mantenha o código centralizado na tela.";
+  document.querySelector("#checkinScanStatus").textContent =
+    "Câmera bloqueada até a validação do CPF.";
+  document.querySelector("#checkinGeoStatus").textContent = "Aguardando validação do CPF.";
+  document.querySelector("#checkinCpfStatus").textContent =
+    "CPF alterado. Valide novamente para liberar o QR Code.";
+  document.querySelector("#checkinVideo").hidden = true;
+  document.querySelector("#checkinQrPreview").hidden = false;
+  setCheckinQrControls(false);
+  updateCheckinPrimaryButton("Validar CPF e iniciar leitura", false);
+  updateCheckinSteps("cpf");
+}
+
+async function handleCheckinSubmit() {
+  if (checkinSession.registering) return;
+
+  if (!checkinSession.employee) {
+    const validation = validateCheckinCpfForPoint(document.querySelector("#checkinCpf").value);
+
+    if (!validation.valid) {
+      recordCheckinAttempt({
+        cpf: document.querySelector("#checkinCpf").value,
+        status: "Bloqueado",
+        reason: validation.reason,
+      });
+      saveState();
+      renderAll();
+      document.querySelector("#checkinCpfStatus").textContent = validation.message;
+      setFormMessage("#checkinMessage", validation.message, "error");
+      return;
+    }
+
+    checkinSession.employee = validation.employee;
+    checkinSession.cpf = validation.employee.cpf;
+    document.querySelector("#checkinCpf").value = formatCpf(validation.employee.cpf);
+    document.querySelector("#checkinCpfStatus").textContent =
+      `${validation.employee.name} validado para iniciar o registro.`;
+    document.querySelector("#checkinQrTitle").textContent = "Aponte a câmera para o QR Code";
+    document.querySelector("#checkinQrTime").textContent = "Mantenha o código centralizado na tela.";
+    document.querySelector("#checkinScanStatus").textContent =
+      "CPF validado com sucesso. Solicitando acesso à câmera...";
+    document.querySelector("#checkinGeoStatus").textContent = "Aguardando leitura do QR Code.";
+    setCheckinQrControls(true);
+    updateCheckinPrimaryButton("Solicitar câmera novamente", false);
+    updateCheckinSteps("qr");
+    clearFormMessage("#checkinMessage");
+    setFormMessage(
+      "#checkinMessage",
+      "CPF validado com sucesso. Aponte a câmera para o QR Code do local de trabalho.",
+      "success",
+    );
+    await startCheckinScanner();
+    return;
+  }
+
+  if (!checkinSession.qrCode) {
+    document.querySelector("#checkinScanStatus").textContent =
+      "Aguardando leitura do QR Code do local de trabalho.";
+    setFormMessage(
+      "#checkinMessage",
+      "CPF validado. Leia o QR Code do local de trabalho para capturar a localização.",
+      "info",
+    );
+    await startCheckinScanner();
+    return;
+  }
+
+  await registerQrCheckin();
+}
+
+function validateCheckinCpfForPoint(cpf) {
+  const cpfDigits = onlyDigits(cpf);
+
+  if (!cpfDigits) {
+    return {
+      valid: false,
+      reason: "CPF não informado",
+      message: "Informe o CPF para iniciar o registro do ponto.",
+    };
+  }
+
+  if (!isValidCpf(cpf)) {
+    return {
+      valid: false,
+      reason: "CPF inválido",
+      message: "CPF inválido. Confira os números informados.",
+    };
+  }
+
+  const employee = findEmployeeByCpf(cpf);
+  if (!employee || employee.status !== "Ativo") {
+    return {
+      valid: false,
+      reason: employee ? `Funcionário ${employee.status}` : "CPF não encontrado",
+      message: "CPF não encontrado ou funcionário não autorizado para registrar ponto.",
+    };
+  }
+
+  return { valid: true, employee };
+}
+
+function setCheckinQrControls(isEnabled) {
+  const qrSelect = document.querySelector("#checkinQrSelect");
+  const simulateButton = document.querySelector("#simulateQrScan");
+  const qrCard = document.querySelector(".qr-card");
+
+  qrSelect.disabled = !isEnabled;
+  simulateButton.disabled = !isEnabled;
+  qrCard.classList.toggle("disabled", !isEnabled);
+}
+
+function updateCheckinPrimaryButton(label, isDisabled) {
+  const button = document.querySelector("#checkinPrimaryButton");
+  button.textContent = label;
+  button.disabled = Boolean(isDisabled);
 }
 
 async function registerQrCheckin() {
-  const cpf = document.querySelector("#checkinCpf").value;
+  const cpf = checkinSession.cpf || document.querySelector("#checkinCpf").value;
   const cpfDigits = onlyDigits(cpf);
+  const cpfValidation = validateCheckinCpfForPoint(cpf);
+
+  if (!cpfValidation.valid) {
+    recordCheckinAttempt({
+      cpf,
+      qrCode: checkinSession.qrCode,
+      status: "Bloqueado",
+      reason: cpfValidation.reason,
+    });
+    saveState();
+    renderAll();
+    setFormMessage("#checkinMessage", cpfValidation.message, "error");
+    return;
+  }
+
+  const employee = checkinSession.employee || cpfValidation.employee;
 
   if (!checkinSession.qrCode) {
     setFormMessage(
       "#checkinMessage",
-      "Leia o QR Code do local de trabalho antes de confirmar o ponto.",
-      "error",
-    );
-    return;
-  }
-
-  if (!isValidCpf(cpf)) {
-    recordCheckinAttempt({
-      cpf,
-      qrCode: checkinSession.qrCode,
-      status: "Bloqueado",
-      reason: "CPF inválido",
-    });
-    saveState();
-    renderAll();
-    setFormMessage("#checkinMessage", "CPF inválido. Confira os números informados.", "error");
-    return;
-  }
-
-  const employee = findEmployeeByCpf(cpf);
-
-  if (!employee) {
-    recordCheckinAttempt({
-      cpf,
-      qrCode: checkinSession.qrCode,
-      status: "Bloqueado",
-      reason: "CPF não encontrado",
-    });
-    saveState();
-    renderAll();
-    setFormMessage(
-      "#checkinMessage",
-      "CPF não encontrado ou funcionário não autorizado para este local.",
-      "error",
-    );
-    return;
-  }
-
-  if (employee.status !== "Ativo") {
-    recordCheckinAttempt({
-      cpf,
-      employee,
-      qrCode: checkinSession.qrCode,
-      status: "Bloqueado",
-      reason: `Funcionário ${employee.status}`,
-    });
-    saveState();
-    renderAll();
-    setFormMessage(
-      "#checkinMessage",
-      `Check-in bloqueado. Funcionário com status ${employee.status}.`,
+      "CPF validado. Leia o QR Code do local de trabalho antes de registrar o ponto.",
       "error",
     );
     return;
@@ -1497,7 +1635,7 @@ async function registerQrCheckin() {
     renderAll();
     setFormMessage(
       "#checkinMessage",
-      "CPF não encontrado ou funcionário não autorizado para este local.",
+      "CPF não encontrado ou funcionário não autorizado para registrar ponto.",
       "error",
     );
     return;
@@ -1559,6 +1697,8 @@ async function registerQrCheckin() {
   updateCheckinSteps("location");
   document.querySelector("#checkinGeoStatus").textContent =
     "Capturando localização do dispositivo...";
+  checkinSession.registering = true;
+  updateCheckinPrimaryButton("Validando localização...", true);
 
   try {
     const devicePosition = await getCheckinPosition(clientCoordinates);
@@ -1581,6 +1721,8 @@ async function registerQrCheckin() {
       });
       saveState();
       renderAll();
+      checkinSession.registering = false;
+      updateCheckinPrimaryButton("Tentar novamente", false);
       document.querySelector("#checkinGeoStatus").textContent =
         `Precisão insuficiente: margem de ${accuracy}m`;
       setFormMessage(
@@ -1606,10 +1748,12 @@ async function registerQrCheckin() {
       });
       saveState();
       renderAll();
+      checkinSession.registering = false;
+      updateCheckinPrimaryButton("Tentar novamente", false);
       document.querySelector("#checkinGeoStatus").textContent = `Distância estimada: ${distance}m`;
       setFormMessage(
         "#checkinMessage",
-        "Não foi possível registrar o ponto. Sua localização atual está fora do raio permitido para este empreendimento.",
+        `Não foi possível registrar o ponto. Sua localização está fora do raio permitido de ${allowedRadius} metros do local de trabalho.`,
         "error",
       );
       return;
@@ -1645,6 +1789,8 @@ async function registerQrCheckin() {
 
     saveState();
     renderAll();
+    checkinSession.registering = false;
+    updateCheckinPrimaryButton("Ponto registrado", true);
     updateCheckinSteps("confirm");
     document.querySelector("#checkinGeoStatus").textContent =
       `${nextRegistration.type} autorizada a ${distance}m · precisão ${accuracy}m`;
@@ -1668,6 +1814,8 @@ async function registerQrCheckin() {
     });
     saveState();
     renderAll();
+    checkinSession.registering = false;
+    updateCheckinPrimaryButton("Tentar novamente", false);
     document.querySelector("#checkinGeoStatus").textContent = "Localização não validada.";
     setFormMessage(
       "#checkinMessage",
@@ -1682,15 +1830,35 @@ async function startCheckinScanner() {
   const video = document.querySelector("#checkinVideo");
   const preview = document.querySelector("#checkinQrPreview");
 
-  if (!navigator.mediaDevices?.getUserMedia) {
-    status.textContent =
-      "Câmera indisponível neste navegador. Use o QR demonstrativo para apresentar o fluxo.";
+  if (!checkinSession.employee) {
+    status.textContent = "Informe e valide o CPF antes de liberar a câmera.";
+    setFormMessage(
+      "#checkinMessage",
+      "Informe e valide o CPF antes de liberar a leitura do QR Code.",
+      "error",
+    );
     return;
   }
 
-  if (!("BarcodeDetector" in window)) {
+  if (checkinSession.scannerActive) {
+    status.textContent = "Câmera ativa. Mantenha o QR Code centralizado.";
+    return;
+  }
+
+  if (!window.isSecureContext) {
     status.textContent =
-      "Leitor nativo de QR não disponível neste navegador. Use o QR demonstrativo.";
+      "A câmera só pode ser liberada em ambiente seguro. Use localhost ou HTTPS.";
+    setFormMessage(
+      "#checkinMessage",
+      "A câmera só pode ser liberada pelo navegador em localhost ou em um site com HTTPS.",
+      "error",
+    );
+    return;
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    status.textContent =
+      "Câmera indisponível neste navegador. Use o QR demonstrativo para apresentar o fluxo.";
     return;
   }
 
@@ -1704,6 +1872,13 @@ async function startCheckinScanner() {
     preview.hidden = true;
     await video.play();
     checkinSession.scannerActive = true;
+
+    if (!("BarcodeDetector" in window)) {
+      status.textContent =
+        "Câmera liberada. Este navegador não possui leitor nativo de QR; use o QR demonstrativo para apresentar o fluxo.";
+      return;
+    }
+
     status.textContent = "Câmera ativa. Mantenha o QR Code centralizado.";
     const detector = new BarcodeDetector({ formats: ["qr_code"] });
 
@@ -1717,9 +1892,18 @@ async function startCheckinScanner() {
         status.textContent = "Não foi possível concluir a leitura. Tente novamente.";
       }
     }, 800);
-  } catch {
-    status.textContent =
-      "Não foi possível acessar a câmera. Para bater o ponto, permita o uso da câmera nas configurações do navegador ou do dispositivo.";
+  } catch (error) {
+    const isPermissionDenied = error?.name === "NotAllowedError";
+    const message = isPermissionDenied
+      ? "A câmera está bloqueada pelo navegador. Clique no ícone de permissões ao lado do endereço e autorize o uso da câmera."
+      : "Não foi possível acessar a câmera. Autorize o uso da câmera para continuar o registro do ponto.";
+
+    status.textContent = message;
+    setFormMessage(
+      "#checkinMessage",
+      message,
+      "error",
+    );
   }
 }
 
@@ -1741,11 +1925,67 @@ function setCheckinQrPayload(rawPayload, successMessage) {
   const qrValidation = validateQrPayload(rawPayload);
   const status = document.querySelector("#checkinScanStatus");
 
+  if (!checkinSession.employee) {
+    status.textContent = "CPF obrigatório antes da leitura do QR Code.";
+    setFormMessage(
+      "#checkinMessage",
+      "Informe e valide o CPF antes de liberar a leitura do QR Code.",
+      "error",
+    );
+    return;
+  }
+
   if (!qrValidation.valid) {
     checkinSession.qrPayload = null;
     checkinSession.qrCode = null;
     status.textContent = qrValidation.message;
     setFormMessage("#checkinMessage", qrValidation.message, "error");
+    return;
+  }
+
+  if (checkinSession.employee.client !== qrValidation.client.name) {
+    stopCheckinScanner();
+    checkinSession.qrPayload = null;
+    checkinSession.qrCode = null;
+    recordCheckinAttempt({
+      cpf: checkinSession.cpf || checkinSession.employee.cpf,
+      employee: checkinSession.employee,
+      qrCode: qrValidation.qrCode,
+      client: qrValidation.client,
+      status: "Bloqueado",
+      reason: "Funcionário não vinculado ao empreendimento",
+    });
+    saveState();
+    renderAll();
+    status.textContent = "QR Code lido, mas o funcionário não está autorizado neste local.";
+    setFormMessage(
+      "#checkinMessage",
+      "CPF não encontrado ou funcionário não autorizado para registrar ponto.",
+      "error",
+    );
+    updateCheckinPrimaryButton("Tentar outro QR Code", false);
+    updateCheckinSteps("qr");
+    return;
+  }
+
+  if (!getClientCoordinates(qrValidation.client)) {
+    stopCheckinScanner();
+    checkinSession.qrPayload = null;
+    checkinSession.qrCode = null;
+    recordCheckinAttempt({
+      cpf: checkinSession.cpf || checkinSession.employee.cpf,
+      employee: checkinSession.employee,
+      qrCode: qrValidation.qrCode,
+      client: qrValidation.client,
+      status: "Bloqueado",
+      reason: "Empreendimento sem coordenadas",
+    });
+    saveState();
+    renderAll();
+    status.textContent = "QR Code sem latitude e longitude cadastradas.";
+    setFormMessage("#checkinMessage", "Local de trabalho sem coordenadas cadastradas.", "error");
+    updateCheckinPrimaryButton("Tentar outro QR Code", false);
+    updateCheckinSteps("qr");
     return;
   }
 
@@ -1758,9 +1998,11 @@ function setCheckinQrPayload(rawPayload, successMessage) {
   document.querySelector("#checkinQrSelect").value = qrValidation.qrCode.id;
   status.textContent = successMessage;
   document.querySelector("#checkinGeoStatus").textContent =
-    "QR validado. Informe o CPF e confirme para validar a localização.";
-  updateCheckinSteps("cpf");
+    "QR validado. Capturando localização do dispositivo...";
+  updateCheckinSteps("location");
   clearFormMessage("#checkinMessage");
+  updateCheckinPrimaryButton("Validando localização...", true);
+  void registerQrCheckin();
 }
 
 function validateQrPayload(rawPayload) {
@@ -1788,6 +2030,14 @@ function validateQrPayload(rawPayload) {
   const client = getClientByQrCode(qrCode);
   if (!client) {
     return { valid: false, message: "QR Code sem empreendimento vinculado." };
+  }
+
+  if (client.active === false) {
+    return { valid: false, message: "Empreendimento inativo para registro de ponto." };
+  }
+
+  if (!getClientCoordinates(client)) {
+    return { valid: false, message: "QR Code sem latitude e longitude cadastradas." };
   }
 
   return { valid: true, payload, qrCode, client };
@@ -1823,7 +2073,7 @@ function populateCheckinQrSelect() {
 }
 
 function updateCheckinSteps(activeStep) {
-  const stepOrder = ["qr", "cpf", "location", "confirm"];
+  const stepOrder = ["cpf", "qr", "location", "confirm"];
   const activeIndex = stepOrder.indexOf(activeStep);
 
   stepOrder.forEach((step, index) => {
@@ -1857,7 +2107,11 @@ function getCheckinPosition(clientCoordinates) {
         });
       },
       () => {
-        reject(new Error("Permita o acesso à localização para registrar o check-in."));
+        reject(
+          new Error(
+            "Não foi possível registrar o ponto. É necessário permitir o acesso à localização do dispositivo.",
+          ),
+        );
       },
       {
         enableHighAccuracy: true,
@@ -2144,6 +2398,8 @@ function persistQrPoint({
     accuracyMeters: accuracy,
     validationStatus: "Aprovado",
     source: "QR Code",
+    ip: "Disponível no backend",
+    userAgent: navigator.userAgent,
   };
 
   if (type === "Saída" && existingPoint) {
@@ -3751,7 +4007,7 @@ function normalizeDemoEmployeeCpfs(employees) {
 function getSafeCheckinRadius(value) {
   const parsedRadius = Number(value);
   if (!Number.isFinite(parsedRadius)) return checkinRules.defaultRadiusMeters;
-  return Math.min(500, Math.max(20, Math.round(parsedRadius)));
+  return Math.min(checkinRules.maxRadiusMeters, Math.max(20, Math.round(parsedRadius)));
 }
 
 function normalizeQrCodes(nextState) {

@@ -735,6 +735,8 @@
           id="sidebarCollapseButton"
           type="button"
           aria-label="Recolher menu lateral"
+          aria-controls="appSidebar"
+          aria-expanded="false"
           aria-pressed="false"
           title="Recolher menu"
         >
@@ -1018,11 +1020,15 @@
             </div>
             <div class="quick-status-grid">
               <article>
-                <strong>QR Code do local</strong>
-                <p>Valida o código ativo do empreendimento antes de liberar o registro.</p>
+                <strong>CPF primeiro</strong>
+                <p>Valida se o funcionário está cadastrado e ativo antes de liberar a câmera.</p>
               </article>
               <article>
-                <strong>Raio permitido</strong>
+                <strong>QR Code do local</strong>
+                <p>Confirma o empreendimento ativo antes de capturar a localização.</p>
+              </article>
+              <article>
+                <strong>Raio de 100m</strong>
                 <p>Compara a posição do celular com a latitude e longitude cadastradas.</p>
               </article>
               <article>
@@ -1659,7 +1665,7 @@
     </dialog>
 
     <dialog class="modal" id="checkinModal">
-      <form class="modal-content checkin-modal-content" id="checkinForm" method="dialog">
+      <form class="modal-content checkin-modal-content" id="checkinForm" method="dialog" novalidate>
         <div class="panel-heading">
           <div>
             <h2>Bater ponto</h2>
@@ -1670,8 +1676,8 @@
           </button>
         </div>
         <ol class="checkin-steps" aria-label="Etapas para bater ponto">
-          <li class="active" id="checkinStepQr">Ler QR</li>
-          <li id="checkinStepCpf">CPF</li>
+          <li class="active" id="checkinStepCpf">CPF</li>
+          <li id="checkinStepQr">Ler QR</li>
           <li id="checkinStepLocation">Localização</li>
           <li id="checkinStepConfirm">Confirmar</li>
         </ol>
@@ -1703,6 +1709,9 @@
                 required
               />
             </label>
+            <small class="field-hint" id="checkinCpfStatus">
+              Informe o CPF para liberar a leitura do QR Code.
+            </small>
             <label class="checkbox-row">
               <input id="checkinDemoLocation" type="checkbox" />
               Usar localização demonstrativa do empreendimento selecionado
@@ -1711,8 +1720,8 @@
               Aguardando leitura do QR Code.
             </div>
             <div class="form-message" id="checkinMessage" hidden></div>
-            <button class="button button-primary" type="submit">
-              Validar e registrar ponto
+            <button class="button button-primary" type="submit" id="checkinPrimaryButton">
+              Validar CPF e iniciar leitura
             </button>
           </div>
         </div>

@@ -51,7 +51,7 @@
       content="https://alexandredecarvalhopaiva.github.io/Saas---Ms/assets/og-image-whatsapp.jpg"
     />
     <link rel="icon" href="assets/ms-logo-mark.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260526-menu-popover" />
+    <link rel="stylesheet" href="styles.css?v=20260527-qr-ponto" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -135,9 +135,10 @@
       <symbol id="icon-collapse" viewBox="0 0 24 24">
         <path d="M15 6l-6 6 6 6"></path>
       </symbol>
-      <symbol id="icon-close" viewBox="0 0 24 24">
-        <path d="M18 6 6 18"></path>
-        <path d="m6 6 12 12"></path>
+      <symbol id="icon-sidebar-toggle" viewBox="0 0 24 24">
+        <path d="M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"></path>
+        <path d="M9 5v14"></path>
+        <path d="m16 9-3 3 3 3"></path>
       </symbol>
       <symbol id="icon-alert" viewBox="0 0 24 24">
         <path d="M12 9v4"></path>
@@ -737,8 +738,7 @@
           aria-pressed="false"
           title="Recolher menu"
         >
-          <svg class="nav-icon collapse-icon" aria-hidden="true"><use href="#icon-collapse"></use></svg>
-          <svg class="nav-icon close-icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+          <svg class="nav-icon collapse-icon" aria-hidden="true"><use href="#icon-sidebar-toggle"></use></svg>
           <span class="nav-text">Recolher</span>
         </button>
         <div class="sidebar-user-card" aria-label="Usuário logado">
@@ -827,7 +827,7 @@
             class="app-menu-button"
             id="appMenuButton"
             type="button"
-            aria-label="Abrir menu do sistema"
+            aria-label="Expandir menu do sistema"
             aria-controls="appSidebar"
             aria-expanded="false"
           >
@@ -1006,6 +1006,52 @@
               <div class="compact-list" id="timeList"></div>
             </section>
           </div>
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Ponto digital com QR Code</h2>
+                <span>CPF, QR físico e geolocalização</span>
+              </div>
+              <button class="button button-primary" type="button" data-open-checkin>
+                Bater ponto
+              </button>
+            </div>
+            <div class="quick-status-grid">
+              <article>
+                <strong>QR Code do local</strong>
+                <p>Valida o código ativo do empreendimento antes de liberar o registro.</p>
+              </article>
+              <article>
+                <strong>Raio permitido</strong>
+                <p>Compara a posição do celular com a latitude e longitude cadastradas.</p>
+              </article>
+              <article>
+                <strong>Auditoria</strong>
+                <p>Armazena tentativas aprovadas e bloqueadas para conferência administrativa.</p>
+              </article>
+            </div>
+          </section>
+          <section class="workspace-panel">
+            <div class="panel-heading">
+              <h2>Auditoria de ponto</h2>
+              <span>Últimas validações</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Funcionário</th>
+                    <th>Empreendimento</th>
+                    <th>Tipo</th>
+                    <th>Distância</th>
+                    <th>Precisão</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="pointAuditTable"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
         <section class="app-view" data-panel="frequency">
@@ -1486,7 +1532,7 @@
       </main>
       <button class="floating-checkin" type="button" id="floatingCheckinButton" data-open-checkin>
         <span aria-hidden="true"></span>
-        Check-in
+        Bater ponto
       </button>
       <nav class="mobile-footer-nav" id="mobileFooterNav" aria-label="Atalhos principais"></nav>
     </section>
@@ -1615,16 +1661,35 @@
     <dialog class="modal" id="checkinModal">
       <form class="modal-content checkin-modal-content" id="checkinForm" method="dialog">
         <div class="panel-heading">
-          <h2>Check-in por QR Code</h2>
+          <div>
+            <h2>Bater ponto</h2>
+            <span>QR Code, CPF e localização</span>
+          </div>
           <button class="close-button" type="button" id="closeCheckinModal" aria-label="Fechar">
             ×
           </button>
         </div>
+        <ol class="checkin-steps" aria-label="Etapas para bater ponto">
+          <li class="active" id="checkinStepQr">Ler QR</li>
+          <li id="checkinStepCpf">CPF</li>
+          <li id="checkinStepLocation">Localização</li>
+          <li id="checkinStepConfirm">Confirmar</li>
+        </ol>
         <div class="checkin-layout">
           <div class="qr-card">
-            <div class="qr-code" aria-label="QR Code de autenticação"></div>
-            <strong>MULTSERV CHECK-IN</strong>
-            <small id="checkinQrTime">Código ativo</small>
+            <div class="qr-scanner" id="checkinScanner" aria-label="Leitor de QR Code">
+              <video id="checkinVideo" muted playsinline hidden></video>
+              <div class="qr-code" id="checkinQrPreview" aria-label="QR Code demonstrativo"></div>
+            </div>
+            <strong id="checkinQrTitle">Aponte a câmera para o QR Code</strong>
+            <small id="checkinQrTime">Mantenha o código centralizado na tela.</small>
+            <div class="scanner-actions">
+              <select id="checkinQrSelect" aria-label="QR Code demonstrativo"></select>
+              <button class="button button-secondary" type="button" id="simulateQrScan">
+                Usar QR demonstrativo
+              </button>
+            </div>
+            <small id="checkinScanStatus">Câmera aguardando permissão.</small>
           </div>
           <div class="stack-form">
             <label>
@@ -1640,20 +1705,20 @@
             </label>
             <label class="checkbox-row">
               <input id="checkinDemoLocation" type="checkbox" />
-              Usar localização demonstrativa
+              Usar localização demonstrativa do empreendimento selecionado
             </label>
             <div class="geo-status" id="checkinGeoStatus">
-              Aguardando validação de CPF e localização.
+              Aguardando leitura do QR Code.
             </div>
             <div class="form-message" id="checkinMessage" hidden></div>
             <button class="button button-primary" type="submit">
-              Validar localização e registrar
+              Validar e registrar ponto
             </button>
           </div>
         </div>
       </form>
     </dialog>
 
-    <script src="app.js?v=20260526-menu-popover" defer></script>
+    <script src="app.js?v=20260527-qr-ponto" defer></script>
   </body>
 </html>

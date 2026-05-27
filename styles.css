@@ -1695,10 +1695,6 @@ input[readonly] {
   transition: transform 180ms ease;
 }
 
-.sidebar-collapse-button .close-icon {
-  display: none;
-}
-
 .app-shell.sidebar-collapsed .sidebar-collapse-button svg {
   transform: rotate(180deg);
 }
@@ -2619,6 +2615,43 @@ tbody tr:hover {
   font-size: 0;
 }
 
+.checkin-modal-content {
+  width: min(920px, calc(100vw - 28px));
+}
+
+.checkin-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.checkin-steps li {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--muted);
+  background: #f7fbfd;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.checkin-steps li.active {
+  color: var(--brand-deep);
+  border-color: rgba(22, 169, 210, 0.35);
+  background: var(--brand-cyan-soft);
+}
+
+.checkin-steps li.done {
+  color: #ffffff;
+  border-color: var(--brand-deep);
+  background: var(--brand-deep);
+}
+
 .checkin-layout {
   display: grid;
   grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
@@ -2637,6 +2670,21 @@ tbody tr:hover {
   text-align: center;
 }
 
+.qr-scanner {
+  position: relative;
+  width: min(230px, 100%);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.qr-scanner video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .qr-card strong,
 .qr-card small {
   display: block;
@@ -2648,7 +2696,7 @@ tbody tr:hover {
 
 .qr-code {
   position: relative;
-  width: min(190px, 100%);
+  width: 100%;
   aspect-ratio: 1;
   border: 10px solid #ffffff;
   border-radius: 8px;
@@ -2674,6 +2722,16 @@ tbody tr:hover {
   color: #ffffff;
   background: var(--brand-deep);
   font-weight: 900;
+}
+
+.scanner-actions {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+}
+
+.scanner-actions .button {
+  width: 100%;
 }
 
 .geo-status {
@@ -3132,6 +3190,10 @@ tbody tr:hover {
   background: transparent;
 }
 
+#checkinModal {
+  width: min(920px, calc(100% - 28px));
+}
+
 .modal::backdrop {
   background: rgba(9, 22, 27, 0.58);
   backdrop-filter: blur(8px);
@@ -3163,6 +3225,10 @@ tbody tr:hover {
   .checkin-layout,
   .app-columns {
     grid-template-columns: 1fr;
+  }
+
+  .checkin-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .export-actions {
@@ -3686,13 +3752,9 @@ tbody tr:hover {
   }
 
   .sidebar-collapse-button .collapse-icon {
-    display: none;
-  }
-
-  .sidebar-collapse-button .close-icon {
     display: block;
-    width: 19px;
-    height: 19px;
+    width: 21px;
+    height: 21px;
   }
 
   .sidebar-collapse-button .nav-text {
@@ -3764,17 +3826,17 @@ tbody tr:hover {
   .floating-checkin {
     right: 14px;
     bottom: calc(var(--mobile-footer-height) + 14px);
-    width: 52px;
+    width: auto;
     min-height: 52px;
     justify-content: center;
-    gap: 0;
-    padding: 0;
-    font-size: 0;
+    gap: 8px;
+    padding: 0 14px 0 10px;
+    font-size: 0.82rem;
   }
 
   .floating-checkin span {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
   }
 
   .public-checkin-button {

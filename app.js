@@ -8,6 +8,13 @@ const passwordPolicy = {
   lockoutMinutes: 2,
 };
 
+const checkinRules = {
+  defaultRadiusMeters: 50,
+  maxAccuracyMeters: 100,
+  duplicateWindowMinutes: 2,
+  geolocationTimeoutMs: 15000,
+};
+
 const demoUsers = {
   alexandre: {
     name: "Alexandre",
@@ -71,7 +78,7 @@ const initialState = {
     {
       id: 1,
       name: "Ana Beatriz Lima",
-      cpf: "123.456.789-10",
+      cpf: "529.982.247-25",
       phone: "(83) 98888-2101",
       role: "Auxiliar de limpeza",
       registration: "MS-001",
@@ -81,7 +88,7 @@ const initialState = {
     {
       id: 2,
       name: "Marcos Vinícius Rocha",
-      cpf: "234.567.891-20",
+      cpf: "153.509.460-56",
       phone: "(83) 98888-2102",
       role: "Encarregado de equipe",
       registration: "MS-002",
@@ -91,7 +98,7 @@ const initialState = {
     {
       id: 3,
       name: "Juliana Freitas Alves",
-      cpf: "345.678.912-30",
+      cpf: "390.533.447-05",
       phone: "(83) 98888-2103",
       role: "Auxiliar de limpeza",
       registration: "MS-003",
@@ -101,7 +108,7 @@ const initialState = {
     {
       id: 4,
       name: "Roberto Silva Santos",
-      cpf: "456.789.123-40",
+      cpf: "875.214.630-80",
       phone: "(83) 98888-2104",
       role: "Auxiliar de limpeza",
       registration: "MS-004",
@@ -111,7 +118,7 @@ const initialState = {
     {
       id: 5,
       name: "Patrícia Gomes Nunes",
-      cpf: "567.891.234-50",
+      cpf: "704.172.890-06",
       phone: "(83) 98888-2105",
       role: "Apoio operacional",
       registration: "MS-005",
@@ -122,41 +129,92 @@ const initialState = {
   clients: [
     {
       id: 1,
+      code: "EMP-001",
       name: "Condomínio Atlântico",
       type: "Condomínio",
       address: "Manaíra, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 12,
       coordinates: { lat: -7.1026, lng: -34.8333 },
+      allowedRadiusMeters: 50,
     },
     {
       id: 2,
+      code: "EMP-002",
       name: "Centro Empresarial Tambiá",
       type: "Empresa",
       address: "Centro, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 8,
       coordinates: { lat: -7.1195, lng: -34.8829 },
+      allowedRadiusMeters: 50,
     },
     {
       id: 3,
+      code: "EMP-003",
       name: "Evento Expo Nordeste",
       type: "Evento",
       address: "Centro de Convenções, João Pessoa - PB",
       manager: "Admin MS",
       activeEmployees: 18,
       coordinates: { lat: -7.1577, lng: -34.8056 },
+      allowedRadiusMeters: 80,
     },
     {
       id: 4,
+      code: "EMP-004",
       name: "Hospital Empresarial Sul",
       type: "Empresa",
       address: "Bancários, João Pessoa - PB",
       manager: "Carla Supervisor",
       activeEmployees: 4,
       coordinates: { lat: -7.1518, lng: -34.8409 },
+      allowedRadiusMeters: 50,
     },
   ],
+  qrCodes: [
+    {
+      id: "QR-LOCAL-001",
+      companyId: "MS-MULTSERV",
+      clientCode: "EMP-001",
+      client: "Condomínio Atlântico",
+      token: "MS-QR-EMP-001-2026",
+      description: "QR físico da recepção do Condomínio Atlântico",
+      active: true,
+      createdAt: today(),
+    },
+    {
+      id: "QR-LOCAL-002",
+      companyId: "MS-MULTSERV",
+      clientCode: "EMP-002",
+      client: "Centro Empresarial Tambiá",
+      token: "MS-QR-EMP-002-2026",
+      description: "QR físico da portaria do Centro Empresarial Tambiá",
+      active: true,
+      createdAt: today(),
+    },
+    {
+      id: "QR-LOCAL-003",
+      companyId: "MS-MULTSERV",
+      clientCode: "EMP-003",
+      client: "Evento Expo Nordeste",
+      token: "MS-QR-EMP-003-2026",
+      description: "QR físico de apoio do Evento Expo Nordeste",
+      active: true,
+      createdAt: today(),
+    },
+    {
+      id: "QR-LOCAL-004",
+      companyId: "MS-MULTSERV",
+      clientCode: "EMP-004",
+      client: "Hospital Empresarial Sul",
+      token: "MS-QR-EMP-004-2026",
+      description: "QR físico da entrada de serviço do Hospital Empresarial Sul",
+      active: true,
+      createdAt: today(),
+    },
+  ],
+  checkinAttempts: [],
   brandSettings: {
     speed: 36,
   },
@@ -282,6 +340,13 @@ let employeeFormMode = "create";
 let editingEmployeeId = null;
 let pendingDeleteEmployeeId = null;
 let expandedFrequencyEmployeeId = null;
+let checkinSession = {
+  qrPayload: null,
+  qrCode: null,
+  stream: null,
+  scanTimer: null,
+  scannerActive: false,
+};
 
 const publicSite = document.querySelector("#publicSite");
 const loginScreen = document.querySelector("#loginScreen");
@@ -663,7 +728,7 @@ function setMobileAppMenuOpen(isOpen) {
   appMenuButton.setAttribute("aria-expanded", String(isOpen));
   appMenuButton.setAttribute(
     "aria-label",
-    isOpen ? "Fechar menu do sistema" : "Abrir menu do sistema",
+    isOpen ? "Encolher menu do sistema" : "Expandir menu do sistema",
   );
   sidebarCollapseButton.setAttribute("aria-expanded", String(isOpen));
   mobileFooterNav
@@ -672,11 +737,11 @@ function setMobileAppMenuOpen(isOpen) {
   if (isMobileNavigation()) {
     sidebarCollapseButton.setAttribute(
       "aria-label",
-      isOpen ? "Fechar menu lateral" : "Expandir menu lateral",
+      isOpen ? "Encolher menu lateral" : "Expandir menu lateral",
     );
-    sidebarCollapseButton.title = isOpen ? "Fechar menu" : "Expandir menu";
+    sidebarCollapseButton.title = isOpen ? "Encolher menu" : "Expandir menu";
     const label = sidebarCollapseButton.querySelector(".nav-text");
-    if (label) label.textContent = isOpen ? "Fechar menu" : "Abrir menu";
+    if (label) label.textContent = isOpen ? "Encolher menu" : "Expandir menu";
   }
   document.body.classList.toggle("app-menu-open", isOpen);
 }
@@ -1184,8 +1249,8 @@ function setupForms() {
     data.phone = formatPhone(data.phone);
     data.registration = data.registration || generateNextEmployeeRegistration();
 
-    if (onlyDigits(data.cpf).length !== 11) {
-      showToast("Informe um CPF com 11 dígitos.");
+    if (!isValidCpf(data.cpf)) {
+      showToast("Informe um CPF válido.");
       return;
     }
 
@@ -1252,15 +1317,21 @@ function setupForms() {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     const employee = state.employees.find((item) => String(item.id) === data.employee);
+    const client = state.clients.find((item) => item.name === data.client);
     state.points.unshift({
       id: Date.now(),
       employee: employee.name,
+      employeeId: employee.id,
+      cpf: employee.cpf,
       client: data.client,
+      clientId: client?.id || null,
       date: data.date,
       in: data.in,
       out: data.out,
       status: data.status,
       source: "Manual",
+      type: data.out ? "Entrada/Saída" : "Entrada",
+      createdAt: nowIso(),
     });
     saveState();
     event.currentTarget.reset();
@@ -1296,41 +1367,114 @@ function setupCheckinFlow() {
     button.addEventListener("click", openCheckinModal);
   });
   document.querySelector("#closeCheckinModal").addEventListener("click", () => {
+    stopCheckinScanner();
     checkinModal.close();
   });
   document.querySelector("#checkinCpf").addEventListener("input", (event) => {
     event.target.value = formatCpf(event.target.value);
     clearFormMessage("#checkinMessage");
   });
+  document.querySelector("#simulateQrScan").addEventListener("click", () => {
+    const selectedQrCode = getQrCodeById(document.querySelector("#checkinQrSelect").value);
+    if (!selectedQrCode) {
+      setFormMessage("#checkinMessage", "Selecione um QR Code demonstrativo válido.", "error");
+      return;
+    }
+    setCheckinQrPayload(buildQrPayload(selectedQrCode), "QR Code demonstrativo lido.");
+  });
+  document.querySelector("#checkinQrSelect").addEventListener("change", () => {
+    checkinSession.qrPayload = null;
+    checkinSession.qrCode = null;
+    updateCheckinSteps("qr");
+    document.querySelector("#checkinScanStatus").textContent =
+      "Selecione o QR e confirme a leitura demonstrativa.";
+    document.querySelector("#checkinGeoStatus").textContent = "Aguardando leitura do QR Code.";
+    clearFormMessage("#checkinMessage");
+  });
   document.querySelector("#checkinForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     await registerQrCheckin();
   });
+  checkinModal.addEventListener("close", stopCheckinScanner);
 }
 
 function openCheckinModal() {
   const now = new Date();
+  stopCheckinScanner();
+  checkinSession.qrPayload = null;
+  checkinSession.qrCode = null;
   document.querySelector("#checkinForm").reset();
+  populateCheckinQrSelect();
   document.querySelector("#checkinQrTime").textContent = `Código ${now.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   })}`;
-  document.querySelector("#checkinGeoStatus").textContent =
-    "Aguardando validação de CPF e localização.";
+  document.querySelector("#checkinQrTitle").textContent = "Aponte a câmera para o QR Code";
+  document.querySelector("#checkinScanStatus").textContent = "Solicitando acesso à câmera...";
+  document.querySelector("#checkinGeoStatus").textContent = "Aguardando leitura do QR Code.";
+  document.querySelector("#checkinVideo").hidden = true;
+  document.querySelector("#checkinQrPreview").hidden = false;
+  updateCheckinSteps("qr");
   clearFormMessage("#checkinMessage");
   checkinModal.showModal();
+  window.setTimeout(startCheckinScanner, 150);
 }
 
 async function registerQrCheckin() {
   const cpf = document.querySelector("#checkinCpf").value;
+  const cpfDigits = onlyDigits(cpf);
+
+  if (!checkinSession.qrCode) {
+    setFormMessage(
+      "#checkinMessage",
+      "Leia o QR Code do local de trabalho antes de confirmar o ponto.",
+      "error",
+    );
+    return;
+  }
+
+  if (!isValidCpf(cpf)) {
+    recordCheckinAttempt({
+      cpf,
+      qrCode: checkinSession.qrCode,
+      status: "Bloqueado",
+      reason: "CPF inválido",
+    });
+    saveState();
+    renderAll();
+    setFormMessage("#checkinMessage", "CPF inválido. Confira os números informados.", "error");
+    return;
+  }
+
   const employee = findEmployeeByCpf(cpf);
 
   if (!employee) {
-    setFormMessage("#checkinMessage", "CPF não localizado no cadastro de funcionários.", "error");
+    recordCheckinAttempt({
+      cpf,
+      qrCode: checkinSession.qrCode,
+      status: "Bloqueado",
+      reason: "CPF não encontrado",
+    });
+    saveState();
+    renderAll();
+    setFormMessage(
+      "#checkinMessage",
+      "CPF não encontrado ou funcionário não autorizado para este local.",
+      "error",
+    );
     return;
   }
 
   if (employee.status !== "Ativo") {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      status: "Bloqueado",
+      reason: `Funcionário ${employee.status}`,
+    });
+    saveState();
+    renderAll();
     setFormMessage(
       "#checkinMessage",
       `Check-in bloqueado. Funcionário com status ${employee.status}.`,
@@ -1339,60 +1483,191 @@ async function registerQrCheckin() {
     return;
   }
 
-  const existingOpenPoint = state.points.find(
-    (point) => point.employee === employee.name && point.date === today() && !point.out,
-  );
-
-  if (existingOpenPoint) {
-    setFormMessage("#checkinMessage", "Já existe um check-in em aberto para hoje.", "error");
+  const client = getClientByQrCode(checkinSession.qrCode);
+  if (!client || employee.client !== client.name) {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      status: "Bloqueado",
+      reason: "Funcionário não vinculado ao empreendimento",
+    });
+    saveState();
+    renderAll();
+    setFormMessage(
+      "#checkinMessage",
+      "CPF não encontrado ou funcionário não autorizado para este local.",
+      "error",
+    );
     return;
   }
 
-  const client = state.clients.find((item) => item.name === employee.client);
+  const nextRegistration = getNextCheckinRegistration(employee);
+  if (nextRegistration.blocked) {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      status: "Bloqueado",
+      reason: nextRegistration.message,
+    });
+    saveState();
+    renderAll();
+    setFormMessage("#checkinMessage", nextRegistration.message, "error");
+    return;
+  }
+
+  if (hasRecentSuccessfulCheckin(cpfDigits)) {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      type: nextRegistration.type,
+      status: "Bloqueado",
+      reason: "Tentativa duplicada em curto intervalo",
+    });
+    saveState();
+    renderAll();
+    setFormMessage(
+      "#checkinMessage",
+      "Já existe uma marcação recente para este CPF. Aguarde alguns minutos antes de tentar novamente.",
+      "error",
+    );
+    return;
+  }
+
   const clientCoordinates = getClientCoordinates(client);
   if (!clientCoordinates) {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      type: nextRegistration.type,
+      status: "Bloqueado",
+      reason: "Empreendimento sem coordenadas",
+    });
+    saveState();
+    renderAll();
     setFormMessage("#checkinMessage", "Local de trabalho sem coordenadas cadastradas.", "error");
     return;
   }
 
-  document.querySelector("#checkinGeoStatus").textContent = "Capturando localização...";
+  updateCheckinSteps("location");
+  document.querySelector("#checkinGeoStatus").textContent =
+    "Capturando localização do dispositivo...";
 
   try {
     const devicePosition = await getCheckinPosition(clientCoordinates);
     const distance = Math.round(calculateDistanceMeters(devicePosition, clientCoordinates));
+    const accuracy = Math.round(devicePosition.accuracy || 0);
+    const allowedRadius = getClientAllowedRadius(client);
 
-    if (distance > 100) {
-      document.querySelector("#checkinGeoStatus").textContent = `Distância estimada: ${distance}m`;
+    if (accuracy > checkinRules.maxAccuracyMeters) {
+      recordCheckinAttempt({
+        cpf,
+        employee,
+        qrCode: checkinSession.qrCode,
+        client,
+        type: nextRegistration.type,
+        status: "Bloqueado",
+        reason: "Localização imprecisa",
+        distance,
+        accuracy,
+        devicePosition,
+      });
+      saveState();
+      renderAll();
+      document.querySelector("#checkinGeoStatus").textContent =
+        `Precisão insuficiente: margem de ${accuracy}m`;
       setFormMessage(
         "#checkinMessage",
-        "Check-in não autorizado. Você está fora da área permitida para registro de ponto.",
+        "Não foi possível confirmar sua localização com precisão suficiente. Tente novamente em uma área com melhor sinal de GPS ou Wi-Fi.",
         "error",
       );
       return;
     }
 
-    state.points.unshift({
-      id: Date.now(),
-      employee: employee.name,
-      client: employee.client,
-      date: today(),
-      in: currentTime(),
-      out: "",
-      status: "Ponto normal",
-      source: "QR Code",
+    if (distance > allowedRadius) {
+      recordCheckinAttempt({
+        cpf,
+        employee,
+        qrCode: checkinSession.qrCode,
+        client,
+        type: nextRegistration.type,
+        status: "Bloqueado",
+        reason: "Fora do raio permitido",
+        distance,
+        accuracy,
+        devicePosition,
+      });
+      saveState();
+      renderAll();
+      document.querySelector("#checkinGeoStatus").textContent = `Distância estimada: ${distance}m`;
+      setFormMessage(
+        "#checkinMessage",
+        "Não foi possível registrar o ponto. Sua localização atual está fora do raio permitido para este empreendimento.",
+        "error",
+      );
+      return;
+    }
+
+    const registrationTime = currentTime();
+    const point = persistQrPoint({
+      employee,
+      client,
+      qrCode: checkinSession.qrCode,
+      type: nextRegistration.type,
+      existingPoint: nextRegistration.point,
+      devicePosition,
+      clientCoordinates,
       distance,
-      location: devicePosition,
-      createdAt: nowIso(),
+      accuracy,
+      registrationTime,
+    });
+
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      point,
+      type: nextRegistration.type,
+      status: "Aprovado",
+      reason: "Ponto registrado",
+      distance,
+      accuracy,
+      devicePosition,
     });
 
     saveState();
     renderAll();
-    document.querySelector("#checkinGeoStatus").textContent = `Check-in autorizado a ${distance}m`;
-    setFormMessage("#checkinMessage", "Check-in registrado com sucesso.", "success");
+    updateCheckinSteps("confirm");
+    document.querySelector("#checkinGeoStatus").textContent =
+      `${nextRegistration.type} autorizada a ${distance}m · precisão ${accuracy}m`;
+    setFormMessage(
+      "#checkinMessage",
+      `Ponto registrado com sucesso. ${nextRegistration.type} confirmada às ${registrationTime}.`,
+      "success",
+    );
     setTimeout(() => {
       if (checkinModal.open) checkinModal.close();
     }, 900);
   } catch (error) {
+    recordCheckinAttempt({
+      cpf,
+      employee,
+      qrCode: checkinSession.qrCode,
+      client,
+      type: nextRegistration.type,
+      status: "Bloqueado",
+      reason: error.message || "Localização não validada",
+    });
+    saveState();
+    renderAll();
     document.querySelector("#checkinGeoStatus").textContent = "Localização não validada.";
     setFormMessage(
       "#checkinMessage",
@@ -1402,11 +1677,169 @@ async function registerQrCheckin() {
   }
 }
 
+async function startCheckinScanner() {
+  const status = document.querySelector("#checkinScanStatus");
+  const video = document.querySelector("#checkinVideo");
+  const preview = document.querySelector("#checkinQrPreview");
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    status.textContent =
+      "Câmera indisponível neste navegador. Use o QR demonstrativo para apresentar o fluxo.";
+    return;
+  }
+
+  if (!("BarcodeDetector" in window)) {
+    status.textContent =
+      "Leitor nativo de QR não disponível neste navegador. Use o QR demonstrativo.";
+    return;
+  }
+
+  try {
+    checkinSession.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false,
+    });
+    video.srcObject = checkinSession.stream;
+    video.hidden = false;
+    preview.hidden = true;
+    await video.play();
+    checkinSession.scannerActive = true;
+    status.textContent = "Câmera ativa. Mantenha o QR Code centralizado.";
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+
+    checkinSession.scanTimer = window.setInterval(async () => {
+      if (!checkinSession.scannerActive || video.readyState < 2) return;
+      try {
+        const codes = await detector.detect(video);
+        if (!codes.length) return;
+        setCheckinQrPayload(codes[0].rawValue, "QR Code lido pela câmera.");
+      } catch {
+        status.textContent = "Não foi possível concluir a leitura. Tente novamente.";
+      }
+    }, 800);
+  } catch {
+    status.textContent =
+      "Não foi possível acessar a câmera. Para bater o ponto, permita o uso da câmera nas configurações do navegador ou do dispositivo.";
+  }
+}
+
+function stopCheckinScanner() {
+  if (checkinSession.scanTimer) {
+    window.clearInterval(checkinSession.scanTimer);
+    checkinSession.scanTimer = null;
+  }
+
+  if (checkinSession.stream) {
+    checkinSession.stream.getTracks().forEach((track) => track.stop());
+    checkinSession.stream = null;
+  }
+
+  checkinSession.scannerActive = false;
+}
+
+function setCheckinQrPayload(rawPayload, successMessage) {
+  const qrValidation = validateQrPayload(rawPayload);
+  const status = document.querySelector("#checkinScanStatus");
+
+  if (!qrValidation.valid) {
+    checkinSession.qrPayload = null;
+    checkinSession.qrCode = null;
+    status.textContent = qrValidation.message;
+    setFormMessage("#checkinMessage", qrValidation.message, "error");
+    return;
+  }
+
+  stopCheckinScanner();
+  checkinSession.qrPayload = qrValidation.payload;
+  checkinSession.qrCode = qrValidation.qrCode;
+  document.querySelector("#checkinQrTitle").textContent = qrValidation.client.name;
+  document.querySelector("#checkinQrTime").textContent =
+    `${qrValidation.qrCode.id} · raio ${getClientAllowedRadius(qrValidation.client)}m`;
+  document.querySelector("#checkinQrSelect").value = qrValidation.qrCode.id;
+  status.textContent = successMessage;
+  document.querySelector("#checkinGeoStatus").textContent =
+    "QR validado. Informe o CPF e confirme para validar a localização.";
+  updateCheckinSteps("cpf");
+  clearFormMessage("#checkinMessage");
+}
+
+function validateQrPayload(rawPayload) {
+  const payload = parseQrPayload(rawPayload);
+
+  if (!payload) {
+    return { valid: false, message: "QR Code inválido ou adulterado." };
+  }
+
+  const qrCode = state.qrCodes.find(
+    (item) =>
+      item.id === payload.qr_code_id &&
+      item.clientCode === payload.empreendimento_id &&
+      item.token === payload.token,
+  );
+
+  if (!qrCode) {
+    return { valid: false, message: "QR Code não localizado na base do sistema." };
+  }
+
+  if (!qrCode.active) {
+    return { valid: false, message: "QR Code inativo para registro de ponto." };
+  }
+
+  const client = getClientByQrCode(qrCode);
+  if (!client) {
+    return { valid: false, message: "QR Code sem empreendimento vinculado." };
+  }
+
+  return { valid: true, payload, qrCode, client };
+}
+
+function parseQrPayload(rawPayload) {
+  if (typeof rawPayload === "object" && rawPayload) return rawPayload;
+
+  try {
+    const parsedPayload = JSON.parse(String(rawPayload || ""));
+    return parsedPayload && typeof parsedPayload === "object" ? parsedPayload : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildQrPayload(qrCode) {
+  return JSON.stringify({
+    empreendimento_id: qrCode.clientCode,
+    qr_code_id: qrCode.id,
+    token: qrCode.token,
+  });
+}
+
+function populateCheckinQrSelect() {
+  const select = document.querySelector("#checkinQrSelect");
+  if (!select) return;
+
+  select.innerHTML = state.qrCodes
+    .filter((qrCode) => qrCode.active)
+    .map((qrCode) => `<option value="${escapeHtml(qrCode.id)}">${escapeHtml(qrCode.client)}</option>`)
+    .join("");
+}
+
+function updateCheckinSteps(activeStep) {
+  const stepOrder = ["qr", "cpf", "location", "confirm"];
+  const activeIndex = stepOrder.indexOf(activeStep);
+
+  stepOrder.forEach((step, index) => {
+    const item = document.querySelector(`#checkinStep${capitalize(step)}`);
+    if (!item) return;
+    item.classList.toggle("active", index === activeIndex);
+    item.classList.toggle("done", activeIndex > index);
+  });
+}
+
 function getCheckinPosition(clientCoordinates) {
   if (document.querySelector("#checkinDemoLocation").checked) {
     return Promise.resolve({
       lat: clientCoordinates.lat,
       lng: clientCoordinates.lng,
+      accuracy: 18,
     });
   }
 
@@ -1420,6 +1853,7 @@ function getCheckinPosition(clientCoordinates) {
         resolve({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
+          accuracy: position.coords.accuracy || 999,
         });
       },
       () => {
@@ -1427,7 +1861,7 @@ function getCheckinPosition(clientCoordinates) {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: checkinRules.geolocationTimeoutMs,
         maximumAge: 0,
       },
     );
@@ -1622,6 +2056,174 @@ function getClientCoordinates(client) {
   return seededClient?.coordinates || null;
 }
 
+function getClientAllowedRadius(client) {
+  return getSafeCheckinRadius(client?.allowedRadiusMeters);
+}
+
+function getQrCodeById(qrCodeId) {
+  return state.qrCodes.find((qrCode) => qrCode.id === qrCodeId) || null;
+}
+
+function getClientByQrCode(qrCode) {
+  if (!qrCode) return null;
+  return (
+    state.clients.find((client) => client.code === qrCode.clientCode) ||
+    state.clients.find((client) => client.name === qrCode.client) ||
+    null
+  );
+}
+
+function getNextCheckinRegistration(employee) {
+  const todayPoints = state.points.filter(
+    (point) => point.employee === employee.name && point.date === today(),
+  );
+  const openPoint = todayPoints.find((point) => point.in && !point.out);
+
+  if (openPoint) {
+    return {
+      type: "Saída",
+      point: openPoint,
+      blocked: false,
+    };
+  }
+
+  if (todayPoints.some((point) => point.in && point.out)) {
+    return {
+      type: null,
+      point: null,
+      blocked: true,
+      message: "Entrada e saída já registradas hoje para este funcionário.",
+    };
+  }
+
+  return {
+    type: "Entrada",
+    point: null,
+    blocked: false,
+  };
+}
+
+function hasRecentSuccessfulCheckin(cpfDigits) {
+  const duplicateWindowMs = checkinRules.duplicateWindowMinutes * 60000;
+  const now = Date.now();
+
+  return state.checkinAttempts.some((attempt) => {
+    if (attempt.status !== "Aprovado") return false;
+    if (onlyDigits(attempt.cpf) !== cpfDigits) return false;
+    const attemptTime = new Date(attempt.createdAt).getTime();
+    if (!Number.isFinite(attemptTime)) return false;
+    return now - attemptTime <= duplicateWindowMs;
+  });
+}
+
+function persistQrPoint({
+  employee,
+  client,
+  qrCode,
+  type,
+  existingPoint,
+  devicePosition,
+  clientCoordinates,
+  distance,
+  accuracy,
+  registrationTime,
+}) {
+  const auditPayload = {
+    employeeId: employee.id,
+    cpf: employee.cpf,
+    clientId: client.id,
+    clientCode: client.code,
+    qrCodeId: qrCode.id,
+    type,
+    serverTime: nowIso(),
+    latitudeDevice: devicePosition.lat,
+    longitudeDevice: devicePosition.lng,
+    latitudeClient: clientCoordinates.lat,
+    longitudeClient: clientCoordinates.lng,
+    distanceMeters: distance,
+    accuracyMeters: accuracy,
+    validationStatus: "Aprovado",
+    source: "QR Code",
+  };
+
+  if (type === "Saída" && existingPoint) {
+    Object.assign(existingPoint, {
+      out: registrationTime,
+      lastType: "Saída",
+      status: "Ponto normal",
+      updatedAt: nowIso(),
+      checkoutAudit: auditPayload,
+    });
+    return existingPoint;
+  }
+
+  const point = {
+    id: Date.now(),
+    employee: employee.name,
+    employeeId: employee.id,
+    cpf: employee.cpf,
+    client: client.name,
+    clientId: client.id,
+    date: today(),
+    in: registrationTime,
+    out: "",
+    status: "Ponto normal",
+    source: "QR Code",
+    type: "Entrada",
+    createdAt: nowIso(),
+    checkinAudit: auditPayload,
+    distance,
+    accuracy,
+    location: devicePosition,
+  };
+
+  state.points.unshift(point);
+  return point;
+}
+
+function recordCheckinAttempt({
+  cpf = "",
+  employee = null,
+  client = null,
+  qrCode = null,
+  point = null,
+  type = "",
+  status,
+  reason,
+  distance = null,
+  accuracy = null,
+  devicePosition = null,
+}) {
+  const attempt = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    pointId: point?.id || null,
+    employeeId: employee?.id || null,
+    employee: employee?.name || "Não identificado",
+    cpf: formatCpf(cpf || employee?.cpf || ""),
+    clientId: client?.id || null,
+    client: client?.name || qrCode?.client || "Não identificado",
+    clientCode: client?.code || qrCode?.clientCode || "",
+    qrCodeId: qrCode?.id || "",
+    type: type || "-",
+    date: today(),
+    time: currentTime(),
+    serverTime: nowIso(),
+    distanceMeters: distance,
+    accuracyMeters: accuracy,
+    status,
+    reason,
+    latitudeDevice: devicePosition?.lat ?? null,
+    longitudeDevice: devicePosition?.lng ?? null,
+    userAgent: navigator.userAgent,
+    ip: "Disponível no backend",
+    createdAt: nowIso(),
+  };
+
+  state.checkinAttempts.unshift(attempt);
+  state.checkinAttempts = state.checkinAttempts.slice(0, 80);
+  return attempt;
+}
+
 function updateEmployeeReferences(oldName, newName) {
   if (!oldName || oldName === newName) return;
 
@@ -1664,6 +2266,24 @@ function formatCpf(value) {
     .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }
 
+function isValidCpf(value) {
+  const digits = onlyDigits(value);
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+
+  const calculateDigit = (base) => {
+    const sum = base
+      .split("")
+      .reduce((total, digit, index) => total + Number(digit) * (base.length + 1 - index), 0);
+    const digit = (sum * 10) % 11;
+    return digit === 10 ? 0 : digit;
+  };
+
+  const firstDigit = calculateDigit(digits.slice(0, 9));
+  const secondDigit = calculateDigit(digits.slice(0, 10));
+  return digits.endsWith(`${firstDigit}${secondDigit}`);
+}
+
 function formatPhone(value) {
   const digits = onlyDigits(value).slice(0, 11);
 
@@ -1684,6 +2304,10 @@ function generateNextEmployeeRegistration() {
   }, 0);
 
   return `MS-${String(highestNumber + 1).padStart(3, "0")}`;
+}
+
+function capitalize(value) {
+  return String(value || "").charAt(0).toUpperCase() + String(value || "").slice(1);
 }
 
 function openLogin() {
@@ -1730,6 +2354,7 @@ function renderAll() {
   renderBrandAdmin();
   renderEvents();
   renderTimeList();
+  renderTimeAudit();
   renderFrequency();
   renderCertificates();
   renderCalendar();
@@ -1890,11 +2515,21 @@ function renderClients() {
           <dl>
             <div><dt>Supervisor</dt><dd>${client.manager}</dd></div>
             <div><dt>Equipe ativa</dt><dd>${client.activeEmployees}</dd></div>
+            <div><dt>Raio de ponto</dt><dd>${getClientAllowedRadius(client)}m</dd></div>
+            <div><dt>QR Code</dt><dd>${escapeHtml(getQrCodeForClient(client)?.id || "Pendente")}</dd></div>
           </dl>
         </article>
       `,
     )
     .join("");
+}
+
+function getQrCodeForClient(client) {
+  return (
+    state.qrCodes.find((qrCode) => qrCode.clientCode === client.code) ||
+    state.qrCodes.find((qrCode) => qrCode.client === client.name) ||
+    null
+  );
 }
 
 function renderBrandShowcase() {
@@ -2146,7 +2781,7 @@ function renderTimeList() {
             <strong>${escapeHtml(point.employee)}</strong>
             <small>${formatDate(point.date)} · ${escapeHtml(point.in)} às ${escapeHtml(
               point.out || "em aberto",
-            )}</small>
+            )} · ${escapeHtml(point.source || "Manual")}</small>
           </div>
           <span class="badge ${point.status === "Ponto normal" ? "active" : "warning"}">
             ${escapeHtml(point.status)}
@@ -2155,6 +2790,45 @@ function renderTimeList() {
       `,
     )
     .join("");
+}
+
+function renderTimeAudit() {
+  const table = document.querySelector("#pointAuditTable");
+  if (!table) return;
+
+  table.innerHTML = state.checkinAttempts.length
+    ? state.checkinAttempts
+        .slice(0, 12)
+        .map(
+          (attempt) => `
+            <tr>
+              <td>
+                <strong>${escapeHtml(attempt.employee)}</strong><br>
+                <small>${escapeHtml(attempt.cpf || "CPF não informado")}</small>
+              </td>
+              <td>
+                ${escapeHtml(attempt.client)}<br>
+                <small>${escapeHtml(attempt.qrCodeId || "Sem QR")}</small>
+              </td>
+              <td>${escapeHtml(attempt.type || "-")}</td>
+              <td>${formatMeters(attempt.distanceMeters)}</td>
+              <td>${formatMeters(attempt.accuracyMeters)}</td>
+              <td>
+                <span class="badge ${attempt.status === "Aprovado" ? "active" : "danger"}">
+                  ${escapeHtml(attempt.status)}
+                </span><br>
+                <small>${escapeHtml(attempt.reason || "-")}</small>
+              </td>
+            </tr>
+          `,
+        )
+        .join("")
+    : `<tr><td colspan="6">Nenhuma validação de ponto registrada ainda.</td></tr>`;
+}
+
+function formatMeters(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  return `${Math.round(Number(value))}m`;
 }
 
 function renderFrequency() {
@@ -2977,6 +3651,7 @@ function populateSelects() {
     document.querySelector("#frequencyClient").value = selectedFrequencyClient;
   }
   document.querySelector("#eventSelect").innerHTML = eventOptions;
+  populateCheckinQrSelect();
 }
 
 function card(title, value, subtitle) {
@@ -3060,6 +3735,60 @@ function normalizeOptionalExternalUrl(value) {
   }
 }
 
+function normalizeDemoEmployeeCpfs(employees) {
+  const demoCpfMap = new Map(
+    initialState.employees.map((employee) => [employee.registration, employee.cpf]),
+  );
+
+  employees.forEach((employee) => {
+    const demoCpf = demoCpfMap.get(employee.registration);
+    if (demoCpf && !isValidCpf(employee.cpf)) {
+      employee.cpf = demoCpf;
+    }
+  });
+}
+
+function getSafeCheckinRadius(value) {
+  const parsedRadius = Number(value);
+  if (!Number.isFinite(parsedRadius)) return checkinRules.defaultRadiusMeters;
+  return Math.min(500, Math.max(20, Math.round(parsedRadius)));
+}
+
+function normalizeQrCodes(nextState) {
+  const savedQrCodes = Array.isArray(nextState.qrCodes) ? nextState.qrCodes : [];
+  const normalizedQrCodes = nextState.clients.map((client, index) => {
+    const seedQr = initialState.qrCodes.find((item) => item.client === client.name);
+    const savedQr = savedQrCodes.find(
+      (item) => item.client === client.name || item.clientCode === client.code,
+    );
+    const fallbackId = `QR-LOCAL-${String(index + 1).padStart(3, "0")}`;
+
+    return {
+      id: String(savedQr?.id || seedQr?.id || fallbackId),
+      companyId: String(savedQr?.companyId || seedQr?.companyId || "MS-MULTSERV"),
+      clientCode: String(savedQr?.clientCode || client.code),
+      client: client.name,
+      token: String(savedQr?.token || seedQr?.token || `MS-QR-${client.code}-2026`),
+      description: String(
+        savedQr?.description || seedQr?.description || `QR físico de ${client.name}`,
+      ),
+      active: savedQr?.active !== false,
+      createdAt: savedQr?.createdAt || seedQr?.createdAt || today(),
+      updatedAt: savedQr?.updatedAt || seedQr?.updatedAt || null,
+    };
+  });
+
+  savedQrCodes
+    .filter(
+      (savedQr) =>
+        savedQr.client &&
+        !normalizedQrCodes.some((qrCode) => qrCode.id === savedQr.id || qrCode.client === savedQr.client),
+    )
+    .forEach((savedQr) => normalizedQrCodes.push(savedQr));
+
+  return normalizedQrCodes;
+}
+
 function loadState() {
   const savedState = localStorage.getItem(storageKey);
   if (!savedState) return structuredClone(initialState);
@@ -3081,6 +3810,9 @@ function ensureStateShape(savedState) {
   nextState.mailbox = Array.isArray(savedState.mailbox) ? savedState.mailbox : [];
   nextState.security = savedState.security || { loginAttempts: {} };
   nextState.security.loginAttempts = nextState.security.loginAttempts || {};
+  nextState.checkinAttempts = Array.isArray(savedState.checkinAttempts)
+    ? savedState.checkinAttempts
+    : [];
   nextState.brandSettings = {
     ...structuredClone(initialState.brandSettings),
     ...(savedState.brandSettings || {}),
@@ -3128,12 +3860,19 @@ function ensureStateShape(savedState) {
     }
   });
 
+  normalizeDemoEmployeeCpfs(nextState.employees);
+
   nextState.clients.forEach((client) => {
     const seededClient = initialState.clients.find((item) => item.name === client.name);
     if (seededClient?.coordinates && !client.coordinates) {
       client.coordinates = structuredClone(seededClient.coordinates);
     }
+    client.code = client.code || seededClient?.code || `EMP-${String(client.id).padStart(3, "0")}`;
+    client.allowedRadiusMeters = getSafeCheckinRadius(
+      client.allowedRadiusMeters || seededClient?.allowedRadiusMeters,
+    );
   });
+  nextState.qrCodes = normalizeQrCodes(nextState);
 
   return nextState;
 }

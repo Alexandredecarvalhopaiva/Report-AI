@@ -474,11 +474,13 @@
               Telefone
               <input
                 type="tel"
+                id="contactPhone"
                 name="telefone"
                 placeholder="(83) 99999-9999"
                 autocomplete="tel"
-                inputmode="tel"
+                inputmode="numeric"
                 maxlength="15"
+                pattern="\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}"
                 required
               />
             </label>
@@ -494,14 +496,18 @@
             <label class="full-field">
               Mensagem
               <textarea
+                id="contactMessage"
                 rows="4"
                 name="mensagem"
                 placeholder="Conte rapidamente o que você precisa"
-                maxlength="600"
+                maxlength="250"
+                aria-describedby="contactMessageCounter"
               ></textarea>
+              <small class="field-counter" id="contactMessageCounter">0/250 caracteres</small>
             </label>
             <a
               class="button button-primary full-field"
+              id="contactWhatsappButton"
               href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20servi%C3%A7os%20da%20Multserv."
               aria-label="Falar pelo WhatsApp no número (83) 99802-4125"
               title="WhatsApp: (83) 99802-4125"
@@ -795,6 +801,10 @@
             <button type="button" data-view="reports" data-label="Relatórios" data-short-label="Relatórios">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-report"></use></svg>
               <span class="nav-text">Relatórios</span>
+            </button>
+            <button class="admin-only" type="button" data-view="leads" data-label="Leads" data-short-label="Leads">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-message"></use></svg>
+              <span class="nav-text">Leads</span>
             </button>
           </div>
           <div class="nav-section admin-only">
@@ -1099,7 +1109,7 @@
                 <select id="frequencyPeriod">
                   <option value="7">Semanal</option>
                   <option value="15">Quinzenal</option>
-                  <option value="30">Últimos 30 dias</option>
+                  <option value="30">Mês atual</option>
                   <option value="365">Anual</option>
                   <option value="custom">Personalizado</option>
                 </select>
@@ -1251,6 +1261,46 @@
                 <button class="button button-secondary" type="button">Relatório por cliente</button>
               </div>
             </section>
+          </div>
+        </section>
+
+        <section class="app-view admin-only" data-panel="leads">
+          <div class="toolbar">
+            <div>
+              <p class="eyebrow">Captação comercial</p>
+              <h2>Leads do site institucional</h2>
+            </div>
+            <span class="badge manual" id="leadsCount">0 leads</span>
+          </div>
+          <div class="toolbar">
+            <input
+              class="search-input"
+              id="leadSearch"
+              type="search"
+              placeholder="Pesquisar por nome, empresa, telefone, serviço ou mensagem"
+            />
+            <select id="leadStatusFilter" aria-label="Filtrar leads por status">
+              <option value="all">Todos os status</option>
+              <option value="Novo">Novos</option>
+              <option value="Em atendimento">Em atendimento</option>
+              <option value="Convertido">Convertidos</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lead</th>
+                  <th>Telefone</th>
+                  <th>Serviço</th>
+                  <th>Mensagem</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTable"></tbody>
+            </table>
           </div>
         </section>
 

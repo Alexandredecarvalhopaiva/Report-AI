@@ -51,6 +51,7 @@ const appRoutes = {
   atestados: "certificates",
   faltas: "absences",
   relatorios: "reports",
+  leads: "leads",
   calendario: "calendar",
   marcas: "brands",
   usuarios: "users",
@@ -72,6 +73,7 @@ const initialState = {
   users: structuredClone(initialUsers),
   resetTokens: [],
   mailbox: [],
+  leads: [],
   security: {
     loginAttempts: {},
   },
@@ -395,6 +397,7 @@ function setupPublicSite() {
   updateHeaderState();
   setupSiteNavObserver();
   setActiveSiteNavLink(window.location.hash);
+  setupContactForm();
 
   const setPublicMenuOpen = (isOpen) => {
     siteNav.classList.toggle("open", isOpen);
@@ -485,6 +488,100 @@ function setupPublicSite() {
       setPublicMenuOpen(false);
     }
   });
+}
+
+function setupContactForm() {
+  const form = document.querySelector(".contact-form");
+  if (!form) return;
+
+  const phoneInput = form.querySelector("#contactPhone");
+  const messageInput = form.querySelector("#contactMessage");
+  const messageCounter = form.querySelector("#contactMessageCounter");
+  const whatsappButton = form.querySelector("#contactWhatsappButton");
+  const maxMessageLength = Number(messageInput?.maxLength) || 250;
+
+  const updateMessageCounter = () => {
+    if (!messageInput || !messageCounter) return;
+    const currentLength = messageInput.value.length;
+    messageCounter.textContent = `${currentLength}/${maxMessageLength} caracteres`;
+    messageCounter.classList.toggle("is-limit", currentLength >= maxMessageLength);
+  };
+
+  const validateContactPhone = ({ showError = false } = {}) => {
+    if (!phoneInput) return true;
+    const isValid = isValidBrazilMobilePhone(phoneInput.value);
+    phoneInput.setCustomValidity(
+      isValid ? "" : "Informe DDD + celular com 9 dígitos. Exemplo: (83) 99999-9999.",
+    );
+    if (!isValid && showError) phoneInput.reportValidity();
+    return isValid;
+  };
+
+  phoneInput?.addEventListener("input", () => {
+    phoneInput.value = formatPhone(phoneInput.value);
+    phoneInput.setCustomValidity("");
+  });
+
+  phoneInput?.addEventListener("blur", () => {
+    if (phoneInput.value) validateContactPhone();
+  });
+
+  messageInput?.addEventListener("input", updateMessageCounter);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    whatsappButton?.click();
+  });
+
+  whatsappButton?.addEventListener("click", (event) => {
+    const isPhoneValid = validateContactPhone({ showError: true });
+    const isFormValid = form.reportValidity();
+    if (!isPhoneValid || !isFormValid) {
+      event.preventDefault();
+      return;
+    }
+
+    saveContactLead(form);
+    whatsappButton.href = buildContactWhatsappUrl(form);
+  });
+
+  updateMessageCounter();
+}
+
+function saveContactLead(form) {
+  const data = Object.fromEntries(new FormData(form));
+  const lead = {
+    id: Date.now(),
+    name: String(data.nome || "").trim(),
+    company: String(data.empresa || "").trim() || "Não informado",
+    phone: formatPhone(data.telefone),
+    service: String(data.servico || "").trim(),
+    message: String(data.mensagem || "").trim() || "Sem mensagem",
+    status: "Novo",
+    source: "Site institucional",
+    createdAt: nowIso(),
+  };
+
+  state.leads.unshift(lead);
+  saveState();
+  renderLeads();
+  showToast("Lead salvo no painel.");
+}
+
+function buildContactWhatsappUrl(form) {
+  const data = Object.fromEntries(new FormData(form));
+  const message = [
+    "Olá, gostaria de solicitar um orçamento com a Multserv.",
+    data.nome ? `Nome: ${data.nome}` : "",
+    data.empresa ? `Empresa: ${data.empresa}` : "",
+    data.telefone ? `Telefone: ${formatPhone(data.telefone)}` : "",
+    data.servico ? `Serviço: ${data.servico}` : "",
+    data.mensagem ? `Mensagem: ${data.mensagem}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return `https://wa.me/5583998024125?text=${encodeURIComponent(message)}`;
 }
 
 function getSiteNavLinks() {
@@ -1286,6 +1383,9 @@ function setupForms() {
   document.querySelector("#frequencyStartDate").addEventListener("change", renderFrequency);
   document.querySelector("#frequencyEndDate").addEventListener("change", renderFrequency);
   document.querySelector("#frequencyTable").addEventListener("click", handleFrequencyTableAction);
+  document.querySelector("#leadSearch")?.addEventListener("input", renderLeads);
+  document.querySelector("#leadStatusFilter")?.addEventListener("change", renderLeads);
+  document.querySelector("#leadsTable")?.addEventListener("click", handleLeadAction);
   document.querySelector("#exportFrequencyPdf").addEventListener("click", () => {
     showToast("Relatório em PDF preparado para exportação.");
   });
@@ -1324,8 +1424,8 @@ function setupForms() {
       return;
     }
 
-    if (onlyDigits(data.phone).length < 10) {
-      showToast("Informe um telefone com DDD.");
+    if (!isValidBrazilMobilePhone(data.phone)) {
+      showToast("Informe DDD + celular com 9 dígitos. Exemplo: (83) 99999-9999.");
       return;
     }
 
@@ -2897,6 +2997,11 @@ function formatPhone(value) {
   return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
 }
 
+function isValidBrazilMobilePhone(value) {
+  const digits = onlyDigits(value);
+  return digits.length === 11 && digits[2] === "9";
+}
+
 function generateNextEmployeeRegistration() {
   const highestNumber = state.employees.reduce((highest, employee) => {
     const match = String(employee.registration || "").match(/^MS-(\d+)$/i);
@@ -2992,6 +3097,7 @@ function renderAll() {
   renderFrequency();
   renderCertificates();
   renderCalendar();
+  renderLeads();
   renderUsers();
   renderMailbox();
 }
@@ -3599,6 +3705,19 @@ function getFrequencyRange() {
     };
   }
 
+  if (periodValue === "30") {
+    const now = new Date();
+    const start = toDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
+    const end = toDateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+
+    return {
+      start,
+      end,
+      days: countDateRangeDays(start, end),
+      label: "Mês atual",
+    };
+  }
+
   const days = Number(periodValue) || 7;
   const start = nextDate(-(days - 1));
   return {
@@ -4168,6 +4287,110 @@ function groupCalendarActivities() {
   return groups;
 }
 
+function renderLeads() {
+  const leadsTable = document.querySelector("#leadsTable");
+  if (!leadsTable) return;
+
+  const leads = getFilteredLeads();
+  document.querySelector("#leadsCount").textContent = `${leads.length} lead${
+    leads.length === 1 ? "" : "s"
+  }`;
+
+  if (!leads.length) {
+    leadsTable.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <article class="empty-state">Nenhum lead encontrado.</article>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  leadsTable.innerHTML = leads
+    .map(
+      (lead) => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(lead.name || "Sem nome")}</strong><br>
+            <small>${escapeHtml(lead.company || "Não informado")}</small>
+          </td>
+          <td>${escapeHtml(lead.phone || "-")}</td>
+          <td>${escapeHtml(lead.service || "-")}</td>
+          <td class="lead-message-cell">${escapeHtml(lead.message || "Sem mensagem")}</td>
+          <td><span class="badge ${leadStatusClass(lead.status)}">${escapeHtml(lead.status)}</span></td>
+          <td>${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</td>
+          <td>
+            <div class="user-actions">
+              <button type="button" data-lead-action="progress" data-lead-id="${lead.id}">
+                Atender
+              </button>
+              <button type="button" data-lead-action="convert" data-lead-id="${lead.id}">
+                Converter
+              </button>
+              <button type="button" data-lead-action="delete" data-lead-id="${lead.id}">
+                Excluir
+              </button>
+            </div>
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+function getFilteredLeads() {
+  const search = normalizeText(document.querySelector("#leadSearch")?.value || "");
+  const status = document.querySelector("#leadStatusFilter")?.value || "all";
+
+  return state.leads
+    .filter((lead) => status === "all" || lead.status === status)
+    .filter((lead) =>
+      normalizeText(
+        [lead.name, lead.company, lead.phone, lead.service, lead.message, lead.status].join(" "),
+      ).includes(search),
+    )
+    .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+}
+
+function handleLeadAction(event) {
+  const button = event.target.closest("[data-lead-action]");
+  if (!button || !isSuperAdmin()) return;
+
+  const lead = state.leads.find((item) => String(item.id) === button.dataset.leadId);
+  if (!lead) return;
+
+  if (button.dataset.leadAction === "progress") {
+    lead.status = "Em atendimento";
+    lead.updatedAt = nowIso();
+    showToast("Lead marcado em atendimento.");
+  }
+
+  if (button.dataset.leadAction === "convert") {
+    lead.status = "Convertido";
+    lead.updatedAt = nowIso();
+    showToast("Lead marcado como convertido.");
+  }
+
+  if (button.dataset.leadAction === "delete") {
+    state.leads = state.leads.filter((item) => item.id !== lead.id);
+    showToast("Lead removido.");
+  }
+
+  saveState();
+  renderLeads();
+}
+
+function leadStatusClass(status) {
+  const statusClasses = {
+    Novo: "manual",
+    "Em atendimento": "warning",
+    Convertido: "active",
+  };
+
+  return statusClasses[status] || "manual";
+}
+
 function eachDateBetween(start, end) {
   const dates = [];
   const current = new Date(`${start}T12:00:00`);
@@ -4529,6 +4752,7 @@ function ensureStateShape(savedState) {
   nextState.users = Array.isArray(savedState.users) ? savedState.users : structuredClone(initialUsers);
   nextState.resetTokens = Array.isArray(savedState.resetTokens) ? savedState.resetTokens : [];
   nextState.mailbox = Array.isArray(savedState.mailbox) ? savedState.mailbox : [];
+  nextState.leads = Array.isArray(savedState.leads) ? savedState.leads : [];
   nextState.security = savedState.security || { loginAttempts: {} };
   nextState.security.loginAttempts = nextState.security.loginAttempts || {};
   nextState.checkinAttempts = Array.isArray(savedState.checkinAttempts)

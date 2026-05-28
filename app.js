@@ -3160,15 +3160,15 @@ function renderEmployees() {
     .map(
       (employee) => `
         <tr>
-          <td>
+          <td data-label="Funcionário">
             <strong>${escapeHtml(employee.name)}</strong><br>
             <small>${escapeHtml(employee.cpf)} · ${escapeHtml(employee.registration)}</small>
           </td>
-          <td>${escapeHtml(employee.role)}</td>
-          <td>${escapeHtml(employee.client)}</td>
-          <td><span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span></td>
-          <td>${escapeHtml(employee.phone)}</td>
-          <td>
+          <td data-label="Cargo">${escapeHtml(employee.role)}</td>
+          <td data-label="Empreendimento">${escapeHtml(employee.client)}</td>
+          <td data-label="Status"><span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span></td>
+          <td data-label="Telefone">${escapeHtml(employee.phone)}</td>
+          <td data-label="Ações">
             <div class="employee-actions" aria-label="Ações de ${escapeHtml(employee.name)}">
               <button
                 class="icon-action-button"
@@ -3404,8 +3404,8 @@ function renderBrandAdmin() {
       .map(
         (brand, index) => `
           <tr>
-            <td><strong>${index + 1}</strong></td>
-            <td>
+            <td data-label="Ordem"><strong>${index + 1}</strong></td>
+            <td data-label="Marca">
               <div class="brand-table-logo">
                 ${renderBrandVisual(brand)}
                 <div>
@@ -3414,7 +3414,7 @@ function renderBrandAdmin() {
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Link">
               ${
                 brand.website
                   ? `<a class="inline-link" href="${escapeHtml(
@@ -3423,12 +3423,12 @@ function renderBrandAdmin() {
                   : `<span class="muted-text">Sem link</span>`
               }
             </td>
-            <td>
+            <td data-label="Status">
               <span class="badge ${brand.active ? "active" : "danger"}">
                 ${brand.active ? "Ativa" : "Inativa"}
               </span>
             </td>
-            <td>
+            <td data-label="Ações">
               <div class="brand-actions">
                 <button type="button" data-brand-action="up" data-brand-id="${brand.id}" ${
                   index === 0 ? "disabled" : ""
@@ -3575,18 +3575,18 @@ function renderTimeAudit() {
         .map(
           (attempt) => `
             <tr>
-              <td>
+              <td data-label="Funcionário">
                 <strong>${escapeHtml(attempt.employee)}</strong><br>
                 <small>${escapeHtml(attempt.cpf || "CPF não informado")}</small>
               </td>
-              <td>
+              <td data-label="Empreendimento">
                 ${escapeHtml(attempt.client)}<br>
                 <small>${escapeHtml(attempt.qrCodeId || "Sem QR")}</small>
               </td>
-              <td>${escapeHtml(attempt.type || "-")}</td>
-              <td>${formatMeters(attempt.distanceMeters)}</td>
-              <td>${formatMeters(attempt.accuracyMeters)}</td>
-              <td>
+              <td data-label="Tipo">${escapeHtml(attempt.type || "-")}</td>
+              <td data-label="Distância">${formatMeters(attempt.distanceMeters)}</td>
+              <td data-label="Precisão">${formatMeters(attempt.accuracyMeters)}</td>
+              <td data-label="Status">
                 <span class="badge ${attempt.status === "Aprovado" ? "active" : "danger"}">
                   ${escapeHtml(attempt.status)}
                 </span><br>
@@ -3983,19 +3983,19 @@ function renderFrequencyTable(records, range) {
         .map(
           (record) => `
             <tr>
-              <td>
+              <td data-label="Funcionário">
                 <strong>${escapeHtml(record.employee.name)}</strong><br>
                 <small>${escapeHtml(record.employee.cpf)} · ${escapeHtml(record.employee.role)}</small>
               </td>
-              <td>${escapeHtml(record.employee.client)}</td>
-              <td>
+              <td data-label="Empreendimento">${escapeHtml(record.employee.client)}</td>
+              <td data-label="Status">
                 <span class="presence-status ${record.statusKey}">
                   <i></i>${escapeHtml(record.statusLabel)}
                 </span>
               </td>
-              <td>${record.periodPoints.length}</td>
-              <td>${renderLatestFrequencyPoint(record.latestPoint)}</td>
-              <td>
+              <td data-label="Registros">${record.periodPoints.length}</td>
+              <td data-label="Último registro">${renderLatestFrequencyPoint(record.latestPoint)}</td>
+              <td data-label="Ações">
                 <button
                   class="table-action-button"
                   type="button"
@@ -4311,16 +4311,16 @@ function renderLeads() {
     .map(
       (lead) => `
         <tr>
-          <td>
+          <td data-label="Lead">
             <strong>${escapeHtml(lead.name || "Sem nome")}</strong><br>
             <small>${escapeHtml(lead.company || "Não informado")}</small>
           </td>
-          <td>${escapeHtml(lead.phone || "-")}</td>
-          <td>${escapeHtml(lead.service || "-")}</td>
-          <td class="lead-message-cell">${escapeHtml(lead.message || "Sem mensagem")}</td>
-          <td><span class="badge ${leadStatusClass(lead.status)}">${escapeHtml(lead.status)}</span></td>
-          <td>${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</td>
-          <td>
+          <td data-label="Telefone">${escapeHtml(lead.phone || "-")}</td>
+          <td data-label="Serviço">${escapeHtml(lead.service || "-")}</td>
+          <td class="lead-message-cell" data-label="Mensagem">${escapeHtml(lead.message || "Sem mensagem")}</td>
+          <td data-label="Status"><span class="badge ${leadStatusClass(lead.status)}">${escapeHtml(lead.status)}</span></td>
+          <td data-label="Data">${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</td>
+          <td data-label="Ações">
             <div class="user-actions">
               <button type="button" data-lead-action="progress" data-lead-id="${lead.id}">
                 Atender
@@ -4420,16 +4420,16 @@ function renderUsers() {
     .map(
       (user) => `
         <tr>
-          <td>
+          <td data-label="Usuário">
             <strong>${escapeHtml(user.name)}</strong><br>
             <small>${escapeHtml(user.email)}</small>
           </td>
-          <td>${escapeHtml(user.role)}</td>
-          <td><span class="badge ${user.status === "Ativo" ? "active" : "danger"}">${
+          <td data-label="Perfil">${escapeHtml(user.role)}</td>
+          <td data-label="Status"><span class="badge ${user.status === "Ativo" ? "active" : "danger"}">${
             user.status
           }</span></td>
-          <td>${user.lastLoginAt ? formatDateTime(user.lastLoginAt) : "Nunca acessou"}</td>
-          <td>
+          <td data-label="Último acesso">${user.lastLoginAt ? formatDateTime(user.lastLoginAt) : "Nunca acessou"}</td>
+          <td data-label="Ações">
             <div class="user-actions">
               <button type="button" data-user-action="reset" data-user-id="${user.id}">
                 Redefinir

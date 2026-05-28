@@ -899,7 +899,13 @@
 
         <section class="app-view" data-panel="clients">
           <div class="toolbar">
-            <h2>Empreendimentos cadastrados</h2>
+            <div>
+              <p class="eyebrow">Postos de trabalho</p>
+              <h2>Empreendimentos cadastrados</h2>
+            </div>
+            <button class="button button-primary" type="button" id="openClientForm">
+              Novo empreendimento
+            </button>
           </div>
           <div class="client-grid" id="clientGrid"></div>
         </section>
@@ -1310,6 +1316,27 @@
           </section>
         </section>
 
+        <dialog class="modal calendar-day-modal" id="calendarDayModal">
+          <div class="modal-content calendar-day-modal-content">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Agenda do dia</p>
+                <h2 id="calendarDayModalTitle">Registros do dia</h2>
+                <span id="calendarDayModalSubtitle">Atividades cadastradas</span>
+              </div>
+              <button
+                class="close-button"
+                type="button"
+                id="closeCalendarDayModal"
+                aria-label="Fechar registros do dia"
+              >
+                ×
+              </button>
+            </div>
+            <div class="calendar-modal-list" id="calendarDayModalList"></div>
+          </div>
+        </dialog>
+
         <section class="app-view admin-only" data-panel="settings">
           <section class="workspace-panel">
             <div class="panel-heading">
@@ -1542,6 +1569,120 @@
       </button>
       <nav class="mobile-footer-nav" id="mobileFooterNav" aria-label="Atalhos principais"></nav>
     </section>
+
+    <dialog class="modal" id="clientModal">
+      <form class="modal-content" id="clientForm" method="dialog" novalidate>
+        <div class="panel-heading">
+          <div>
+            <h2 id="clientFormTitle">Novo empreendimento</h2>
+            <span>Cadastro do posto de trabalho e coordenadas para ponto</span>
+          </div>
+          <button class="close-button" type="button" id="closeClientForm" aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div class="form-row">
+          <label>
+            Nome do empreendimento
+            <input name="name" required placeholder="Condomínio Atlântico" />
+          </label>
+          <label>
+            Código
+            <input name="code" required readonly placeholder="EMP-001" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            Tipo
+            <select name="type">
+              <option>Empresa</option>
+              <option>Condomínio</option>
+              <option>Evento</option>
+              <option>Hospital</option>
+              <option>Outro</option>
+            </select>
+          </label>
+          <label>
+            Supervisor responsável
+            <input name="manager" required placeholder="Nome do supervisor" />
+          </label>
+        </div>
+        <label>
+          Endereço
+          <input name="address" required placeholder="Rua, bairro, cidade - UF" />
+        </label>
+        <div class="form-row">
+          <label>
+            Latitude
+            <input name="latitude" required type="number" step="any" placeholder="-7.11532" />
+          </label>
+          <label>
+            Longitude
+            <input name="longitude" required type="number" step="any" placeholder="-34.86101" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            Raio permitido para ponto
+            <input name="allowedRadiusMeters" required type="number" min="20" max="100" step="1" />
+          </label>
+          <label>
+            Equipe ativa
+            <input name="activeEmployees" required type="number" min="0" step="1" />
+          </label>
+        </div>
+        <label>
+          Status
+          <select name="active">
+            <option value="true">Ativo</option>
+            <option value="false">Inativo</option>
+          </select>
+        </label>
+        <div class="form-message" id="clientFormMessage" hidden></div>
+        <button class="button button-primary" type="submit" id="clientFormSubmit">
+          Cadastrar empreendimento
+        </button>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="deleteClientModal">
+      <form class="modal-content delete-modal-content" id="deleteClientForm" method="dialog">
+        <div class="panel-heading">
+          <div>
+            <h2>Excluir empreendimento</h2>
+            <span>Validação de segurança do cadastro</span>
+          </div>
+          <button class="close-button" type="button" id="closeDeleteClient" aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div class="delete-warning">
+          <strong id="deleteClientName">Empreendimento</strong>
+          <p>
+            Tem certeza que deseja excluir esse empreendimento? O QR Code vinculado também será
+            removido se não houver registros operacionais associados.
+          </p>
+        </div>
+        <label>
+          Para confirmar, digite excluir
+          <input
+            id="deleteClientConfirmation"
+            type="text"
+            autocomplete="off"
+            placeholder="excluir"
+          />
+        </label>
+        <div class="form-message" id="deleteClientMessage" hidden></div>
+        <div class="modal-actions">
+          <button class="button button-secondary" type="button" id="cancelDeleteClient">
+            Cancelar
+          </button>
+          <button class="button button-danger" type="submit" id="confirmDeleteClient" disabled>
+            Excluir empreendimento
+          </button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog class="modal" id="employeeModal">
       <form class="modal-content" id="employeeForm" method="dialog">

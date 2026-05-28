@@ -340,6 +340,9 @@ let calendarCursor = new Date();
 let employeeFormMode = "create";
 let editingEmployeeId = null;
 let pendingDeleteEmployeeId = null;
+let clientFormMode = "create";
+let editingClientId = null;
+let pendingDeleteClientId = null;
 let expandedFrequencyEmployeeId = null;
 let checkinSession = {
   employee: null,
@@ -365,7 +368,10 @@ const loginForm = document.querySelector("#loginForm");
 const employeeModal = document.querySelector("#employeeModal");
 const employeeDetailModal = document.querySelector("#employeeDetailModal");
 const deleteEmployeeModal = document.querySelector("#deleteEmployeeModal");
+const clientModal = document.querySelector("#clientModal");
+const deleteClientModal = document.querySelector("#deleteClientModal");
 const checkinModal = document.querySelector("#checkinModal");
+const calendarDayModal = document.querySelector("#calendarDayModal");
 
 document.addEventListener("DOMContentLoaded", () => {
   saveState();
@@ -1195,6 +1201,41 @@ function setupBrandManagement() {
 }
 
 function setupForms() {
+  document.querySelector("#openClientForm").addEventListener("click", () => {
+    prepareClientForm();
+    clientModal.showModal();
+  });
+
+  document.querySelector("#closeClientForm").addEventListener("click", () => {
+    clientModal.close();
+  });
+
+  document.querySelector("#clientGrid").addEventListener("click", handleClientCardAction);
+
+  document.querySelector("#clientForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveClientFromForm();
+  });
+
+  document.querySelector("#closeDeleteClient").addEventListener("click", () => {
+    closeDeleteClientModal();
+  });
+
+  document.querySelector("#cancelDeleteClient").addEventListener("click", () => {
+    closeDeleteClientModal();
+  });
+
+  document.querySelector("#deleteClientConfirmation").addEventListener("input", (event) => {
+    document.querySelector("#confirmDeleteClient").disabled =
+      normalizeDeleteConfirmation(event.target.value) !== "excluir";
+    clearFormMessage("#deleteClientMessage");
+  });
+
+  document.querySelector("#deleteClientForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    confirmClientDeletion();
+  });
+
   document.querySelector("#openEmployeeForm").addEventListener("click", () => {
     prepareEmployeeForm();
     employeeModal.showModal();
@@ -1260,6 +1301,13 @@ function setupForms() {
   document.querySelector("#nextMonth").addEventListener("click", () => {
     calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1);
     renderCalendar();
+  });
+  document.querySelector("#calendarGrid").addEventListener("click", handleCalendarDayClick);
+  document.querySelector("#closeCalendarDayModal").addEventListener("click", () => {
+    calendarDayModal.close();
+  });
+  calendarDayModal.addEventListener("click", (event) => {
+    if (event.target === calendarDayModal) calendarDayModal.close();
   });
 
   document.querySelector("#employeeForm").addEventListener("submit", (event) => {
@@ -2149,6 +2197,229 @@ function setupEmployeeMasks() {
   });
 }
 
+function handleClientCardAction(event) {
+  const button = event.target.closest("[data-client-action]");
+  if (!button) return;
+
+  const clientId = Number(button.dataset.clientId);
+  const action = button.dataset.clientAction;
+
+  if (action === "edit") {
+    openClientEditor(clientId);
+    return;
+  }
+
+  if (action === "delete") {
+    openDeleteClientModal(clientId);
+  }
+}
+
+function prepareClientForm(client = null) {
+  const form = document.querySelector("#clientForm");
+  form.reset();
+  clientFormMode = client ? "edit" : "create";
+  editingClientId = client?.id ?? null;
+  document.querySelector("#clientFormTitle").textContent = client
+    ? "Editar empreendimento"
+    : "Novo empreendimento";
+  document.querySelector("#clientFormSubmit").textContent = client
+    ? "Salvar alterações"
+    : "Cadastrar empreendimento";
+  clearFormMessage("#clientFormMessage");
+
+  if (!client) {
+    form.elements.code.value = generateNextClientCode();
+    form.elements.allowedRadiusMeters.value = checkinRules.defaultRadiusMeters;
+    form.elements.activeEmployees.value = 0;
+    form.elements.active.value = "true";
+    return;
+  }
+
+  form.elements.name.value = client.name;
+  form.elements.code.value = client.code || generateNextClientCode();
+  form.elements.type.value = client.type || "Empresa";
+  form.elements.manager.value = client.manager || "";
+  form.elements.address.value = client.address || "";
+  form.elements.latitude.value = getClientCoordinates(client)?.lat ?? "";
+  form.elements.longitude.value = getClientCoordinates(client)?.lng ?? "";
+  form.elements.allowedRadiusMeters.value = getClientAllowedRadius(client);
+  form.elements.activeEmployees.value = Number(client.activeEmployees || 0);
+  form.elements.active.value = String(client.active !== false);
+}
+
+function saveClientFromForm() {
+  const form = document.querySelector("#clientForm");
+  const data = Object.fromEntries(new FormData(form));
+  const wasEditing = clientFormMode === "edit";
+  const existingClient = wasEditing ? findClientById(editingClientId) : null;
+  const oldName = existingClient?.name || "";
+  const oldCode = existingClient?.code || "";
+  const parsedClient = parseClientFormData(data, existingClient?.id);
+
+  if (!parsedClient.valid) {
+    setFormMessage("#clientFormMessage", parsedClient.message, "error");
+    return;
+  }
+
+  if (wasEditing && !existingClient) {
+    setFormMessage("#clientFormMessage", "Empreendimento não encontrado para edição.", "error");
+    return;
+  }
+
+  if (wasEditing) {
+    Object.assign(existingClient, parsedClient.client);
+    updateClientReferences(oldName, existingClient.name, oldCode, existingClient.code);
+    syncQrCodeForClient(existingClient, { oldName, oldCode });
+  } else {
+    const client = {
+      id: Date.now(),
+      ...parsedClient.client,
+    };
+    state.clients.unshift(client);
+    syncQrCodeForClient(client);
+  }
+
+  saveState();
+  clientModal.close();
+  clientFormMode = "create";
+  editingClientId = null;
+  renderAll();
+  showToast(
+    wasEditing
+      ? "Empreendimento atualizado com sucesso."
+      : "Empreendimento cadastrado com sucesso.",
+  );
+}
+
+function parseClientFormData(data, currentClientId = null) {
+  const name = String(data.name || "").trim();
+  const code = String(data.code || generateNextClientCode()).trim().toUpperCase();
+  const type = String(data.type || "Empresa").trim();
+  const address = String(data.address || "").trim();
+  const manager = String(data.manager || "").trim();
+  const latitude = Number(data.latitude);
+  const longitude = Number(data.longitude);
+  const activeEmployees = Math.max(0, Math.round(Number(data.activeEmployees || 0)));
+  const allowedRadiusMeters = getSafeCheckinRadius(data.allowedRadiusMeters);
+  const active = data.active === "true";
+
+  if (!name || !address || !manager) {
+    return { valid: false, message: "Preencha nome, endereço e supervisor responsável." };
+  }
+
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+    return { valid: false, message: "Informe uma latitude válida entre -90 e 90." };
+  }
+
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    return { valid: false, message: "Informe uma longitude válida entre -180 e 180." };
+  }
+
+  const duplicatedName = state.clients.some(
+    (client) =>
+      Number(client.id) !== Number(currentClientId) &&
+      normalizeText(client.name) === normalizeText(name),
+  );
+  if (duplicatedName) {
+    return { valid: false, message: "Já existe um empreendimento com esse nome." };
+  }
+
+  const duplicatedCode = state.clients.some(
+    (client) =>
+      Number(client.id) !== Number(currentClientId) &&
+      String(client.code || "").toUpperCase() === code,
+  );
+  if (duplicatedCode) {
+    return { valid: false, message: "Já existe um empreendimento com esse código." };
+  }
+
+  return {
+    valid: true,
+    client: {
+      code,
+      name,
+      type,
+      address,
+      manager,
+      activeEmployees,
+      coordinates: { lat: latitude, lng: longitude },
+      allowedRadiusMeters,
+      active,
+    },
+  };
+}
+
+function openClientEditor(clientId) {
+  const client = findClientById(clientId);
+  if (!client) {
+    showToast("Empreendimento não encontrado para edição.");
+    return;
+  }
+
+  prepareClientForm(client);
+  clientModal.showModal();
+}
+
+function openDeleteClientModal(clientId) {
+  const client = findClientById(clientId);
+  if (!client) {
+    showToast("Empreendimento não encontrado para exclusão.");
+    return;
+  }
+
+  pendingDeleteClientId = clientId;
+  document.querySelector("#deleteClientName").textContent = client.name;
+  document.querySelector("#deleteClientConfirmation").value = "";
+  document.querySelector("#confirmDeleteClient").disabled = true;
+  clearFormMessage("#deleteClientMessage");
+  deleteClientModal.showModal();
+}
+
+function closeDeleteClientModal() {
+  pendingDeleteClientId = null;
+  if (deleteClientModal.open) deleteClientModal.close();
+}
+
+function confirmClientDeletion() {
+  const confirmation = normalizeDeleteConfirmation(
+    document.querySelector("#deleteClientConfirmation").value,
+  );
+
+  if (confirmation !== "excluir") {
+    setFormMessage(
+      "#deleteClientMessage",
+      'Digite "excluir" para confirmar a remoção do empreendimento.',
+      "error",
+    );
+    return;
+  }
+
+  const client = findClientById(pendingDeleteClientId);
+  if (!client) {
+    setFormMessage("#deleteClientMessage", "Empreendimento não encontrado.", "error");
+    return;
+  }
+
+  const usage = getClientUsage(client);
+  if (usage.total > 0) {
+    setFormMessage(
+      "#deleteClientMessage",
+      `Este empreendimento possui ${usage.total} vínculo(s) operacional(is). Para preservar o histórico, edite o status para Inativo antes de remover vínculos.`,
+      "error",
+    );
+    return;
+  }
+
+  state.clients = state.clients.filter((item) => Number(item.id) !== Number(client.id));
+  state.qrCodes = state.qrCodes.filter(
+    (qrCode) => qrCode.clientCode !== client.code && qrCode.client !== client.name,
+  );
+  saveState();
+  closeDeleteClientModal();
+  renderAll();
+  showToast("Empreendimento excluído com sucesso.");
+}
+
 function handleEmployeeTableAction(event) {
   const button = event.target.closest("[data-employee-action]");
   if (!button) return;
@@ -2296,6 +2567,10 @@ function confirmEmployeeDeletion() {
 
 function findEmployeeById(employeeId) {
   return state.employees.find((employee) => Number(employee.id) === Number(employeeId));
+}
+
+function findClientById(clientId) {
+  return state.clients.find((client) => Number(client.id) === Number(clientId));
 }
 
 function findEmployeeByCpf(cpf) {
@@ -2492,6 +2767,76 @@ function updateEmployeeReferences(oldName, newName) {
   });
 }
 
+function updateClientReferences(oldName, newName, oldCode, newCode) {
+  if (oldName && oldName !== newName) {
+    state.employees.forEach((employee) => {
+      if (employee.client === oldName) employee.client = newName;
+    });
+
+    state.events.forEach((event) => {
+      if (event.client === oldName) event.client = newName;
+    });
+
+    state.points.forEach((point) => {
+      if (point.client === oldName) point.client = newName;
+    });
+
+    state.checkinAttempts.forEach((attempt) => {
+      if (attempt.client === oldName) attempt.client = newName;
+    });
+  }
+
+  state.qrCodes.forEach((qrCode) => {
+    if ((oldName && qrCode.client === oldName) || (oldCode && qrCode.clientCode === oldCode)) {
+      qrCode.client = newName;
+      qrCode.clientCode = newCode;
+    }
+  });
+}
+
+function syncQrCodeForClient(client, previous = {}) {
+  let qrCode =
+    state.qrCodes.find((item) => item.clientCode === client.code) ||
+    state.qrCodes.find((item) => previous.oldCode && item.clientCode === previous.oldCode) ||
+    state.qrCodes.find((item) => item.client === client.name) ||
+    state.qrCodes.find((item) => previous.oldName && item.client === previous.oldName);
+
+  if (!qrCode) {
+    qrCode = {
+      id: generateNextQrCodeId(),
+      companyId: "MS-MULTSERV",
+      createdAt: today(),
+    };
+    state.qrCodes.push(qrCode);
+  }
+
+  Object.assign(qrCode, {
+    clientCode: client.code,
+    client: client.name,
+    token: qrCode.token || `MS-QR-${client.code}-2026`,
+    description: qrCode.description || `QR físico de ${client.name}`,
+    active: client.active !== false,
+    updatedAt: nowIso(),
+  });
+}
+
+function getClientUsage(client) {
+  const employees = state.employees.filter((employee) => employee.client === client.name).length;
+  const events = state.events.filter((event) => event.client === client.name).length;
+  const points = state.points.filter((point) => point.client === client.name).length;
+  const attempts = state.checkinAttempts.filter(
+    (attempt) => attempt.client === client.name || attempt.clientCode === client.code,
+  ).length;
+
+  return {
+    employees,
+    events,
+    points,
+    attempts,
+    total: employees + events + points + attempts,
+  };
+}
+
 function removeEmployee(employee) {
   const employeeId = Number(employee.id);
   state.employees = state.employees.filter((item) => Number(item.id) !== employeeId);
@@ -2560,6 +2905,39 @@ function generateNextEmployeeRegistration() {
   }, 0);
 
   return `MS-${String(highestNumber + 1).padStart(3, "0")}`;
+}
+
+function generateNextClientCode() {
+  const highestNumber = state.clients.reduce((highest, client) => {
+    const match = String(client.code || "").match(/^EMP-(\d+)$/i);
+    if (!match) return highest;
+    return Math.max(highest, Number(match[1]));
+  }, 0);
+
+  return `EMP-${String(highestNumber + 1).padStart(3, "0")}`;
+}
+
+function generateNextQrCodeId() {
+  const highestNumber = state.qrCodes.reduce((highest, qrCode) => {
+    const match = String(qrCode.id || "").match(/^QR-LOCAL-(\d+)$/i);
+    if (!match) return highest;
+    return Math.max(highest, Number(match[1]));
+  }, 0);
+
+  return `QR-LOCAL-${String(highestNumber + 1).padStart(3, "0")}`;
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function formatCoordinate(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toFixed(6) : "-";
 }
 
 function capitalize(value) {
@@ -2764,18 +3142,51 @@ function getInitials(name) {
 function renderClients() {
   document.querySelector("#clientGrid").innerHTML = state.clients
     .map(
-      (client) => `
-        <article class="client-card">
-          <h3>${client.name}</h3>
-          <p>${client.type} · ${client.address}</p>
+      (client) => {
+        const coordinates = getClientCoordinates(client);
+        const qrCode = getQrCodeForClient(client);
+
+        return `
+        <article class="client-card ${client.active === false ? "inactive" : ""}">
+          <div class="client-card-header">
+            <div>
+              <h3>${escapeHtml(client.name)}</h3>
+              <p>${escapeHtml(client.type)} · ${escapeHtml(client.address)}</p>
+            </div>
+            <span class="badge ${client.active === false ? "danger" : "active"}">
+              ${client.active === false ? "Inativo" : "Ativo"}
+            </span>
+          </div>
           <dl>
-            <div><dt>Supervisor</dt><dd>${client.manager}</dd></div>
-            <div><dt>Equipe ativa</dt><dd>${client.activeEmployees}</dd></div>
+            <div><dt>Código</dt><dd>${escapeHtml(client.code || "-")}</dd></div>
+            <div><dt>Supervisor</dt><dd>${escapeHtml(client.manager || "-")}</dd></div>
+            <div><dt>Equipe ativa</dt><dd>${Number(client.activeEmployees || 0)}</dd></div>
             <div><dt>Raio de ponto</dt><dd>${getClientAllowedRadius(client)}m</dd></div>
-            <div><dt>QR Code</dt><dd>${escapeHtml(getQrCodeForClient(client)?.id || "Pendente")}</dd></div>
+            <div><dt>Latitude</dt><dd>${formatCoordinate(coordinates?.lat)}</dd></div>
+            <div><dt>Longitude</dt><dd>${formatCoordinate(coordinates?.lng)}</dd></div>
+            <div><dt>QR Code</dt><dd>${escapeHtml(qrCode?.id || "Pendente")}</dd></div>
           </dl>
+          <div class="client-card-actions">
+            <button
+              class="button button-secondary"
+              type="button"
+              data-client-action="edit"
+              data-client-id="${client.id}"
+            >
+              Editar
+            </button>
+            <button
+              class="button button-danger"
+              type="button"
+              data-client-action="delete"
+              data-client-id="${client.id}"
+            >
+              Excluir
+            </button>
+          </div>
         </article>
-      `,
+      `;
+      },
     )
     .join("");
 }
@@ -3626,42 +4037,96 @@ function renderCalendar() {
           .map((activity) => `${activity.label} - ${activity.title}`)
           .join(", ")}`
       : "Sem atividades";
-
-    return `
-      <article class="calendar-day ${activities.length ? "has-activity" : ""} ${
-        dateKey === todayKey ? "today" : ""
-      } ${activityClasses}" aria-label="${dayNumberInMonth} de ${escapeHtml(
-        document.querySelector("#calendarMonthTitle").textContent,
-      )}. ${escapeHtml(activityLabel)}">
-        <div class="calendar-day-head">
-          <strong>${dayNumberInMonth}</strong>
-          ${activities.length ? `<span>${activities.length}</span>` : ""}
-        </div>
-        ${
-          activities.length
-            ? `<div class="calendar-dots">${activityDots}${
-                extraCount > 0 ? `<small>+${extraCount}</small>` : ""
-              }</div>`
-            : ""
-        }
-        <div class="calendar-activities">
-          ${visibleActivities
-            .map(
-              (activity) => `
-                <div class="calendar-activity ${activity.kind}">
-                  <b>${activity.label}</b>
-                  <small>${activity.title}</small>
-                </div>
-              `,
-            )
-            .join("")}
-          ${extraCount > 0 ? `<em>+${extraCount} atividade(s)</em>` : ""}
-        </div>
-      </article>
+    const dayContent = `
+      <div class="calendar-day-head">
+        <strong>${dayNumberInMonth}</strong>
+        ${activities.length ? `<span>${activities.length}</span>` : ""}
+      </div>
+      ${
+        activities.length
+          ? `<div class="calendar-dots">${activityDots}${
+              extraCount > 0 ? `<small>+${extraCount}</small>` : ""
+            }</div>`
+          : ""
+      }
+      <div class="calendar-activities">
+        ${visibleActivities
+          .map(
+            (activity) => `
+              <div class="calendar-activity ${activity.kind}">
+                <b>${activity.label}</b>
+                <small>${activity.title}</small>
+              </div>
+            `,
+          )
+          .join("")}
+        ${extraCount > 0 ? `<em>+${extraCount} atividade(s)</em>` : ""}
+      </div>
     `;
+    const dayClass = `calendar-day ${activities.length ? "has-activity" : ""} ${
+      dateKey === todayKey ? "today" : ""
+    } ${activityClasses}`;
+    const accessibleLabel = `${dayNumberInMonth} de ${escapeHtml(
+      document.querySelector("#calendarMonthTitle").textContent,
+    )}. ${escapeHtml(activityLabel)}${
+      activities.length ? ". Toque para ver os registros do dia." : ""
+    }`;
+
+    if (activities.length) {
+      return `
+        <button
+          class="${dayClass}"
+          type="button"
+          data-calendar-date="${dateKey}"
+          aria-label="${accessibleLabel}"
+        >
+          ${dayContent}
+        </button>
+      `;
+    }
+
+    return `<article class="${dayClass}" aria-label="${accessibleLabel}">${dayContent}</article>`;
   }).join("");
 
   document.querySelector("#calendarGrid").innerHTML = header + cells;
+}
+
+function handleCalendarDayClick(event) {
+  const dayButton = event.target.closest("[data-calendar-date]");
+  if (!dayButton) return;
+  openCalendarDayModal(dayButton.dataset.calendarDate);
+}
+
+function openCalendarDayModal(dateKey) {
+  const activities = groupCalendarActivities()[dateKey] || [];
+  if (!activities.length) return;
+
+  const modalTitle = document.querySelector("#calendarDayModalTitle");
+  const modalSubtitle = document.querySelector("#calendarDayModalSubtitle");
+  const modalList = document.querySelector("#calendarDayModalList");
+  const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${dateKey}T12:00:00`));
+
+  modalTitle.textContent = capitalize(formattedDate);
+  modalSubtitle.textContent = `${activities.length} registro${
+    activities.length > 1 ? "s" : ""
+  } de ocorrência`;
+  modalList.innerHTML = activities
+    .map(
+      (activity) => `
+        <article class="calendar-modal-item ${activity.kind}">
+          <span>${escapeHtml(activity.label)}</span>
+          <strong>${escapeHtml(activity.title)}</strong>
+          <small>${escapeHtml(activity.detail || "Sem detalhes adicionais")}</small>
+        </article>
+      `,
+    )
+    .join("");
+  calendarDayModal.showModal();
 }
 
 function groupCalendarActivities() {
@@ -3869,10 +4334,10 @@ function populateSelects() {
   const selectedFrequencyEmployee = document.querySelector("#frequencyEmployee")?.value || "all";
   const selectedFrequencyClient = document.querySelector("#frequencyClient")?.value || "all";
   const clientOptions = state.clients
-    .map((client) => `<option value="${client.name}">${client.name}</option>`)
+    .map((client) => `<option value="${escapeHtml(client.name)}">${escapeHtml(client.name)}</option>`)
     .join("");
   const employeeOptions = state.employees
-    .map((employee) => `<option value="${employee.id}">${employee.name}</option>`)
+    .map((employee) => `<option value="${employee.id}">${escapeHtml(employee.name)}</option>`)
     .join("");
   const frequencyEmployeeOptions = [
     `<option value="all">Todos os funcionários</option>`,
@@ -4123,7 +4588,20 @@ function ensureStateShape(savedState) {
     if (seededClient?.coordinates && !client.coordinates) {
       client.coordinates = structuredClone(seededClient.coordinates);
     }
+    if (client.coordinates) {
+      client.coordinates = {
+        lat: Number(client.coordinates.lat),
+        lng: Number(client.coordinates.lng),
+      };
+    }
     client.code = client.code || seededClient?.code || `EMP-${String(client.id).padStart(3, "0")}`;
+    client.type = client.type || seededClient?.type || "Empresa";
+    client.address = client.address || seededClient?.address || "Endereço não informado";
+    client.manager = client.manager || seededClient?.manager || "Supervisor não informado";
+    client.activeEmployees = Number.isFinite(Number(client.activeEmployees))
+      ? Math.max(0, Math.round(Number(client.activeEmployees)))
+      : Number(seededClient?.activeEmployees || 0);
+    client.active = client.active !== false;
     client.allowedRadiusMeters = getSafeCheckinRadius(
       client.allowedRadiusMeters || seededClient?.allowedRadiusMeters,
     );

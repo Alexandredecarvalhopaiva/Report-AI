@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Previa da logo Report AI</title>
+    <style>
+      :root {
+        --algodao-cru: #f3e7d2;
+        --sombra-umbuzeiro: #3f4632;
+        --flor-seca: #d8c3a0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        gap: 32px;
+        padding: 48px;
+        color: var(--sombra-umbuzeiro);
+        background:
+          linear-gradient(90deg, rgba(63, 70, 50, 0.06) 1px, transparent 1px),
+          linear-gradient(rgba(63, 70, 50, 0.05) 1px, transparent 1px),
+          var(--algodao-cru);
+        background-size: 28px 28px;
+        font-family: Inter, Arial, sans-serif;
+      }
+
+      main {
+        display: grid;
+        justify-items: center;
+        gap: 28px;
+        width: min(100%, 980px);
+      }
+
+      .logo-main {
+        width: min(100%, 620px);
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img class="logo-main" src="assets/report-ai-logo.png" alt="Logo Report AI" />
+    </main>
+  </body>
+</html>

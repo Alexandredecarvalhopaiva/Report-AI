@@ -1,0 +1,50 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Report AI - simbolo cordel</title>
+  <desc id="desc">Selo compacto em estilo cordel com sol, algodao, mandacaru e iniciais AI.</desc>
+  <defs>
+    <pattern id="cuts" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+      <path d="M0 2H12" stroke="#3F4632" stroke-width="2.2" stroke-linecap="round" opacity=".24"/>
+    </pattern>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency=".018 .08" numOctaves="2" seed="18" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <clipPath id="clip">
+      <path d="M151 56C213 25 295 27 357 61C419 95 458 158 459 232C461 313 413 387 344 425C276 462 186 456 126 405C67 355 42 274 61 197C75 137 101 81 151 56Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="transparent"/>
+  <g filter="url(#rough)">
+    <path d="M151 56C213 25 295 27 357 61C419 95 458 158 459 232C461 313 413 387 344 425C276 462 186 456 126 405C67 355 42 274 61 197C75 137 101 81 151 56Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="16" stroke-linejoin="round"/>
+    <path d="M164 83C218 56 290 58 344 88C397 118 431 173 432 237C433 306 392 370 333 402C274 434 197 429 146 385C95 342 74 273 90 207C102 155 121 105 164 83Z" stroke="#A85F3A" stroke-width="8" stroke-linejoin="round"/>
+
+    <g clip-path="url(#clip)">
+      <path d="M39 330C117 289 183 292 253 327C326 364 391 347 480 296V515H39V330Z" fill="#D8C3A0"/>
+      <path d="M68 350C142 311 191 317 254 349C329 387 395 362 468 323" stroke="#3F4632" stroke-width="7" stroke-linecap="round"/>
+      <path d="M86 389C149 360 204 363 260 389C325 419 384 405 450 372" stroke="#3F4632" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+
+      <circle cx="293" cy="192" r="82" fill="#D88B2A"/>
+      <circle cx="293" cy="192" r="82" fill="url(#cuts)"/>
+      <path d="M293 74V117M293 267V315M187 192H141M446 192H400M214 113L180 80M372 271L405 305M372 113L405 80M214 271L180 305" stroke="#3F4632" stroke-width="10" stroke-linecap="round"/>
+
+      <path d="M164 346V187C164 148 190 118 222 118C254 118 281 148 281 187V346" stroke="#5F7446" stroke-width="24" stroke-linecap="round"/>
+      <path d="M164 249C129 249 113 222 113 193" stroke="#5F7446" stroke-width="20" stroke-linecap="round"/>
+      <path d="M281 234C319 234 338 204 338 170" stroke="#5F7446" stroke-width="20" stroke-linecap="round"/>
+      <path d="M164 346V187C164 148 190 118 222 118C254 118 281 148 281 187V346" stroke="#3F4632" stroke-width="5" stroke-linecap="round" opacity=".66"/>
+      <path d="M164 249C129 249 113 222 113 193" stroke="#3F4632" stroke-width="5" stroke-linecap="round" opacity=".66"/>
+      <path d="M281 234C319 234 338 204 338 170" stroke="#3F4632" stroke-width="5" stroke-linecap="round" opacity=".66"/>
+
+      <path d="M213 134C193 108 197 75 220 59C242 76 247 108 226 134H213Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M184 158C151 148 134 116 146 90C174 91 202 114 203 147L184 158Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M255 158C288 148 306 116 293 90C265 91 237 114 236 147L255 158Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M185 135C207 148 234 148 255 135" stroke="#3F4632" stroke-width="5" stroke-linecap="round"/>
+
+      <path d="M129 337H352C363 337 373 347 373 358V431H108V358C108 347 118 337 129 337Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="12" stroke-linejoin="round"/>
+      <text x="151" y="410" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="900" letter-spacing="0" fill="#3F4632">AI</text>
+      <path d="M344 337C318 366 318 401 344 431" stroke="#A85F3A" stroke-width="9" stroke-linecap="round"/>
+    </g>
+
+    <path d="M86 72L109 98L75 106L109 125L75 145L116 154L91 188L134 181L119 224L157 204L164 251L194 218L222 256L232 209L276 233L266 186L312 194L286 157L329 143L291 123L325 98L285 91L299 48L259 70L237 30L215 73L177 45L171 91L132 72Z" stroke="#3F4632" stroke-width="8" stroke-linejoin="round" opacity=".32"/>
+  </g>
+</svg>

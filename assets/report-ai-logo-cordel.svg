@@ -1,0 +1,86 @@
+<svg width="900" height="360" viewBox="0 0 900 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Report AI - logo em estilo cordel sertanejo</title>
+  <desc id="desc">Logo horizontal com selo em xilogravura, algodao, sol, mandacaru e tipografia inspirada em cordel.</desc>
+  <defs>
+    <pattern id="woodcut-diagonal" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+      <path d="M0 1H10" stroke="#3F4632" stroke-width="2" stroke-linecap="round" opacity=".26"/>
+    </pattern>
+    <pattern id="woodcut-fine" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)">
+      <path d="M0 1H8" stroke="#3F4632" stroke-width="1.35" stroke-linecap="round" opacity=".2"/>
+    </pattern>
+    <filter id="roughen" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency=".018 .08" numOctaves="2" seed="12" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <clipPath id="badge-clip">
+      <path d="M86 54C123 32 180 29 218 52C256 75 280 120 277 168C274 218 242 264 197 284C152 304 94 295 60 258C26 222 17 165 35 119C45 92 62 68 86 54Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="900" height="360" fill="transparent"/>
+
+  <g filter="url(#roughen)">
+    <path d="M86 54C123 32 180 29 218 52C256 75 280 120 277 168C274 218 242 264 197 284C152 304 94 295 60 258C26 222 17 165 35 119C45 92 62 68 86 54Z" fill="#F3E7D2"/>
+    <path d="M86 54C123 32 180 29 218 52C256 75 280 120 277 168C274 218 242 264 197 284C152 304 94 295 60 258C26 222 17 165 35 119C45 92 62 68 86 54Z" stroke="#3F4632" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M93 70C126 51 176 48 209 68C242 88 263 126 260 167C258 211 230 250 190 268C151 286 101 278 72 246C43 215 36 166 51 126C60 102 72 82 93 70Z" stroke="#A85F3A" stroke-width="4.5" stroke-linejoin="round"/>
+
+    <g clip-path="url(#badge-clip)">
+      <path d="M16 206C65 182 103 181 151 204C194 225 236 217 293 186V320H16V206Z" fill="#D8C3A0"/>
+      <path d="M31 218C78 194 109 198 151 218C197 240 242 223 285 199" stroke="#3F4632" stroke-width="4" stroke-linecap="round"/>
+      <path d="M34 242C78 222 113 222 151 239C195 258 238 246 276 226" stroke="#3F4632" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+      <path d="M57 264C95 250 125 252 159 265C190 277 225 270 260 253" stroke="#3F4632" stroke-width="2.5" stroke-linecap="round" opacity=".38"/>
+
+      <circle cx="169" cy="132" r="50" fill="#D88B2A"/>
+      <circle cx="169" cy="132" r="50" fill="url(#woodcut-diagonal)"/>
+      <path d="M169 56V83M169 181V210M102 132H73M265 132H237M120 83L100 63M219 181L239 201M219 83L239 63M120 181L100 201" stroke="#3F4632" stroke-width="6" stroke-linecap="round"/>
+
+      <path d="M84 211V124C84 101 101 83 120 83C140 83 157 101 157 124V211" stroke="#5F7446" stroke-width="14" stroke-linecap="round"/>
+      <path d="M84 160C64 160 55 145 55 128" stroke="#5F7446" stroke-width="12" stroke-linecap="round"/>
+      <path d="M157 150C181 150 192 132 192 111" stroke="#5F7446" stroke-width="12" stroke-linecap="round"/>
+      <path d="M84 211V124C84 101 101 83 120 83C140 83 157 101 157 124V211" stroke="#3F4632" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <path d="M84 160C64 160 55 145 55 128" stroke="#3F4632" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <path d="M157 150C181 150 192 132 192 111" stroke="#3F4632" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+
+      <path d="M116 94C104 78 106 57 120 46C133 57 136 78 124 94H116Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M99 109C79 103 69 83 76 67C93 68 110 82 111 102L99 109Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M141 109C161 103 171 83 164 67C147 68 130 82 129 102L141 109Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M100 94C112 101 127 101 140 94" stroke="#3F4632" stroke-width="3" stroke-linecap="round"/>
+
+      <path d="M80 225H204C210 225 216 231 216 238V279H68V238C68 231 74 225 80 225Z" fill="#F3E7D2" stroke="#3F4632" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M90 243H193M90 259H173" stroke="#3F4632" stroke-width="5" stroke-linecap="round"/>
+      <path d="M205 225C190 242 190 265 205 279" stroke="#A85F3A" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <path d="M64 46L76 62L57 68L75 79L57 91L79 96L65 114L89 111L81 134L102 124L104 150L121 132L136 153L141 127L165 140L159 114L184 118L170 98L193 90L173 78L191 64L169 61L177 38L155 50L144 29L132 52L111 37L108 61L86 46Z" stroke="#3F4632" stroke-width="4" stroke-linejoin="round" opacity=".34"/>
+  </g>
+
+  <g transform="translate(330 60)">
+    <path d="M8 22H520" stroke="#3F4632" stroke-width="7" stroke-linecap="round"/>
+    <path d="M8 44H360" stroke="#A85F3A" stroke-width="4" stroke-linecap="round"/>
+
+    <text x="0" y="126" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="900" letter-spacing="0" fill="#3F4632" stroke="#3F4632" stroke-width="1.4">
+      REPORT AI
+    </text>
+    <text x="3" y="126" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="900" letter-spacing="0" fill="#F3E7D2" stroke="#F3E7D2" stroke-width=".35" opacity=".23">
+      REPORT AI
+    </text>
+
+    <path d="M4 153H520" stroke="#3F4632" stroke-width="7" stroke-linecap="round"/>
+    <path d="M4 174H432" stroke="#5F7446" stroke-width="4" stroke-linecap="round"/>
+
+    <text x="4" y="224" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" letter-spacing="0" fill="#A85F3A">
+      RELATORIOS COM ALMA DO SERTAO
+    </text>
+
+    <g transform="translate(3 249)">
+      <path d="M0 0H505" stroke="#3F4632" stroke-width="3" stroke-linecap="round"/>
+      <path d="M0 16H505" stroke="#3F4632" stroke-width="3" stroke-linecap="round"/>
+      <path d="M16 0L0 16M48 0L32 16M80 0L64 16M112 0L96 16M144 0L128 16M176 0L160 16M208 0L192 16M240 0L224 16M272 0L256 16M304 0L288 16M336 0L320 16M368 0L352 16M400 0L384 16M432 0L416 16M464 0L448 16M496 0L480 16" stroke="#D88B2A" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <path d="M496 100C515 100 531 116 531 135C531 154 515 170 496 170C477 170 461 154 461 135C461 116 477 100 496 100Z" fill="#D88B2A" stroke="#3F4632" stroke-width="6"/>
+    <path d="M479 131H514M479 142H506" stroke="#3F4632" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M496 108V122M496 149V162M466 135H478M514 135H526" stroke="#3F4632" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M463 135C476 127 490 126 505 133C516 138 524 137 531 131" stroke="#F3E7D2" stroke-width="3.5" stroke-linecap="round" opacity=".85"/>
+  </g>
+</svg>

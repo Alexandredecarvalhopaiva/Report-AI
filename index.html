@@ -51,7 +51,7 @@
       content="https://alexandredecarvalhopaiva.github.io/Saas---Ms/assets/og-image-whatsapp.jpg"
     />
     <link rel="icon" href="assets/ms-logo-mark.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260527-qr-ponto" />
+    <link rel="stylesheet" href="styles.css?v=20260603-report-ai-2" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -794,9 +794,9 @@
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-alert"></use></svg>
               <span class="nav-text">Faltas</span>
             </button>
-            <button type="button" data-view="reports" data-label="Relatórios" data-short-label="Relatórios">
+            <button type="button" data-view="reports" data-label="Acesse Report AI" data-short-label="Report AI">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-report"></use></svg>
-              <span class="nav-text">Relatórios</span>
+              <span class="nav-text">Report AI</span>
             </button>
             <button class="admin-only" type="button" data-view="leads" data-label="Leads" data-short-label="Leads">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-message"></use></svg>
@@ -1225,37 +1225,382 @@
         </section>
 
         <section class="app-view" data-panel="reports">
-          <div class="app-columns">
-            <section class="workspace-panel">
-              <div class="panel-heading">
-                <h2>Relatórios por período</h2>
-                <span>PDF e Excel</span>
+          <div class="report-ai-shell">
+            <section class="report-ai-hero">
+              <div>
+                <p class="eyebrow">Acesse Report AI</p>
+                <h2>Gerador inteligente de relatórios operacionais para eventos</h2>
+                <p>
+                  Consolide dashboard, anexos, dados de acesso e auditoria automática em uma
+                  entrega executiva pronta para produtor, revisor e cliente.
+                </p>
               </div>
-              <div class="quick-status-grid">
-                <article>
-                  <strong>Frequência mensal</strong>
-                  <p>Resumo de presença, atrasos, faltas e justificativas por funcionário.</p>
-                </article>
-                <article>
-                  <strong>Operação por cliente</strong>
-                  <p>Visão por empreendimento com quantidade de funcionários e ocorrências.</p>
-                </article>
-                <article>
-                  <strong>Auditoria de ponto</strong>
-                  <p>Histórico de check-ins, localização, tentativas inválidas e ajustes manuais.</p>
-                </article>
+              <div class="report-score-card" aria-label="Score de confiabilidade do relatório">
+                <span>Score</span>
+                <strong id="reportAiHeroScore">0,0</strong>
+                <small id="reportAiHeroStatus">Rascunho</small>
               </div>
             </section>
-            <section class="workspace-panel">
-              <div class="panel-heading">
-                <h2>Exportações rápidas</h2>
-                <span>Protótipo</span>
+
+            <div class="dashboard-grid dashboard-grid-compact report-ai-metrics" id="reportAiCards"></div>
+
+            <nav class="report-step-tabs" aria-label="Fluxo do Acesse Report AI">
+              <button class="active" type="button" data-report-screen="events">Eventos</button>
+              <button type="button" data-report-screen="event">Cadastro</button>
+              <button type="button" data-report-screen="uploads">Uploads</button>
+              <button type="button" data-report-screen="extraction">Dados</button>
+              <button type="button" data-report-screen="audit">Auditoria</button>
+              <button type="button" data-report-screen="generation">Geração</button>
+              <button type="button" data-report-screen="versions">Versões</button>
+            </nav>
+
+            <section class="report-screen active" data-report-panel="events">
+              <div class="app-columns">
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <div>
+                      <h2>Eventos com relatório</h2>
+                      <span id="reportAiEventCount">0 eventos</span>
+                    </div>
+                    <button class="button button-primary" type="button" id="startNewReportEvent">
+                      Novo relatório
+                    </button>
+                  </div>
+                  <div class="report-event-list" id="reportAiEventList"></div>
+                </section>
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <h2>Pipeline do MVP</h2>
+                    <span>7 telas principais</span>
+                  </div>
+                  <div class="report-workflow">
+                    <article><strong>1</strong><span>Login com Gmail e perfis de acesso</span></article>
+                    <article><strong>2</strong><span>Lista de eventos e status de entrega</span></article>
+                    <article><strong>3</strong><span>Cadastro operacional do evento</span></article>
+                    <article><strong>4</strong><span>Upload de PDF, imagem, CSV ou XLSX</span></article>
+                    <article><strong>5</strong><span>Prévia dos indicadores extraídos</span></article>
+                    <article><strong>6</strong><span>Auditoria com nota de confiabilidade</span></article>
+                    <article><strong>7</strong><span>Geração e exportação versionada</span></article>
+                  </div>
+                </section>
               </div>
-              <div class="stack-form">
-                <button class="button button-secondary" type="button">Relatório semanal</button>
-                <button class="button button-secondary" type="button">Relatório mensal</button>
-                <button class="button button-secondary" type="button">Relatório por cliente</button>
+            </section>
+
+            <section class="report-screen" data-report-panel="event">
+              <section class="workspace-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Cadastro do evento</h2>
+                    <span>Identificação, período e operação</span>
+                  </div>
+                  <span class="badge active" id="reportSelectedEventBadge">Evento selecionado</span>
+                </div>
+                <form class="stack-form" id="reportAiEventForm">
+                  <input name="id" type="hidden" />
+                  <div class="form-row">
+                    <label>
+                      Nome do evento
+                      <input name="eventName" required placeholder="Pré-Junino" />
+                    </label>
+                    <label>
+                      Cliente/contratante
+                      <input name="clientName" required placeholder="Produtor ou contratante" />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Empresa responsável
+                      <input name="companyName" required placeholder="Acesse Tecnologia Operacional" />
+                    </label>
+                    <label>
+                      CNPJ da empresa
+                      <input name="cnpj" placeholder="00.000.000/0001-00" />
+                    </label>
+                  </div>
+                  <label>
+                    Local
+                    <input name="location" required placeholder="Local do evento" />
+                  </label>
+                  <div class="form-row">
+                    <label>
+                      Data inicial
+                      <input name="startDate" type="date" required />
+                    </label>
+                    <label>
+                      Data final
+                      <input name="endDate" type="date" required />
+                    </label>
+                    <label>
+                      Quantidade de dias
+                      <input name="days" type="number" min="1" step="1" required />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Agendas vinculadas
+                      <input name="agendas" placeholder="Geral, VIP, Equipe" />
+                    </label>
+                    <label>
+                      Portões utilizados
+                      <input name="gates" placeholder="Entrada A, Entrada B" />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Equipamentos utilizados
+                      <input name="devices" placeholder="Intelbras 5532 MF, LPR, catracas" />
+                    </label>
+                    <label>
+                      Método principal de acesso
+                      <select name="mainMethod">
+                        <option>Reconhecimento facial</option>
+                        <option>QR Code</option>
+                        <option>Cartão RFID</option>
+                        <option>Lista manual</option>
+                        <option>Misto</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    Responsável técnico pelo relatório
+                    <input name="technicalOwner" required placeholder="Nome do responsável" />
+                  </label>
+                  <div class="modal-actions">
+                    <button class="button button-secondary" type="button" id="cancelReportEventEdit">
+                      Limpar
+                    </button>
+                    <button class="button button-primary" type="submit">Salvar cadastro</button>
+                  </div>
+                </form>
+              </section>
+            </section>
+
+            <section class="report-screen" data-report-panel="uploads">
+              <div class="app-columns">
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <h2>Importação de dados</h2>
+                    <span>PDF, imagem, CSV ou XLSX</span>
+                  </div>
+                  <form class="stack-form" id="reportAttachmentForm">
+                    <label>
+                      Arquivos
+                      <input
+                        id="reportAttachmentInput"
+                        name="files"
+                        type="file"
+                        multiple
+                        accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.xls"
+                      />
+                    </label>
+                    <div class="form-row">
+                      <label>
+                        Relação com o evento
+                        <select name="relation">
+                          <option>Dashboard principal</option>
+                          <option>Exportação analítica</option>
+                          <option>Evidência operacional</option>
+                          <option>Foto de equipamento</option>
+                          <option>Documento do cliente</option>
+                        </select>
+                      </label>
+                      <label>
+                        Tipo de fonte
+                        <select name="sourceType">
+                          <option>Upload manual</option>
+                          <option>Captura de página</option>
+                          <option>Integração futura via API</option>
+                        </select>
+                      </label>
+                    </div>
+                    <label>
+                      Descrição
+                      <textarea name="description" rows="3" placeholder="Ex: PDF do dashboard consolidado"></textarea>
+                    </label>
+                    <button class="button button-primary" type="submit">Adicionar anexos</button>
+                  </form>
+                </section>
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <h2>Central de anexos</h2>
+                    <span id="reportAttachmentCount">0 anexos</span>
+                  </div>
+                  <div class="compact-list" id="reportAttachmentList"></div>
+                </section>
               </div>
+            </section>
+
+            <section class="report-screen" data-report-panel="extraction">
+              <section class="workspace-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Prévia dos dados extraídos</h2>
+                    <span>Indicadores estruturados antes da redação</span>
+                  </div>
+                  <span class="badge manual">Editável no MVP</span>
+                </div>
+                <form class="stack-form report-metrics-form" id="reportMetricsForm">
+                  <div class="form-row">
+                    <label>
+                      Público cadastrado
+                      <input name="registeredPublic" type="number" min="0" step="1" required />
+                    </label>
+                    <label>
+                      Público esperado
+                      <input name="expectedPublic" type="number" min="0" step="1" required />
+                    </label>
+                    <label>
+                      Total de acessos
+                      <input name="totalAccesses" type="number" min="0" step="1" required />
+                    </label>
+                    <label>
+                      Acessos únicos
+                      <input name="uniqueAccesses" type="number" min="0" step="1" required />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Ocupação informada (%)
+                      <input name="occupancyPercent" type="number" min="0" max="100" step="0.1" required />
+                    </label>
+                    <label>
+                      Ausentes informados
+                      <input name="absentPublic" type="number" min="0" step="1" required />
+                    </label>
+                    <label>
+                      Horário de pico
+                      <input name="peakTime" type="time" required />
+                    </label>
+                    <label>
+                      Entradas no pico
+                      <input name="peakEntries" type="number" min="0" step="1" required />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Velocidade no pico
+                      <input name="peakSpeed" placeholder="6 acessos/min" />
+                    </label>
+                    <label>
+                      Reconhecimento facial
+                      <input name="facialAccesses" type="number" min="0" step="1" />
+                    </label>
+                    <label>
+                      QR/cartão
+                      <input name="qrCardAccesses" type="number" min="0" step="1" />
+                    </label>
+                    <label>
+                      Outros métodos
+                      <input name="otherAccesses" type="number" min="0" step="1" />
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label>
+                      Dia 1
+                      <input name="dayOneDate" type="date" required />
+                    </label>
+                    <label>
+                      Acessos dia 1
+                      <input name="dayOneAccesses" type="number" min="0" step="1" required />
+                    </label>
+                    <label>
+                      Dia 2
+                      <input name="dayTwoDate" type="date" required />
+                    </label>
+                    <label>
+                      Acessos dia 2
+                      <input name="dayTwoAccesses" type="number" min="0" step="1" required />
+                    </label>
+                  </div>
+                  <button class="button button-primary" type="submit">Salvar dados estruturados</button>
+                </form>
+              </section>
+            </section>
+
+            <section class="report-screen" data-report-panel="audit">
+              <div class="app-columns">
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <div>
+                      <h2>Auditoria inteligente</h2>
+                      <span>Validação matemática, completude e fontes</span>
+                    </div>
+                    <button class="button button-primary" type="button" id="runReportAudit">
+                      Executar auditoria
+                    </button>
+                  </div>
+                  <div class="report-audit-score">
+                    <span>Nota do relatório</span>
+                    <strong id="reportQualityScore">0,0/10</strong>
+                    <small id="reportQualitySummary">Aguardando dados</small>
+                  </div>
+                </section>
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <h2>Pendências de validação</h2>
+                    <span id="reportQualityIssueCount">0 itens</span>
+                  </div>
+                  <div class="compact-list report-check-list" id="reportQualityChecks"></div>
+                </section>
+              </div>
+            </section>
+
+            <section class="report-screen" data-report-panel="generation">
+              <div class="app-columns generation-columns">
+                <section class="workspace-panel">
+                  <div class="panel-heading">
+                    <h2>Gerador de relatório</h2>
+                    <span>PDF, Word e Google Sheets</span>
+                  </div>
+                  <form class="stack-form" id="reportGeneratorForm">
+                    <label>
+                      Modelo
+                      <select name="reportType">
+                        <option>Relatório Básico</option>
+                        <option selected>Relatório Detalhado</option>
+                        <option>Relatório Personalizado</option>
+                      </select>
+                    </label>
+                    <label>
+                      Observações finais
+                      <textarea name="recommendations" rows="5"></textarea>
+                    </label>
+                    <div class="export-toggle-grid">
+                      <label class="checkbox-row"><input name="pdf" type="checkbox" checked /> PDF</label>
+                      <label class="checkbox-row"><input name="word" type="checkbox" checked /> Word</label>
+                      <label class="checkbox-row"><input name="sheets" type="checkbox" checked /> Google Sheets</label>
+                    </div>
+                    <button class="button button-primary" type="submit" id="generateReportVersion">
+                      Gerar versão
+                    </button>
+                  </form>
+                </section>
+                <section class="workspace-panel report-preview-panel">
+                  <div class="panel-heading">
+                    <h2>Prévia executiva</h2>
+                    <span id="reportPreviewType">Relatório Detalhado</span>
+                  </div>
+                  <div class="report-preview" id="reportPreview"></div>
+                  <div class="modal-actions">
+                    <button class="button button-secondary" type="button" id="exportReportPdf">PDF</button>
+                    <button class="button button-secondary" type="button" id="exportReportWord">Word</button>
+                    <button class="button button-secondary" type="button" id="exportReportSheets">Sheets</button>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section class="report-screen" data-report-panel="versions">
+              <section class="workspace-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>Versionamento</h2>
+                    <span>Histórico de geração, aprovação e envio</span>
+                  </div>
+                  <span class="badge warning" id="reportCurrentVersion">v1.0</span>
+                </div>
+                <div class="compact-list report-version-list" id="reportVersionList"></div>
+              </section>
             </section>
           </div>
         </section>
@@ -1917,6 +2262,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20260527-qr-ponto" defer></script>
+    <script src="app.js?v=20260603-report-ai-2" defer></script>
   </body>
 </html>

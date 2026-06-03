@@ -334,6 +334,115 @@ const initialState = {
       status: "Registrado",
     },
   ],
+  reportAi: {
+    selectedEventId: 1,
+    selectedScreen: "events",
+    events: [
+      {
+        id: 1,
+        eventName: "Pré-Junino",
+        clientName: "Produtor Pré-Junino",
+        companyName: "Acesse Tecnologia Operacional",
+        cnpj: "00.000.000/0001-00",
+        location: "João Pessoa - PB",
+        startDate: "2026-05-23",
+        endDate: "2026-05-24",
+        days: 2,
+        agendas: "Geral, convidados, equipe técnica",
+        gates: "Entrada principal, acesso VIP",
+        devices: "Intelbras 5532 MF, 5531, 3532, catracas e LPR",
+        mainMethod: "Reconhecimento facial",
+        technicalOwner: "Alexandre",
+        status: "Com inconsistência",
+        createdAt: today(),
+      },
+    ],
+    attachments: [
+      {
+        id: 1,
+        eventId: 1,
+        name: "dashboard-pre-junino.pdf",
+        fileType: "PDF",
+        relation: "Dashboard principal",
+        sourceType: "Upload manual",
+        description: "PDF do dashboard com indicadores consolidados do evento.",
+        uploadedBy: "Alexandre",
+        uploadedAt: today(),
+      },
+      {
+        id: 2,
+        eventId: 1,
+        name: "fluxo-por-horario.png",
+        fileType: "Imagem",
+        relation: "Evidência operacional",
+        sourceType: "Upload manual",
+        description: "Imagem do gráfico de fluxo por horário com pico às 18h.",
+        uploadedBy: "Alexandre",
+        uploadedAt: today(),
+      },
+    ],
+    metrics: {
+      1: {
+        registeredPublic: 4307,
+        expectedPublic: 4092,
+        totalAccesses: 2019,
+        uniqueAccesses: 2019,
+        occupancyPercent: 47,
+        absentPublic: 2288,
+        peakTime: "18:00",
+        peakEntries: 375,
+        peakSpeed: "6 acessos/min",
+        facialAccesses: 1988,
+        qrCardAccesses: 31,
+        otherAccesses: 0,
+        credentialedWithPhoto: 3960,
+        credentialedWithoutPhoto: 347,
+        notificationsDelivered: 3850,
+        notificationsFailed: 201,
+        notificationTotal: 4051,
+        deviceNotes: "Uma leitora 5532 MF apresentou instabilidade pontual no segundo dia.",
+        dayBreakdown: [
+          { date: "2026-05-23", accesses: 1048, peakTime: "18:00", peakEntries: 182 },
+          { date: "2026-05-24", accesses: 1262, peakTime: "18:00", peakEntries: 193 },
+        ],
+      },
+    },
+    reports: [
+      {
+        id: 1,
+        eventId: 1,
+        reportType: "Relatório Detalhado",
+        currentVersion: "v1.0",
+        status: "Com inconsistência",
+        recommendations:
+          "Confirmar a quantidade oficial de dias do evento e solicitar exportação analítica com passagens por dia, horário e categoria antes da versão final.",
+        versions: [
+          {
+            id: 1,
+            versionNumber: "v1.0",
+            qualityScore: 7.9,
+            status: "Com inconsistência",
+            createdBy: "Sistema",
+            createdAt: today(),
+            changes: "Gerado automaticamente a partir de dashboard e anexos.",
+            filePdfUrl: "pre-junino-v1.pdf",
+            fileDocxUrl: "pre-junino-v1.docx",
+            fileSheetUrl: "pre-junino-v1.xlsx",
+          },
+        ],
+      },
+    ],
+  },
+};
+
+const reportAiScreenLabels = {
+  events: "Eventos",
+  event: "Cadastro",
+  uploads: "Uploads",
+  extraction: "Dados",
+  audit: "Auditoria",
+  generation: "Geração",
+  versions: "Versões",
 };
 
 let state = ensureStateShape(loadState());
@@ -384,6 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPasswordRecovery();
   setupUserManagement();
   setupBrandManagement();
+  setupReportAi();
   renderAll();
 });
 
@@ -917,6 +1027,7 @@ function navigateToAppView(view, options = {}) {
   });
   document.querySelectorAll(".app-view").forEach((item) => item.classList.remove("active"));
   panel.classList.add("active");
+  appShell.classList.toggle("report-ai-active", view === "reports");
   document.querySelector("#viewTitle").textContent = button.dataset.label || button.textContent.trim();
 
   if (updateHash) {
@@ -1294,6 +1405,74 @@ function setupBrandManagement() {
     saveState();
     renderBrandShowcase();
     renderBrandAdmin();
+  });
+}
+
+function setupReportAi() {
+  const shell = document.querySelector(".report-ai-shell");
+  if (!shell) return;
+
+  shell.querySelectorAll("[data-report-screen]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setReportAiScreen(button.dataset.reportScreen);
+    });
+  });
+
+  document.querySelector("#startNewReportEvent")?.addEventListener("click", () => {
+    setReportAiScreen("event");
+    prepareReportEventForm(null);
+    showToast("Cadastro pronto para um novo relatório.");
+  });
+
+  document.querySelector("#cancelReportEventEdit")?.addEventListener("click", () => {
+    prepareReportEventForm(getSelectedReportEvent());
+  });
+
+  document.querySelector("#reportAiEventList")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-report-event-id]");
+    if (!button) return;
+    state.reportAi.selectedEventId = Number(button.dataset.reportEventId);
+    saveState();
+    setReportAiScreen("event");
+  });
+
+  document.querySelector("#reportAiEventForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveReportEventFromForm(event.currentTarget);
+  });
+
+  document.querySelector("#reportAttachmentForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveReportAttachmentsFromForm(event.currentTarget);
+  });
+
+  document.querySelector("#reportMetricsForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveReportMetricsFromForm(event.currentTarget);
+  });
+
+  document.querySelector("#runReportAudit")?.addEventListener("click", () => {
+    applyReportComputedStatus();
+    saveState();
+    renderReports();
+    showToast("Auditoria atualizada com as regras de consistência.");
+  });
+
+  document.querySelector("#reportGeneratorForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    generateReportVersion(event.currentTarget);
+  });
+
+  ["Pdf", "Word", "Sheets"].forEach((format) => {
+    document.querySelector(`#exportReport${format}`)?.addEventListener("click", () => {
+      showToast(`Exportação ${format} preparada no protótipo.`);
+    });
+  });
+
+  document.querySelector("#reportVersionList")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-report-version-action]");
+    if (!button) return;
+    updateReportVersionStatus(button.dataset.reportVersionAction);
   });
 }
 
@@ -3096,6 +3275,7 @@ function renderAll() {
   renderTimeAudit();
   renderFrequency();
   renderCertificates();
+  renderReports();
   renderCalendar();
   renderLeads();
   renderUsers();
@@ -3543,6 +3723,847 @@ function renderTeamPicker() {
       renderAll();
     });
   });
+}
+
+function renderReports() {
+  const shell = document.querySelector(".report-ai-shell");
+  if (!shell) return;
+
+  const reportAi = getReportAiData();
+  const selectedEvent = getSelectedReportEvent();
+  const selectedScreen = reportAi.selectedScreen || "events";
+
+  shell.querySelectorAll("[data-report-screen]").forEach((button) => {
+    const isActive = button.dataset.reportScreen === selectedScreen;
+    button.classList.toggle("active", isActive);
+    button.toggleAttribute("aria-current", isActive);
+  });
+
+  shell.querySelectorAll("[data-report-panel]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.reportPanel === selectedScreen);
+  });
+
+  renderReportEventList(selectedEvent);
+
+  if (!selectedEvent) {
+    renderEmptyReportState();
+    return;
+  }
+
+  const attachments = getReportAttachments(selectedEvent.id);
+  const metrics = getReportMetricsForEvent(selectedEvent.id, selectedEvent);
+  const report = getReportRecordForEvent(selectedEvent.id);
+  const audit = buildReportAudit(selectedEvent, metrics, attachments, report);
+
+  document.querySelector("#reportAiHeroScore").textContent = formatDecimal(audit.score);
+  document.querySelector("#reportAiHeroStatus").textContent = report.status;
+  document.querySelector("#reportSelectedEventBadge").textContent = selectedEvent.eventName;
+  document.querySelector("#reportCurrentVersion").textContent = report.currentVersion;
+
+  document.querySelector("#reportAiCards").innerHTML = [
+    card("Acessos", formatInteger(metrics.totalAccesses), "Total geral informado"),
+    card("Ocupação", `${formatDecimal(metrics.occupancyPercent)}%`, `Calculada: ${formatDecimal(audit.calculatedOccupancy)}%`),
+    card("Anexos", attachments.length, "Fontes vinculadas"),
+    card("Versão atual", report.currentVersion, report.status),
+  ].join("");
+
+  prepareReportEventForm(selectedEvent);
+  prepareReportMetricsForm(metrics);
+  prepareReportGeneratorForm(report);
+  renderReportAttachments(attachments);
+  renderReportAudit(audit);
+  renderReportPreview(selectedEvent, metrics, audit, report);
+  renderReportVersions(report);
+}
+
+function renderEmptyReportState() {
+  document.querySelector("#reportAiCards").innerHTML = [
+    card("Acessos", "0", "Sem evento selecionado"),
+    card("Ocupação", "0%", "Sem dados estruturados"),
+    card("Anexos", "0", "Aguardando upload"),
+    card("Versão atual", "-", "Rascunho"),
+  ].join("");
+  document.querySelector("#reportAiHeroScore").textContent = "0,0";
+  document.querySelector("#reportAiHeroStatus").textContent = "Rascunho";
+  document.querySelector("#reportAttachmentList").innerHTML = `<article class="empty-state">Cadastre um evento para anexar arquivos.</article>`;
+  document.querySelector("#reportQualityChecks").innerHTML = `<article class="empty-state">Cadastre um evento para executar auditoria.</article>`;
+  document.querySelector("#reportPreview").innerHTML = `<article class="empty-state">A prévia será montada após o cadastro do evento.</article>`;
+  document.querySelector("#reportVersionList").innerHTML = `<article class="empty-state">Nenhuma versão gerada.</article>`;
+}
+
+function renderReportEventList(selectedEvent) {
+  const reportAi = getReportAiData();
+  document.querySelector("#reportAiEventCount").textContent = `${reportAi.events.length} eventos`;
+
+  if (!reportAi.events.length) {
+    document.querySelector("#reportAiEventList").innerHTML = `
+      <article class="empty-state">Nenhum evento cadastrado para relatório.</article>
+    `;
+    return;
+  }
+
+  document.querySelector("#reportAiEventList").innerHTML = reportAi.events
+    .map((event) => {
+      const metrics = getReportMetricsForEvent(event.id, event);
+      const attachments = getReportAttachments(event.id);
+      const report = getReportRecordForEvent(event.id);
+      const audit = buildReportAudit(event, metrics, attachments, report);
+      const isSelected = selectedEvent?.id === event.id;
+
+      return `
+        <button
+          class="report-event-card ${isSelected ? "active" : ""}"
+          type="button"
+          data-report-event-id="${event.id}"
+        >
+          <span class="badge ${statusToBadgeClass(report.status)}">${escapeHtml(report.status)}</span>
+          <strong>${escapeHtml(event.eventName)}</strong>
+          <small>${formatReportDate(event.startDate)} até ${formatReportDate(event.endDate)} · ${escapeHtml(
+            event.clientName,
+          )}</small>
+          <span>${formatInteger(metrics.totalAccesses)} acessos · score ${formatDecimal(audit.score)}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function prepareReportEventForm(event) {
+  const form = document.querySelector("#reportAiEventForm");
+  if (!form) return;
+
+  form.reset();
+
+  if (!event) {
+    form.elements.id.value = "";
+    form.elements.startDate.value = today();
+    form.elements.endDate.value = today();
+    form.elements.days.value = 1;
+    form.elements.companyName.value = "Acesse Tecnologia Operacional";
+    form.elements.mainMethod.value = "Reconhecimento facial";
+    form.elements.technicalOwner.value = activeUser?.name || "Responsável técnico";
+    document.querySelector("#reportSelectedEventBadge").textContent = "Novo relatório";
+    return;
+  }
+
+  Object.entries(event).forEach(([key, value]) => {
+    if (form.elements[key]) form.elements[key].value = value ?? "";
+  });
+}
+
+function prepareReportMetricsForm(metrics) {
+  const form = document.querySelector("#reportMetricsForm");
+  if (!form || !metrics) return;
+  const [dayOne = {}, dayTwo = {}] = metrics.dayBreakdown || [];
+
+  const values = {
+    registeredPublic: metrics.registeredPublic,
+    expectedPublic: metrics.expectedPublic,
+    totalAccesses: metrics.totalAccesses,
+    uniqueAccesses: metrics.uniqueAccesses,
+    occupancyPercent: metrics.occupancyPercent,
+    absentPublic: metrics.absentPublic,
+    peakTime: metrics.peakTime,
+    peakEntries: metrics.peakEntries,
+    peakSpeed: metrics.peakSpeed,
+    facialAccesses: metrics.facialAccesses,
+    qrCardAccesses: metrics.qrCardAccesses,
+    otherAccesses: metrics.otherAccesses,
+    dayOneDate: dayOne.date,
+    dayOneAccesses: dayOne.accesses,
+    dayTwoDate: dayTwo.date,
+    dayTwoAccesses: dayTwo.accesses,
+  };
+
+  Object.entries(values).forEach(([key, value]) => {
+    if (form.elements[key]) form.elements[key].value = value ?? "";
+  });
+}
+
+function prepareReportGeneratorForm(report) {
+  const form = document.querySelector("#reportGeneratorForm");
+  if (!form || !report) return;
+  form.elements.reportType.value = report.reportType || "Relatório Detalhado";
+  form.elements.recommendations.value = report.recommendations || "";
+  document.querySelector("#reportPreviewType").textContent = form.elements.reportType.value;
+}
+
+function renderReportAttachments(attachments) {
+  document.querySelector("#reportAttachmentCount").textContent = `${attachments.length} anexos`;
+  document.querySelector("#reportAttachmentList").innerHTML = attachments.length
+    ? attachments
+        .map(
+          (attachment) => `
+            <article class="list-item">
+              <div>
+                <strong>${escapeHtml(attachment.name)}</strong>
+                <small>${escapeHtml(attachment.relation)} · ${escapeHtml(
+                  attachment.fileType,
+                )} · ${formatReportDate(attachment.uploadedAt)}</small>
+                <small>${escapeHtml(attachment.description || "Sem descrição")}</small>
+              </div>
+              <span class="badge manual">${escapeHtml(attachment.sourceType)}</span>
+            </article>
+          `,
+        )
+        .join("")
+    : `<article class="empty-state">Nenhum anexo vinculado ao evento selecionado.</article>`;
+}
+
+function renderReportAudit(audit) {
+  const blockingChecks = audit.checks.filter((check) => check.severity !== "success");
+  document.querySelector("#reportQualityScore").textContent = `${formatDecimal(audit.score)}/10`;
+  document.querySelector("#reportQualitySummary").textContent = audit.summary;
+  document.querySelector("#reportQualityIssueCount").textContent = `${blockingChecks.length} itens`;
+  document.querySelector("#reportQualityChecks").innerHTML = audit.checks
+    .map(
+      (check) => `
+        <article class="list-item report-check-item ${escapeHtml(check.severity)}">
+          <div>
+            <strong>${escapeHtml(check.title)}</strong>
+            <small>${escapeHtml(check.description)}</small>
+            <small>${escapeHtml(check.suggestion)}</small>
+          </div>
+          <span class="badge ${severityToBadgeClass(check.severity)}">${escapeHtml(
+            severityToLabel(check.severity),
+          )}</span>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderReportPreview(event, metrics, audit, report) {
+  const daySum = getDailyAccessSum(metrics);
+  const recommendations = report.recommendations || "Revisar pendências de validação antes do envio ao cliente.";
+
+  document.querySelector("#reportPreview").innerHTML = `
+    <article>
+      <span class="report-preview-kicker">${escapeHtml(report.reportType)}</span>
+      <h3>${escapeHtml(event.eventName)}</h3>
+      <p>
+        No período de ${formatReportDate(event.startDate)} a ${formatReportDate(event.endDate)}, o
+        evento registrou ${formatInteger(metrics.totalAccesses)} acessos, com público cadastrado de
+        ${formatInteger(metrics.registeredPublic)} pessoas e ocupação informada de
+        ${formatDecimal(metrics.occupancyPercent)}%.
+      </p>
+      <dl class="report-preview-grid">
+        <div><dt>Pico operacional</dt><dd>${escapeHtml(metrics.peakTime)} · ${formatInteger(
+          metrics.peakEntries,
+        )} entradas</dd></div>
+        <div><dt>Método principal</dt><dd>${escapeHtml(event.mainMethod)}</dd></div>
+        <div><dt>Soma por dia</dt><dd>${formatInteger(daySum)} passagens</dd></div>
+        <div><dt>Score</dt><dd>${formatDecimal(audit.score)}/10</dd></div>
+      </dl>
+      <p>${escapeHtml(recommendations)}</p>
+    </article>
+  `;
+}
+
+function renderReportVersions(report) {
+  document.querySelector("#reportVersionList").innerHTML = report.versions.length
+    ? report.versions
+        .map(
+          (version) => `
+            <article class="list-item report-version-item">
+              <div>
+                <strong>${escapeHtml(version.versionNumber)} · ${escapeHtml(version.status)}</strong>
+                <small>${formatReportDate(version.createdAt)} · score ${formatDecimal(
+                  version.qualityScore,
+                )} · ${escapeHtml(version.createdBy)}</small>
+                <small>${escapeHtml(version.changes)}</small>
+              </div>
+              <div class="version-actions">
+                <button type="button" data-report-version-action="approve">Aprovar</button>
+                <button type="button" data-report-version-action="send">Enviar</button>
+                <button type="button" data-report-version-action="archive">Arquivar</button>
+              </div>
+            </article>
+          `,
+        )
+        .join("")
+    : `<article class="empty-state">Nenhuma versão gerada para este evento.</article>`;
+}
+
+function setReportAiScreen(screen) {
+  if (!reportAiScreenLabels[screen]) return;
+  state.reportAi.selectedScreen = screen;
+  saveState();
+  renderReports();
+}
+
+function getReportAiData() {
+  if (!state.reportAi) {
+    state.reportAi = structuredClone(initialState.reportAi);
+  }
+  state.reportAi.events = Array.isArray(state.reportAi.events) ? state.reportAi.events : [];
+  state.reportAi.attachments = Array.isArray(state.reportAi.attachments)
+    ? state.reportAi.attachments
+    : [];
+  state.reportAi.metrics = state.reportAi.metrics || {};
+  state.reportAi.reports = Array.isArray(state.reportAi.reports) ? state.reportAi.reports : [];
+  state.reportAi.selectedScreen = reportAiScreenLabels[state.reportAi.selectedScreen]
+    ? state.reportAi.selectedScreen
+    : "events";
+  return state.reportAi;
+}
+
+function getSelectedReportEvent() {
+  const reportAi = getReportAiData();
+  const selectedEvent =
+    reportAi.events.find((event) => Number(event.id) === Number(reportAi.selectedEventId)) ||
+    reportAi.events[0] ||
+    null;
+
+  if (selectedEvent && Number(reportAi.selectedEventId) !== Number(selectedEvent.id)) {
+    reportAi.selectedEventId = selectedEvent.id;
+  }
+
+  return selectedEvent;
+}
+
+function getReportAttachments(eventId) {
+  return getReportAiData().attachments.filter((attachment) => Number(attachment.eventId) === Number(eventId));
+}
+
+function getReportMetricsForEvent(eventId, event = getSelectedReportEvent()) {
+  const reportAi = getReportAiData();
+  if (!reportAi.metrics[eventId]) {
+    reportAi.metrics[eventId] = buildDefaultReportMetrics(event);
+  }
+  return reportAi.metrics[eventId];
+}
+
+function getReportRecordForEvent(eventId) {
+  const reportAi = getReportAiData();
+  let report = reportAi.reports.find((item) => Number(item.eventId) === Number(eventId));
+
+  if (!report) {
+    report = {
+      id: Date.now(),
+      eventId,
+      reportType: "Relatório Detalhado",
+      currentVersion: "v0.1",
+      status: "Rascunho",
+      recommendations:
+        "Validar total global, indicadores por dia e anexos antes de aprovar o envio ao cliente.",
+      versions: [],
+    };
+    reportAi.reports.unshift(report);
+  }
+
+  report.versions = Array.isArray(report.versions) ? report.versions : [];
+  return report;
+}
+
+function buildDefaultReportMetrics(event) {
+  return {
+    registeredPublic: 0,
+    expectedPublic: 0,
+    totalAccesses: 0,
+    uniqueAccesses: 0,
+    occupancyPercent: 0,
+    absentPublic: 0,
+    peakTime: "18:00",
+    peakEntries: 0,
+    peakSpeed: "",
+    facialAccesses: 0,
+    qrCardAccesses: 0,
+    otherAccesses: 0,
+    credentialedWithPhoto: 0,
+    credentialedWithoutPhoto: 0,
+    notificationsDelivered: 0,
+    notificationsFailed: 0,
+    notificationTotal: 0,
+    deviceNotes: "",
+    dayBreakdown: [
+      { date: event?.startDate || today(), accesses: 0, peakTime: "18:00", peakEntries: 0 },
+      { date: event?.endDate || event?.startDate || today(), accesses: 0, peakTime: "18:00", peakEntries: 0 },
+    ],
+  };
+}
+
+function saveReportEventFromForm(form) {
+  const reportAi = getReportAiData();
+  const data = Object.fromEntries(new FormData(form));
+  const id = Number(data.id);
+  const existingEvent = reportAi.events.find((event) => Number(event.id) === id);
+  const eventRecord = {
+    id: existingEvent?.id || Date.now(),
+    eventName: sanitizeReportText(data.eventName),
+    clientName: sanitizeReportText(data.clientName),
+    companyName: sanitizeReportText(data.companyName),
+    cnpj: sanitizeReportText(data.cnpj),
+    location: sanitizeReportText(data.location),
+    startDate: data.startDate,
+    endDate: data.endDate,
+    days: Math.max(1, Number(data.days) || 1),
+    agendas: sanitizeReportText(data.agendas),
+    gates: sanitizeReportText(data.gates),
+    devices: sanitizeReportText(data.devices),
+    mainMethod: sanitizeReportText(data.mainMethod),
+    technicalOwner: sanitizeReportText(data.technicalOwner),
+    status: existingEvent?.status || "Rascunho",
+    createdAt: existingEvent?.createdAt || today(),
+    updatedAt: today(),
+  };
+
+  if (!eventRecord.eventName || !eventRecord.clientName || !eventRecord.companyName) {
+    showToast("Informe evento, cliente e empresa responsável.");
+    return;
+  }
+
+  if (existingEvent) {
+    Object.assign(existingEvent, eventRecord);
+  } else {
+    reportAi.events.unshift(eventRecord);
+    reportAi.metrics[eventRecord.id] = buildDefaultReportMetrics(eventRecord);
+  }
+
+  reportAi.selectedEventId = eventRecord.id;
+  getReportRecordForEvent(eventRecord.id);
+  applyReportComputedStatus();
+  saveState();
+  renderReports();
+  showToast(existingEvent ? "Cadastro do evento atualizado." : "Evento criado para relatório.");
+}
+
+function saveReportAttachmentsFromForm(form) {
+  const selectedEvent = getSelectedReportEvent();
+  if (!selectedEvent) {
+    showToast("Cadastre um evento antes de enviar anexos.");
+    return;
+  }
+
+  const data = Object.fromEntries(new FormData(form));
+  const files = [...document.querySelector("#reportAttachmentInput").files];
+  if (!files.length) {
+    showToast("Selecione pelo menos um arquivo para anexar.");
+    return;
+  }
+
+  files.forEach((file, index) => {
+    state.reportAi.attachments.unshift({
+      id: Date.now() + index,
+      eventId: selectedEvent.id,
+      name: file.name,
+      fileType: getReportFileType(file.name),
+      relation: sanitizeReportText(data.relation),
+      sourceType: sanitizeReportText(data.sourceType),
+      description: sanitizeReportText(data.description) || "Anexo enviado para validação do relatório.",
+      uploadedBy: activeUser?.name || "Usuário",
+      uploadedAt: today(),
+    });
+  });
+
+  form.reset();
+  applyReportComputedStatus();
+  saveState();
+  renderReports();
+  showToast(`${files.length} anexo${files.length > 1 ? "s" : ""} vinculado${files.length > 1 ? "s" : ""}.`);
+}
+
+function saveReportMetricsFromForm(form) {
+  const selectedEvent = getSelectedReportEvent();
+  if (!selectedEvent) {
+    showToast("Cadastre um evento antes de salvar indicadores.");
+    return;
+  }
+
+  const data = Object.fromEntries(new FormData(form));
+  state.reportAi.metrics[selectedEvent.id] = {
+    ...getReportMetricsForEvent(selectedEvent.id, selectedEvent),
+    registeredPublic: toReportNumber(data.registeredPublic),
+    expectedPublic: toReportNumber(data.expectedPublic),
+    totalAccesses: toReportNumber(data.totalAccesses),
+    uniqueAccesses: toReportNumber(data.uniqueAccesses),
+    occupancyPercent: toReportNumber(data.occupancyPercent),
+    absentPublic: toReportNumber(data.absentPublic),
+    peakTime: data.peakTime || "18:00",
+    peakEntries: toReportNumber(data.peakEntries),
+    peakSpeed: sanitizeReportText(data.peakSpeed),
+    facialAccesses: toReportNumber(data.facialAccesses),
+    qrCardAccesses: toReportNumber(data.qrCardAccesses),
+    otherAccesses: toReportNumber(data.otherAccesses),
+    dayBreakdown: [
+      {
+        date: data.dayOneDate || selectedEvent.startDate,
+        accesses: toReportNumber(data.dayOneAccesses),
+        peakTime: data.peakTime || "18:00",
+        peakEntries: Math.round(toReportNumber(data.peakEntries) / 2),
+      },
+      {
+        date: data.dayTwoDate || selectedEvent.endDate,
+        accesses: toReportNumber(data.dayTwoAccesses),
+        peakTime: data.peakTime || "18:00",
+        peakEntries: Math.ceil(toReportNumber(data.peakEntries) / 2),
+      },
+    ],
+  };
+
+  applyReportComputedStatus();
+  saveState();
+  renderReports();
+  showToast("Dados estruturados atualizados.");
+}
+
+function generateReportVersion(form) {
+  const selectedEvent = getSelectedReportEvent();
+  if (!selectedEvent) {
+    showToast("Cadastre um evento antes de gerar relatório.");
+    return;
+  }
+
+  const data = Object.fromEntries(new FormData(form));
+  const report = getReportRecordForEvent(selectedEvent.id);
+  const metrics = getReportMetricsForEvent(selectedEvent.id, selectedEvent);
+  const audit = buildReportAudit(selectedEvent, metrics, getReportAttachments(selectedEvent.id), report);
+  const versionNumber = getNextReportVersion(report);
+  const status = audit.checks.some((check) => check.severity === "danger" || check.severity === "warning")
+    ? "Com inconsistência"
+    : "Em revisão";
+  const slug = slugifyReportName(selectedEvent.eventName);
+  const fileSuffix = versionNumber.replace(".", "-");
+
+  report.reportType = data.reportType || "Relatório Detalhado";
+  report.recommendations = sanitizeReportText(data.recommendations);
+  report.currentVersion = versionNumber;
+  report.status = status;
+  selectedEvent.status = status;
+  report.versions.unshift({
+    id: Date.now(),
+    versionNumber,
+    qualityScore: audit.score,
+    status,
+    createdBy: activeUser?.name || "Usuário",
+    createdAt: today(),
+    changes: `${report.reportType} gerado com auditoria automática e anexos vinculados.`,
+    filePdfUrl: data.pdf ? `${slug}-${fileSuffix}.pdf` : "",
+    fileDocxUrl: data.word ? `${slug}-${fileSuffix}.docx` : "",
+    fileSheetUrl: data.sheets ? `${slug}-${fileSuffix}.xlsx` : "",
+  });
+
+  state.reportAi.selectedScreen = "versions";
+  saveState();
+  renderReports();
+  showToast(`${versionNumber} gerada com score ${formatDecimal(audit.score)}/10.`);
+}
+
+function updateReportVersionStatus(action) {
+  const event = getSelectedReportEvent();
+  if (!event) return;
+
+  const report = getReportRecordForEvent(event.id);
+  const latestVersion = report.versions[0];
+  if (!latestVersion) {
+    showToast("Gere uma versão antes de alterar o status.");
+    return;
+  }
+
+  const statusByAction = {
+    approve: "Aprovado",
+    send: "Enviado ao cliente",
+    archive: "Arquivado",
+  };
+  const nextStatus = statusByAction[action];
+  if (!nextStatus) return;
+
+  latestVersion.status = nextStatus;
+  report.status = nextStatus;
+  event.status = nextStatus;
+  saveState();
+  renderReports();
+  showToast(`Relatório ${nextStatus.toLowerCase()}.`);
+}
+
+function applyReportComputedStatus() {
+  const event = getSelectedReportEvent();
+  if (!event) return;
+  const report = getReportRecordForEvent(event.id);
+  const audit = buildReportAudit(
+    event,
+    getReportMetricsForEvent(event.id, event),
+    getReportAttachments(event.id),
+    report,
+  );
+  const hasIssues = audit.checks.some((check) => check.severity === "danger" || check.severity === "warning");
+  const nextStatus = hasIssues ? "Com inconsistência" : "Em revisão";
+
+  if (!["Aprovado", "Enviado ao cliente", "Arquivado"].includes(report.status)) {
+    report.status = nextStatus;
+    event.status = nextStatus;
+  }
+}
+
+function buildReportAudit(event, metrics, attachments, report = {}) {
+  const checks = [];
+  const requiredFields = [
+    ["eventName", "nome do evento"],
+    ["clientName", "cliente/contratante"],
+    ["companyName", "empresa responsável"],
+    ["location", "local"],
+    ["startDate", "data inicial"],
+    ["endDate", "data final"],
+    ["days", "quantidade de dias"],
+    ["technicalOwner", "responsável técnico"],
+  ];
+  const missingFields = requiredFields.filter(([key]) => !event?.[key]).map(([, label]) => label);
+
+  addReportCheck(checks, {
+    severity: missingFields.length ? "danger" : "success",
+    title: "Completude das informações obrigatórias",
+    description: missingFields.length
+      ? `Campos ausentes: ${missingFields.join(", ")}.`
+      : "Identificação do evento, período, empresa e responsável técnico estão preenchidos.",
+    suggestion: missingFields.length
+      ? "Preencha os campos obrigatórios antes de gerar a versão final."
+      : "Manter estes campos como capa e trilha de auditoria do relatório.",
+    penalty: missingFields.length ? Math.min(2, missingFields.length * 0.3) : 0,
+  });
+
+  const dailySum = getDailyAccessSum(metrics);
+  const totalAccesses = toReportNumber(metrics.totalAccesses);
+  addReportCheck(checks, {
+    severity: dailySum === totalAccesses ? "success" : "warning",
+    title: "Total global versus acessos por dia",
+    description:
+      dailySum === totalAccesses
+        ? "A soma dos acessos por dia confere com o total geral."
+        : `Os dias somam ${formatInteger(dailySum)}, mas o total geral informado é ${formatInteger(
+            totalAccesses,
+          )}.`,
+    suggestion:
+      dailySum === totalAccesses
+        ? "Registrar a fonte da soma diária no anexo analítico."
+        : "Confirmar se o total geral representa acessos únicos e se os dias representam passagens totais.",
+    penalty: dailySum === totalAccesses ? 0 : 0.9,
+  });
+
+  const expectedPublic = toReportNumber(metrics.expectedPublic);
+  const uniqueAccesses = toReportNumber(metrics.uniqueAccesses);
+  const calculatedOccupancy = expectedPublic ? (uniqueAccesses / expectedPublic) * 100 : 0;
+  const occupancyDelta = Math.abs(calculatedOccupancy - toReportNumber(metrics.occupancyPercent));
+  addReportCheck(checks, {
+    severity: occupancyDelta <= 1 ? "success" : "warning",
+    title: "Cálculo de ocupação",
+    description:
+      occupancyDelta <= 1
+        ? "A ocupação informada está coerente com acessos únicos sobre público esperado."
+        : `A ocupação informada é ${formatDecimal(
+            metrics.occupancyPercent,
+          )}%, mas a regra do MVP calcula ${formatDecimal(calculatedOccupancy)}%.`,
+    suggestion:
+      occupancyDelta <= 1
+        ? "Manter a regra explícita no rodapé metodológico."
+        : "Definir se a ocupação usa público esperado ou público cadastrado e exibir a base no relatório.",
+    penalty: occupancyDelta <= 1 ? 0 : 0.4,
+  });
+
+  const calculatedAbsent = Math.max(0, expectedPublic - uniqueAccesses);
+  const absentDelta = Math.abs(calculatedAbsent - toReportNumber(metrics.absentPublic));
+  addReportCheck(checks, {
+    severity: absentDelta <= 1 ? "success" : "warning",
+    title: "Cálculo de ausentes",
+    description:
+      absentDelta <= 1
+        ? "A quantidade de ausentes confere com público esperado menos acessos únicos."
+        : `Ausentes informados: ${formatInteger(
+            metrics.absentPublic,
+          )}. Pela regra do MVP, seriam ${formatInteger(calculatedAbsent)}.`,
+    suggestion:
+      absentDelta <= 1
+        ? "Separar esta informação dos bloqueios e recusas de acesso."
+        : "Confirmar se ausentes usam público esperado, público cadastrado ou outra base operacional.",
+    penalty: absentDelta <= 1 ? 0 : 0.4,
+  });
+
+  const methodTotal =
+    toReportNumber(metrics.facialAccesses) +
+    toReportNumber(metrics.qrCardAccesses) +
+    toReportNumber(metrics.otherAccesses);
+  addReportCheck(checks, {
+    severity: methodTotal === totalAccesses ? "success" : "danger",
+    title: "Métodos de acesso",
+    description:
+      methodTotal === totalAccesses
+        ? "Reconhecimento facial, QR/cartão e outros métodos fecham com o total autorizado."
+        : `Os métodos somam ${formatInteger(methodTotal)} contra ${formatInteger(totalAccesses)} acessos.`,
+    suggestion:
+      methodTotal === totalAccesses
+        ? "Destacar reconhecimento facial como método predominante."
+        : "Revisar a extração dos métodos de acesso antes de aprovar o relatório.",
+    penalty: methodTotal === totalAccesses ? 0 : 1,
+  });
+
+  const credentialedTotal =
+    toReportNumber(metrics.credentialedWithPhoto) + toReportNumber(metrics.credentialedWithoutPhoto);
+  addReportCheck(checks, {
+    severity: !credentialedTotal || credentialedTotal === toReportNumber(metrics.registeredPublic) ? "success" : "warning",
+    title: "Credenciamento",
+    description:
+      !credentialedTotal
+        ? "Os dados de credenciamento ainda não foram detalhados."
+        : `Com foto e sem foto somam ${formatInteger(credentialedTotal)} cadastros.`,
+    suggestion:
+      !credentialedTotal
+        ? "Adicionar campos de credenciamento com foto e sem foto quando houver exportação."
+        : "Usar este fechamento como evidência de integridade cadastral.",
+    penalty: !credentialedTotal || credentialedTotal === toReportNumber(metrics.registeredPublic) ? 0 : 0.3,
+  });
+
+  addReportCheck(checks, {
+    severity: attachments.length ? "success" : "warning",
+    title: "Qualidade dos anexos e evidências",
+    description: attachments.length
+      ? `${attachments.length} anexo(s) vinculados ao evento selecionado.`
+      : "Nenhum PDF, imagem ou planilha foi vinculado ao relatório.",
+    suggestion: attachments.length
+      ? "Nomear anexos por indicador para facilitar auditoria futura."
+      : "Anexar ao menos o dashboard consolidado ou uma exportação analítica.",
+    penalty: attachments.length ? 0 : 0.7,
+  });
+
+  addReportCheck(checks, {
+    severity: attachments.some((attachment) => attachment.sourceType === "Integração futura via API") ? "success" : "info",
+    title: "Rastreabilidade das fontes",
+    description: "O MVP registra arquivo, tipo, usuário, data de upload e relação com o evento.",
+    suggestion: "Na versão integrada, gravar também consulta/API de origem por indicador.",
+    penalty: 0.2,
+  });
+
+  addReportCheck(checks, {
+    severity: metrics.deviceNotes ? "info" : "success",
+    title: "Status dos dispositivos",
+    description: metrics.deviceNotes || "Nenhuma observação de dispositivo registrada.",
+    suggestion: metrics.deviceNotes
+      ? "Levar a instabilidade para as recomendações operacionais do relatório."
+      : "Manter observações de equipamentos offline quando existirem.",
+    penalty: metrics.deviceNotes ? 0.2 : 0,
+  });
+
+  addReportCheck(checks, {
+    severity: report.recommendations ? "success" : "warning",
+    title: "Recomendações e conclusão operacional",
+    description: report.recommendations
+      ? "O relatório já possui recomendações finais para revisão."
+      : "Ainda não há recomendação operacional preenchida.",
+    suggestion: report.recommendations
+      ? "Conectar recomendações diretamente às inconsistências detectadas."
+      : "Adicionar próximos passos de validação antes da exportação.",
+    penalty: report.recommendations ? 0 : 0.5,
+  });
+
+  const score = Math.max(
+    0,
+    Math.min(
+      10,
+      10 - checks.reduce((total, check) => total + check.penalty, 0),
+    ),
+  );
+  const issueCount = checks.filter((check) => check.severity === "danger" || check.severity === "warning").length;
+
+  return {
+    score: Math.round(score * 10) / 10,
+    checks,
+    calculatedOccupancy,
+    calculatedAbsent,
+    summary: issueCount
+      ? `${issueCount} pendência(s) antes da aprovação final`
+      : "Pronto para revisão e aprovação",
+  };
+}
+
+function addReportCheck(checks, check) {
+  checks.push({
+    penalty: 0,
+    ...check,
+  });
+}
+
+function getDailyAccessSum(metrics) {
+  return (metrics.dayBreakdown || []).reduce(
+    (total, day) => total + toReportNumber(day.accesses),
+    0,
+  );
+}
+
+function getNextReportVersion(report) {
+  if (!report.versions.length) return "v1.0";
+  const versionNumbers = report.versions
+    .map((version) => String(version.versionNumber || "").match(/^v(\d+)\.(\d+)$/))
+    .filter(Boolean)
+    .map((match) => Number(match[2]));
+  const nextMinor = versionNumbers.length ? Math.max(...versionNumbers) + 1 : report.versions.length;
+  return `v1.${nextMinor}`;
+}
+
+function getReportFileType(fileName) {
+  const extension = String(fileName || "").split(".").pop().toLowerCase();
+  if (extension === "pdf") return "PDF";
+  if (["png", "jpg", "jpeg", "webp"].includes(extension)) return "Imagem";
+  if (["csv", "xlsx", "xls"].includes(extension)) return "Planilha";
+  return "Arquivo";
+}
+
+function sanitizeReportText(value) {
+  return String(value || "").trim();
+}
+
+function toReportNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function formatInteger(value) {
+  return Math.round(toReportNumber(value)).toLocaleString("pt-BR");
+}
+
+function formatDecimal(value) {
+  return toReportNumber(value).toLocaleString("pt-BR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+}
+
+function formatReportDate(value) {
+  return value ? formatDate(value) : "-";
+}
+
+function slugifyReportName(value) {
+  return String(value || "relatorio")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48) || "relatorio";
+}
+
+function statusToBadgeClass(status) {
+  if (["Aprovado", "Enviado ao cliente"].includes(status)) return "active";
+  if (["Com inconsistência", "Em revisão"].includes(status)) return "warning";
+  if (status === "Arquivado") return "manual";
+  return "";
+}
+
+function severityToBadgeClass(severity) {
+  const classMap = {
+    success: "active",
+    warning: "warning",
+    danger: "danger",
+    info: "manual",
+  };
+  return classMap[severity] || "";
+}
+
+function severityToLabel(severity) {
+  const labelMap = {
+    success: "OK",
+    warning: "Atenção",
+    danger: "Crítico",
+    info: "Nota",
+  };
+  return labelMap[severity] || "Item";
 }
 
 function renderTimeList() {
@@ -4831,8 +5852,100 @@ function ensureStateShape(savedState) {
     );
   });
   nextState.qrCodes = normalizeQrCodes(nextState);
+  nextState.reportAi = normalizeReportAiState(nextState.reportAi);
 
   return nextState;
+}
+
+function normalizeReportAiState(reportAiState) {
+  const seed = structuredClone(initialState.reportAi);
+  const reportAi = {
+    ...seed,
+    ...(reportAiState || {}),
+  };
+
+  reportAi.events = Array.isArray(reportAiState?.events)
+    ? reportAiState.events.map((event, index) => ({
+        id: Number(event.id) || Date.now() + index,
+        eventName: sanitizeReportText(event.eventName || event.name || `Evento ${index + 1}`),
+        clientName: sanitizeReportText(event.clientName || event.client || "Cliente não informado"),
+        companyName: sanitizeReportText(event.companyName || "Acesse Tecnologia Operacional"),
+        cnpj: sanitizeReportText(event.cnpj),
+        location: sanitizeReportText(event.location || "Local não informado"),
+        startDate: event.startDate || event.date || today(),
+        endDate: event.endDate || event.startDate || event.date || today(),
+        days: Math.max(1, Number(event.days) || 1),
+        agendas: sanitizeReportText(event.agendas),
+        gates: sanitizeReportText(event.gates),
+        devices: sanitizeReportText(event.devices),
+        mainMethod: sanitizeReportText(event.mainMethod || "Reconhecimento facial"),
+        technicalOwner: sanitizeReportText(event.technicalOwner || "Responsável técnico"),
+        status: sanitizeReportText(event.status || "Rascunho"),
+        createdAt: event.createdAt || today(),
+        updatedAt: event.updatedAt || null,
+      }))
+    : seed.events;
+
+  reportAi.attachments = Array.isArray(reportAiState?.attachments)
+    ? reportAiState.attachments.map((attachment, index) => ({
+        id: Number(attachment.id) || Date.now() + index,
+        eventId: Number(attachment.eventId) || reportAi.events[0]?.id || 0,
+        name: sanitizeReportText(attachment.name || `anexo-${index + 1}.pdf`),
+        fileType: sanitizeReportText(attachment.fileType || getReportFileType(attachment.name)),
+        relation: sanitizeReportText(attachment.relation || "Dashboard principal"),
+        sourceType: sanitizeReportText(attachment.sourceType || "Upload manual"),
+        description: sanitizeReportText(attachment.description),
+        uploadedBy: sanitizeReportText(attachment.uploadedBy || "Usuário"),
+        uploadedAt: attachment.uploadedAt || today(),
+      }))
+    : seed.attachments;
+
+  reportAi.metrics = reportAiState?.metrics && typeof reportAiState.metrics === "object"
+    ? reportAiState.metrics
+    : seed.metrics;
+
+  reportAi.events.forEach((event) => {
+    reportAi.metrics[event.id] = {
+      ...buildDefaultReportMetrics(event),
+      ...(reportAi.metrics[event.id] || {}),
+    };
+  });
+
+  reportAi.reports = Array.isArray(reportAiState?.reports)
+    ? reportAiState.reports.map((report, index) => ({
+        id: Number(report.id) || Date.now() + index,
+        eventId: Number(report.eventId) || reportAi.events[0]?.id || 0,
+        reportType: sanitizeReportText(report.reportType || "Relatório Detalhado"),
+        currentVersion: sanitizeReportText(report.currentVersion || "v0.1"),
+        status: sanitizeReportText(report.status || "Rascunho"),
+        recommendations: sanitizeReportText(report.recommendations),
+        versions: Array.isArray(report.versions) ? report.versions : [],
+      }))
+    : seed.reports;
+
+  reportAi.events.forEach((event) => {
+    if (!reportAi.reports.some((report) => Number(report.eventId) === Number(event.id))) {
+      reportAi.reports.push({
+        id: Date.now() + event.id,
+        eventId: event.id,
+        reportType: "Relatório Detalhado",
+        currentVersion: "v0.1",
+        status: event.status || "Rascunho",
+        recommendations: "Validar anexos e indicadores antes de aprovar o envio ao cliente.",
+        versions: [],
+      });
+    }
+  });
+
+  reportAi.selectedEventId =
+    reportAi.events.find((event) => Number(event.id) === Number(reportAi.selectedEventId))?.id ||
+    reportAi.events[0]?.id ||
+    null;
+  reportAi.selectedScreen = reportAiScreenLabels[reportAi.selectedScreen]
+    ? reportAi.selectedScreen
+    : "events";
+
+  return reportAi;
 }
 
 function saveState() {

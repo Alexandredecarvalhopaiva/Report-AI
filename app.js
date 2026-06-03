@@ -1,5 +1,5 @@
-const storageKey = "ms-demo-state-v1";
-const sidebarStateKey = "ms-sidebar-collapsed";
+const storageKey = "report-ai-demo-state-v1";
+const sidebarStateKey = "report-ai-sidebar-collapsed";
 
 const passwordPolicy = {
   minLength: 8,
@@ -224,8 +224,8 @@ const initialState = {
   brandLogos: [
     {
       id: 1,
-      name: "Condomínio Atlântico",
-      initials: "CA",
+      name: "Dashboard em tempo real",
+      initials: "BI",
       logoUrl: "",
       website: "",
       color: "#006783",
@@ -234,8 +234,8 @@ const initialState = {
     },
     {
       id: 2,
-      name: "Centro Empresarial Tambiá",
-      initials: "CT",
+      name: "PDF do painel",
+      initials: "PDF",
       logoUrl: "",
       website: "",
       color: "#16a9d2",
@@ -244,8 +244,8 @@ const initialState = {
     },
     {
       id: 3,
-      name: "Hospital Empresarial Sul",
-      initials: "HS",
+      name: "Imagem do dashboard",
+      initials: "IMG",
       logoUrl: "",
       website: "",
       color: "#2f8f83",
@@ -254,8 +254,8 @@ const initialState = {
     },
     {
       id: 4,
-      name: "Expo Nordeste",
-      initials: "EN",
+      name: "CSV analítico",
+      initials: "CSV",
       logoUrl: "",
       website: "",
       color: "#f2b531",
@@ -264,8 +264,8 @@ const initialState = {
     },
     {
       id: 5,
-      name: "Residencial Cabo Branco",
-      initials: "RC",
+      name: "XLSX operacional",
+      initials: "XLS",
       logoUrl: "",
       website: "",
       color: "#34495e",
@@ -274,8 +274,8 @@ const initialState = {
     },
     {
       id: 6,
-      name: "João Pessoa Business Center",
-      initials: "JP",
+      name: "API do Acesse",
+      initials: "API",
       logoUrl: "",
       website: "",
       color: "#0b7a9c",
@@ -668,7 +668,7 @@ function saveContactLead(form) {
     service: String(data.servico || "").trim(),
     message: String(data.mensagem || "").trim() || "Sem mensagem",
     status: "Novo",
-    source: "Site institucional",
+    source: "Site Acesse Report AI",
     createdAt: nowIso(),
   };
 
@@ -681,11 +681,11 @@ function saveContactLead(form) {
 function buildContactWhatsappUrl(form) {
   const data = Object.fromEntries(new FormData(form));
   const message = [
-    "Olá, gostaria de solicitar um orçamento com a Multserv.",
+    "Olá, gostaria de validar o Acesse Report AI.",
     data.nome ? `Nome: ${data.nome}` : "",
     data.empresa ? `Empresa: ${data.empresa}` : "",
     data.telefone ? `Telefone: ${formatPhone(data.telefone)}` : "",
-    data.servico ? `Serviço: ${data.servico}` : "",
+    data.servico ? `Interesse: ${data.servico}` : "",
     data.mensagem ? `Mensagem: ${data.mensagem}` : "",
   ]
     .filter(Boolean)
@@ -885,12 +885,12 @@ function setupAppNavigation() {
 }
 
 function buildMobileFooterShortcuts() {
-  const shortcutOrder = ["dashboard", "calendar", "certificates", "employees"];
+  const shortcutOrder = ["reports", "events", "calendar", "dashboard"];
   const shortcutLabels = {
-    dashboard: "Dashboard",
+    reports: "Report AI",
+    events: "Eventos",
     calendar: "Agenda",
-    certificates: "Atestados",
-    employees: "Equipe",
+    dashboard: "Painel",
   };
   const shortcutButtons = shortcutOrder
     .map((view) => document.querySelector(`.app-nav button[data-view="${view}"]`))
@@ -3256,7 +3256,7 @@ function enterApp(user) {
   document.body.classList.add("is-logged-in");
   updateAccessControl();
   const currentRoute = getCurrentAppRoute();
-  navigateToAppView(currentRoute?.view || "dashboard", {
+  navigateToAppView(currentRoute?.view || "reports", {
     replace: !currentRoute,
   });
   renderAll();
@@ -5337,7 +5337,7 @@ function renderLeads() {
             <small>${escapeHtml(lead.company || "Não informado")}</small>
           </td>
           <td data-label="Telefone">${escapeHtml(lead.phone || "-")}</td>
-          <td data-label="Serviço">${escapeHtml(lead.service || "-")}</td>
+          <td data-label="Interesse">${escapeHtml(lead.service || "-")}</td>
           <td class="lead-message-cell" data-label="Mensagem">${escapeHtml(lead.message || "Sem mensagem")}</td>
           <td data-label="Status"><span class="badge ${leadStatusClass(lead.status)}">${escapeHtml(lead.status)}</span></td>
           <td data-label="Data">${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</td>
@@ -5510,7 +5510,7 @@ function updateAccessControl() {
   });
 
   if (!isSuperAdmin() && document.querySelector(".app-view.admin-only.active")) {
-    navigateToAppView("dashboard", { replace: true });
+    navigateToAppView("reports", { replace: true });
   }
 }
 
@@ -6149,7 +6149,7 @@ function sendWelcomeEmail(user, temporaryPassword) {
   state.mailbox.unshift({
     id: Date.now(),
     to: user.email,
-    subject: "Bem-vindo ao painel Multserv",
+    subject: "Bem-vindo ao Acesse Report AI",
     token: "",
     createdAt: nowIso(),
     preview: `Usuário criado com perfil ${user.role}. Senha temporária: ${temporaryPassword}.`,
@@ -6158,7 +6158,7 @@ function sendWelcomeEmail(user, temporaryPassword) {
 
 function generateResetToken() {
   const random = crypto.getRandomValues(new Uint32Array(1))[0].toString().slice(0, 6);
-  return `MS-${random.padStart(6, "0")}`;
+  return `AR-${random.padStart(6, "0")}`;
 }
 
 function isValidResetToken(email, token) {

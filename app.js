@@ -25,17 +25,17 @@ const demoUsers = {
     status: "Ativo",
   },
   admin: {
-    name: "Admin MS",
-    email: "admin@ms.com",
+    name: "Admin Report AI",
+    email: "admin@reportai.com",
     password: "Mserv@2026",
     role: "Super Admin",
     status: "Ativo",
   },
   supervisor: {
-    name: "Carla Supervisor",
-    email: "supervisor@ms.com",
+    name: "Carla Revisora",
+    email: "revisor@reportai.com",
     password: "Equipe@2026",
-    role: "Supervisor",
+    role: "Revisor",
     status: "Ativo",
   },
 };
@@ -43,16 +43,16 @@ const demoUsers = {
 const appRoutePrefix = "painel";
 const appRoutes = {
   dashboard: "dashboard",
-  funcionarios: "employees",
-  empreendimentos: "clients",
-  eventos: "events",
-  frequencia: "frequency",
-  ponto: "timeclock",
-  atestados: "certificates",
-  faltas: "absences",
+  funcionarios: "reports",
+  empreendimentos: "reports",
+  eventos: "reports",
+  frequencia: "reports",
+  ponto: "reports",
+  atestados: "reports",
+  faltas: "reports",
   relatorios: "reports",
   leads: "leads",
-  calendario: "calendar",
+  calendario: "reports",
   marcas: "brands",
   usuarios: "users",
   configuracoes: "settings",
@@ -61,6 +61,7 @@ const appRoutes = {
 const appViewRoutes = Object.fromEntries(
   Object.entries(appRoutes).map(([route, view]) => [view, route]),
 );
+appViewRoutes.reports = "relatorios";
 
 const initialUsers = Object.values(demoUsers).map((user, index) => ({
   id: index + 1,
@@ -839,6 +840,13 @@ function setupAppNavigation() {
   });
 
   mobileFooterNav.addEventListener("click", (event) => {
+    const reportActionButton = event.target.closest("[data-mobile-report-action]");
+    if (reportActionButton) {
+      openReportEventDraft();
+      closeMobileAppMenu();
+      return;
+    }
+
     const menuButton = event.target.closest("button[data-menu-trigger]");
     if (menuButton) {
       toggleMobileAppMenu();
@@ -885,36 +893,44 @@ function setupAppNavigation() {
 }
 
 function buildMobileFooterShortcuts() {
-  const shortcutOrder = ["reports", "events", "calendar", "dashboard"];
+  const shortcutOrder = ["dashboard", "reports", "leads"];
   const shortcutLabels = {
-    reports: "Report AI",
-    events: "Eventos",
-    calendar: "Agenda",
-    dashboard: "Painel",
+    dashboard: "Resumo",
+    reports: "Central",
+    leads: "Leads",
   };
   const shortcutButtons = shortcutOrder
     .map((view) => document.querySelector(`.app-nav button[data-view="${view}"]`))
     .filter(Boolean);
 
-  const shortcutMarkup = shortcutButtons
-    .map((button) => {
-      const icon = button.querySelector(".nav-icon")?.outerHTML || "";
-      const view = button.dataset.view;
-      const label = shortcutLabels[view] || button.dataset.shortLabel || button.dataset.label || "";
+  const shortcutMarkup = shortcutButtons.map((button) => {
+    const icon = button.querySelector(".nav-icon")?.outerHTML || "";
+    const view = button.dataset.view;
+    const label = shortcutLabels[view] || button.dataset.shortLabel || button.dataset.label || "";
+    const adminClass = button.classList.contains("admin-only") ? " class=\"admin-only\"" : "";
 
-      return `
-        <button type="button" data-view="${escapeHtml(view)}" aria-label="${escapeHtml(
-          button.dataset.label || label,
-        )}">
-          ${icon}
-          <span>${escapeHtml(label)}</span>
-        </button>
-      `;
-    })
-    .join("");
+    return `
+      <button${adminClass} type="button" data-view="${escapeHtml(view)}" aria-label="${escapeHtml(
+        button.dataset.label || label,
+      )}">
+        ${icon}
+        <span>${escapeHtml(label)}</span>
+      </button>
+    `;
+  });
 
   mobileFooterNav.innerHTML = `
-    ${shortcutMarkup}
+    ${shortcutMarkup.slice(0, 2).join("")}
+    <button
+      class="mobile-report-action"
+      type="button"
+      data-mobile-report-action
+      aria-label="Inserir novo relatório"
+    >
+      <svg class="nav-icon" aria-hidden="true"><use href="#icon-file"></use></svg>
+      <span>Inserir relatório</span>
+    </button>
+    ${shortcutMarkup.slice(2).join("")}
     <button type="button" data-menu-trigger aria-label="Abrir menu completo" aria-controls="appSidebar" aria-expanded="false">
       <svg class="nav-icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
       <span>Menu</span>
@@ -1328,7 +1344,7 @@ function setupBrandManagement() {
     event.preventDefault();
 
     if (!isSuperAdmin()) {
-      setFormMessage("#brandLogoMessage", "Apenas Super Admin pode gerenciar marcas.", "error");
+      setFormMessage("#brandLogoMessage", "Apenas Super Admin pode gerenciar fontes.", "error");
       return;
     }
 
@@ -1343,12 +1359,12 @@ function setupBrandManagement() {
     }
 
     if (logoUrl === null) {
-      setFormMessage("#brandLogoMessage", "Informe uma URL válida para a logomarca.", "error");
+      setFormMessage("#brandLogoMessage", "Informe uma URL válida para o ícone ou evidência.", "error");
       return;
     }
 
     if (website === null) {
-      setFormMessage("#brandLogoMessage", "Informe uma URL válida para o site do cliente.", "error");
+      setFormMessage("#brandLogoMessage", "Informe uma URL válida para a referência.", "error");
       return;
     }
 
@@ -1369,7 +1385,7 @@ function setupBrandManagement() {
     brandForm.reset();
     brandForm.querySelector('[name="color"]').value = "#006783";
     brandForm.querySelector('[name="active"]').checked = true;
-    setFormMessage("#brandLogoMessage", "Marca adicionada ao carrossel.", "success");
+    setFormMessage("#brandLogoMessage", "Fonte adicionada ao carrossel.", "success");
     renderBrandShowcase();
     renderBrandAdmin();
   });
@@ -1383,23 +1399,23 @@ function setupBrandManagement() {
 
     if (button.dataset.brandAction === "up") {
       moveBrandLogo(brand.id, -1);
-      showToast("Marca movida para cima.");
+      showToast("Fonte movida para cima.");
     }
 
     if (button.dataset.brandAction === "down") {
       moveBrandLogo(brand.id, 1);
-      showToast("Marca movida para baixo.");
+      showToast("Fonte movida para baixo.");
     }
 
     if (button.dataset.brandAction === "toggle") {
       brand.active = !brand.active;
-      showToast(brand.active ? "Marca ativada no site." : "Marca removida da vitrine pública.");
+      showToast(brand.active ? "Fonte ativada no site." : "Fonte removida da vitrine pública.");
     }
 
     if (button.dataset.brandAction === "delete") {
       state.brandLogos = state.brandLogos.filter((item) => item.id !== brand.id);
       normalizeBrandOrders();
-      showToast("Marca removida do carrossel.");
+      showToast("Fonte removida do carrossel.");
     }
 
     saveState();
@@ -1419,9 +1435,7 @@ function setupReportAi() {
   });
 
   document.querySelector("#startNewReportEvent")?.addEventListener("click", () => {
-    setReportAiScreen("event");
-    prepareReportEventForm(null);
-    showToast("Cadastro pronto para um novo relatório.");
+    openReportEventDraft();
   });
 
   document.querySelector("#cancelReportEventEdit")?.addEventListener("click", () => {
@@ -3283,48 +3297,150 @@ function renderAll() {
 }
 
 function renderDashboard() {
-  const activeCount = state.employees.filter((employee) => employee.status === "Ativo").length;
-  const unavailableEmployees = state.employees.filter((employee) => employee.status !== "Ativo");
-  const absentCount = unavailableEmployees.length;
-  const weekEvents = state.events.filter((event) => daysFromToday(event.date) <= 7).length;
+  const reportAi = getReportAiData();
+  const reportEvents = reportAi.events;
+  const reportRecords = reportAi.reports;
+  const allVersions = reportRecords.flatMap((report) =>
+    Array.isArray(report.versions) ? report.versions.map((version) => ({ ...version, report })) : [],
+  );
+  const latestVersion = allVersions
+    .slice()
+    .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))[0];
+  const uniqueClients = new Set(
+    reportEvents.map((event) => sanitizeReportText(event.clientName)).filter(Boolean),
+  );
+  const totalVersions = reportAi.reports.reduce(
+    (sum, item) => sum + (Array.isArray(item.versions) ? item.versions.length : 0),
+    0,
+  );
+  const emittedFiles = allVersions.reduce(
+    (sum, version) =>
+      sum +
+      Number(Boolean(version.filePdfUrl)) +
+      Number(Boolean(version.fileDocxUrl)) +
+      Number(Boolean(version.fileSheetUrl)),
+    0,
+  );
+  const metricBlocks = Object.keys(reportAi.metrics || {}).length;
+  const totalAttachments = reportAi.attachments.length;
+  const audits = reportEvents.map((event) => {
+    const report = getReportRecordForEvent(event.id);
+    const metrics = getReportMetricsForEvent(event.id, event);
+    return buildReportAudit(event, metrics, getReportAttachments(event.id), report);
+  });
+  const openIssues = audits.reduce(
+    (sum, audit) => sum + audit.checks.filter((check) => check.severity !== "success").length,
+    0,
+  );
+  const averageScore = audits.length
+    ? audits.reduce((sum, audit) => sum + audit.score, 0) / audits.length
+    : 0;
+  const openLeads = state.leads.filter((lead) => ["Novo", "Em atendimento"].includes(lead.status)).length;
+  const clientList = [...uniqueClients].slice(0, 3).join(", ") || "Nenhum contratante cadastrado";
+  const reportTypeCounts = reportRecords.reduce((counts, report) => {
+    const type = report.reportType || "Relatório";
+    counts[type] = (counts[type] || 0) + (Array.isArray(report.versions) ? report.versions.length : 0);
+    return counts;
+  }, {});
+  const reportTypeSummary =
+    Object.entries(reportTypeCounts)
+      .filter(([, count]) => count > 0)
+      .map(([type, count]) => `${count} ${type.toLowerCase()}`)
+      .join(" · ") || "Nenhuma emissão registrada";
+  const sourceTypes = reportAi.attachments.reduce((counts, attachment) => {
+    const type = attachment.fileType || "Fonte";
+    counts[type] = (counts[type] || 0) + 1;
+    return counts;
+  }, {});
+  const sourceSummary =
+    Object.entries(sourceTypes)
+      .map(([type, count]) => `${count} ${type}`)
+      .join(" · ") || "Aguardando uploads";
 
   document.querySelector("#dashboardCards").innerHTML = [
-    card("Funcionários ativos", activeCount, "Equipe disponível"),
-    card("Indisponíveis", absentCount, "Status diferente de ativo"),
-    card("Atestados", state.certificates.length, "Registros no sistema"),
-    card("Eventos da semana", weekEvents, "Demandas programadas"),
+    card("Clientes cadastrados", uniqueClients.size, "Contratantes com eventos no Report AI"),
+    card("Eventos cadastrados", reportEvents.length, "Eventos com relatório operacional"),
+    card("Relatórios emitidos", totalVersions, "Versões geradas no histórico"),
+    card("Arquivos emitidos", emittedFiles, "PDF, Word e Sheets simulados"),
+    card("Dados estruturados", metricBlocks, "Blocos de indicadores extraídos"),
+    card("Anexos importados", totalAttachments, "PDF, imagem, CSV ou XLSX"),
+    card("Leads captados", state.leads.length, `${openLeads} em aberto`),
+    card("Pendências abertas", openIssues, `Score médio ${formatDecimal(averageScore)}/10`),
   ].join("");
 
-  document.querySelector("#statusBoard").innerHTML = unavailableEmployees.length
-    ? unavailableEmployees
-        .map(
-          (employee) => `
-            <article class="status-row">
-              <div>
-                <strong>${escapeHtml(employee.name)}</strong>
-                <small>${escapeHtml(employee.role)} · ${escapeHtml(employee.client)}</small>
-              </div>
-              <span class="badge ${escapeHtml(employee.status)}">${escapeHtml(employee.status)}</span>
-            </article>
-          `,
-        )
-        .join("")
-    : `<article class="empty-state">Todos os funcionários estão ativos.</article>`;
+  document.querySelector("#statusBoard").innerHTML = `
+    <article class="status-row">
+      <div>
+        <strong>Contratantes cadastrados</strong>
+        <small>${escapeHtml(clientList)}</small>
+      </div>
+      <span class="badge active">${formatInteger(uniqueClients.size)}</span>
+    </article>
+    <article class="status-row">
+      <div>
+        <strong>Relatórios por modelo</strong>
+        <small>${escapeHtml(reportTypeSummary)}</small>
+      </div>
+      <span class="badge manual">${formatInteger(totalVersions)}</span>
+    </article>
+    <article class="status-row">
+      <div>
+        <strong>Fontes importadas</strong>
+        <small>${escapeHtml(sourceSummary)}</small>
+      </div>
+      <span class="badge">${formatInteger(totalAttachments)}</span>
+    </article>
+    <article class="status-row">
+      <div>
+        <strong>Qualidade média dos relatórios</strong>
+        <small>Baseada nas auditorias automáticas do módulo Report AI</small>
+      </div>
+      <span class="badge ${averageScore >= 8 ? "active" : "warning"}">${formatDecimal(averageScore)}/10</span>
+    </article>
+  `;
 
-  document.querySelector("#dashboardEvents").innerHTML = state.events
-    .slice(0, 4)
-    .map(
-      (event) => `
-        <article class="list-item">
-          <div>
-            <strong>${event.name}</strong>
-            <small>${formatDate(event.date)} · ${event.client}</small>
-          </div>
-          <span class="badge">${event.team.length} pessoas</span>
-        </article>
-      `,
-    )
-    .join("");
+  document.querySelector("#dashboardEvents").innerHTML = `
+    <article class="list-item">
+      <div>
+        <strong>Última emissão</strong>
+        <small>${
+          latestVersion
+            ? `${escapeHtml(latestVersion.versionNumber)} · score ${formatDecimal(latestVersion.qualityScore)} · ${escapeHtml(
+                latestVersion.status,
+              )}`
+            : "Nenhum relatório emitido ainda"
+        }</small>
+      </div>
+      <span class="badge ${latestVersion ? statusToBadgeClass(latestVersion.status) : "manual"}">
+        ${latestVersion ? "Emitido" : "Rascunho"}
+      </span>
+    </article>
+    <article class="list-item">
+      <div>
+        <strong>Leads em aberto</strong>
+        <small>Contatos novos ou em atendimento vindos do site</small>
+      </div>
+      <span class="badge ${openLeads ? "warning" : "active"}">${formatInteger(openLeads)}</span>
+    </article>
+    <article class="list-item">
+      <div>
+        <strong>Pendências de auditoria</strong>
+        <small>Inconsistências, campos ausentes ou fontes insuficientes</small>
+      </div>
+      <span class="badge ${openIssues ? "warning" : "active"}">${formatInteger(openIssues)}</span>
+    </article>
+    <article class="list-item">
+      <div>
+        <strong>Próxima ação recomendada</strong>
+        <small>${
+          openIssues
+            ? "Revisar pendências antes de aprovar ou enviar relatórios ao cliente."
+            : "Inserir novo relatório ou acompanhar leads captados."
+        }</small>
+      </div>
+      <span class="badge manual">Resumo</span>
+    </article>
+  `;
 }
 
 function renderEmployees() {
@@ -3497,7 +3613,7 @@ function renderBrandShowcase() {
     carousel.style.width = "auto";
     carousel.innerHTML = `
       <div class="brand-empty">
-        Nenhuma marca ativa no momento.
+        Nenhuma fonte ativa no momento.
       </div>
     `;
     return;
@@ -3542,7 +3658,7 @@ function renderBrandVisual(brand) {
   if (brand.logoUrl) {
     return `
       <span class="brand-logo-frame">
-        <img src="${escapeHtml(brand.logoUrl)}" alt="Logo ${name}" loading="lazy" />
+        <img src="${escapeHtml(brand.logoUrl)}" alt="Fonte ${name}" loading="lazy" />
       </span>
     `;
   }
@@ -3571,12 +3687,12 @@ function renderBrandAdmin() {
     speedValue.textContent = `${getBrandSpeed()}s por volta`;
   }
 
-  document.querySelector("#brandLogoCount").textContent = `${orderedBrands.length} marcas`;
+  document.querySelector("#brandLogoCount").textContent = `${orderedBrands.length} fontes`;
 
   if (!orderedBrands.length) {
     brandTable.innerHTML = `
       <tr>
-        <td colspan="5">Nenhuma marca cadastrada.</td>
+        <td colspan="5">Nenhuma fonte cadastrada.</td>
       </tr>
     `;
   } else {
@@ -3585,12 +3701,12 @@ function renderBrandAdmin() {
         (brand, index) => `
           <tr>
             <td data-label="Ordem"><strong>${index + 1}</strong></td>
-            <td data-label="Marca">
+            <td data-label="Fonte">
               <div class="brand-table-logo">
                 ${renderBrandVisual(brand)}
                 <div>
                   <strong>${escapeHtml(brand.name)}</strong>
-                  <small>${brand.logoUrl ? "Logomarca por imagem" : "Marca textual provisória"}</small>
+                  <small>${brand.logoUrl ? "Evidência por imagem" : "Fonte textual provisória"}</small>
                 </div>
               </div>
             </td>
@@ -3643,7 +3759,7 @@ function renderBrandAdmin() {
             `,
           )
           .join("")
-      : `<article class="empty-state">Ative pelo menos uma marca para exibir no site.</article>`;
+      : `<article class="empty-state">Ative pelo menos uma fonte para exibir no site.</article>`;
   }
 }
 
@@ -3990,6 +4106,13 @@ function setReportAiScreen(screen) {
   state.reportAi.selectedScreen = screen;
   saveState();
   renderReports();
+}
+
+function openReportEventDraft() {
+  navigateToAppView("reports");
+  setReportAiScreen("event");
+  prepareReportEventForm(null);
+  showToast("Cadastro pronto para inserir um novo relatório.");
 }
 
 function getReportAiData() {

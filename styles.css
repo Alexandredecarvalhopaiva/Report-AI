@@ -4852,13 +4852,20 @@ button.calendar-day:focus-visible {
     left: 0;
     z-index: 30;
     display: none;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns:
+      minmax(0, 0.84fr)
+      minmax(0, 0.84fr)
+      minmax(102px, 1.34fr)
+      minmax(0, 0.84fr)
+      minmax(0, 0.84fr);
+    align-items: end;
+    gap: 6px;
     min-height: var(--mobile-footer-height);
-    border-top: 1px solid rgba(0, 103, 131, 0.12);
+    border-top: 1px solid rgba(168, 95, 58, 0.14);
     padding: 7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 -14px 34px rgba(0, 103, 131, 0.13);
+    background: rgba(251, 243, 229, 0.96);
+    box-shadow: 0 -14px 34px rgba(63, 70, 50, 0.13);
     backdrop-filter: blur(18px);
   }
 
@@ -4886,6 +4893,58 @@ button.calendar-day:focus-visible {
   .mobile-footer-nav button:hover {
     color: var(--brand-deep);
     background: var(--brand-cyan-soft);
+  }
+
+  .mobile-footer-nav .mobile-report-action {
+    position: relative;
+    isolation: isolate;
+    min-height: 66px;
+    align-self: stretch;
+    overflow: visible;
+    border: 1px solid rgba(255, 250, 240, 0.58);
+    padding: 7px 8px 8px;
+    color: #ffffff;
+    background:
+      linear-gradient(135deg, var(--sol-junho), var(--barro-queimado) 58%, var(--sombra-umbuzeiro));
+    box-shadow:
+      0 14px 28px rgba(168, 95, 58, 0.34),
+      0 0 0 4px rgba(216, 139, 42, 0.14);
+    transform: translateY(-12px);
+  }
+
+  .mobile-footer-nav .mobile-report-action::before {
+    position: absolute;
+    top: -7px;
+    right: 12px;
+    border-radius: 999px;
+    padding: 3px 7px;
+    color: var(--sombra-umbuzeiro);
+    background: var(--algodao-cru);
+    box-shadow: 0 6px 14px rgba(63, 70, 50, 0.16);
+    content: "Novo";
+    font-size: 0.58rem;
+    font-weight: 950;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .mobile-footer-nav .mobile-report-action:hover,
+  .mobile-footer-nav .mobile-report-action:focus-visible {
+    color: #ffffff;
+    background:
+      linear-gradient(135deg, var(--barro-queimado), var(--sol-junho) 62%, var(--mandacaru));
+  }
+
+  .mobile-footer-nav .mobile-report-action .nav-icon {
+    width: 25px;
+    height: 25px;
+    filter: drop-shadow(0 4px 8px rgba(63, 70, 50, 0.2));
+  }
+
+  .mobile-footer-nav .mobile-report-action span {
+    max-width: 92px;
+    line-height: 1.05;
+    text-align: center;
   }
 
   .mobile-footer-nav .nav-icon {

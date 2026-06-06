@@ -9,7 +9,7 @@
       content="Acesse Report AI transforma dados de controle de acesso, reconhecimento facial, dashboards e anexos em relatórios profissionais, auditáveis e prontos para entrega."
     />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#006783" />
+    <meta name="theme-color" content="#A85F3A" />
     <link rel="canonical" href="https://alexandredecarvalhopaiva.github.io/Report-AI/" />
     <meta
       property="og:title"
@@ -51,7 +51,7 @@
       content="https://alexandredecarvalhopaiva.github.io/Report-AI/assets/report-ai-logo.png"
     />
     <link rel="icon" href="assets/report-ai-logo.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260603-paleta-sertao-1" />
+    <link rel="stylesheet" href="styles.css?v=20260606-mobile-leads-1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -575,7 +575,7 @@
           <strong>Acesse Report AI</strong>
         </div>
         <h2>Acesso ao protótipo</h2>
-        <p>Entre como Supervisor ou Super Admin para navegar pelo MVP de relatórios operacionais.</p>
+        <p>Entre como Revisor ou Super Admin para navegar pelo MVP de relatórios operacionais.</p>
         <form class="login-form" id="loginForm">
           <button class="button button-google" type="button" id="googleLogin">
             <svg class="google-icon" viewBox="0 0 18 18" aria-hidden="true">
@@ -706,50 +706,18 @@
         </div>
         <nav class="app-nav" aria-label="Navegação do sistema">
           <div class="nav-section">
-            <span class="nav-section-title">Operacional</span>
-            <button class="active" type="button" data-view="dashboard" data-label="Dashboard" data-short-label="Painel" aria-current="page">
+            <span class="nav-section-title">Relatórios</span>
+            <button class="active" type="button" data-view="dashboard" data-label="Resumo executivo" data-short-label="Resumo" aria-current="page">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-dashboard"></use></svg>
-              <span class="nav-text">Dashboard</span>
+              <span class="nav-text">Resumo executivo</span>
             </button>
-            <button type="button" data-view="employees" data-label="Funcionários" data-short-label="Equipe">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
-              <span class="nav-text">Funcionários</span>
-            </button>
-            <button type="button" data-view="clients" data-label="Empreendimentos" data-short-label="Locais">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-building"></use></svg>
-              <span class="nav-text">Empreendimentos</span>
-            </button>
-            <button type="button" data-view="events" data-label="Eventos" data-short-label="Eventos">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-              <span class="nav-text">Eventos</span>
-            </button>
-            <button type="button" data-view="calendar" data-label="Calendário" data-short-label="Agenda">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-              <span class="nav-text">Calendário</span>
+            <button type="button" data-view="reports" data-label="Central de relatórios" data-short-label="Report AI">
+              <svg class="nav-icon" aria-hidden="true"><use href="#icon-report"></use></svg>
+              <span class="nav-text">Central de relatórios</span>
             </button>
           </div>
-          <div class="nav-section">
-            <span class="nav-section-title">Gestão</span>
-            <button type="button" data-view="frequency" data-label="Frequência" data-short-label="Frequência">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-activity"></use></svg>
-              <span class="nav-text">Frequência</span>
-            </button>
-            <button type="button" data-view="timeclock" data-label="Ponto" data-short-label="Ponto">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-clock"></use></svg>
-              <span class="nav-text">Ponto</span>
-            </button>
-            <button type="button" data-view="certificates" data-label="Atestados" data-short-label="Atestados">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-file"></use></svg>
-              <span class="nav-text">Atestados</span>
-            </button>
-            <button type="button" data-view="absences" data-label="Faltas" data-short-label="Faltas">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-alert"></use></svg>
-              <span class="nav-text">Faltas</span>
-            </button>
-            <button type="button" data-view="reports" data-label="Acesse Report AI" data-short-label="Report AI">
-              <svg class="nav-icon" aria-hidden="true"><use href="#icon-report"></use></svg>
-              <span class="nav-text">Report AI</span>
-            </button>
+          <div class="nav-section admin-only">
+            <span class="nav-section-title">Relacionamento</span>
             <button class="admin-only" type="button" data-view="leads" data-label="Leads" data-short-label="Leads">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-message"></use></svg>
               <span class="nav-text">Leads</span>
@@ -757,9 +725,9 @@
           </div>
           <div class="nav-section admin-only">
             <span class="nav-section-title">Sistema</span>
-            <button class="admin-only" type="button" data-view="brands" data-label="Marcas" data-short-label="Marcas">
+            <button class="admin-only" type="button" data-view="brands" data-label="Fontes de dados" data-short-label="Fontes">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-award"></use></svg>
-              <span class="nav-text">Marcas</span>
+              <span class="nav-text">Fontes de dados</span>
             </button>
             <button class="admin-only" type="button" data-view="users" data-label="Usuários" data-short-label="Usuários">
               <svg class="nav-icon" aria-hidden="true"><use href="#icon-users"></use></svg>
@@ -811,15 +779,15 @@
           <div class="app-columns">
             <section class="workspace-panel">
               <div class="panel-heading">
-                <h2>Status dos funcionários</h2>
-                <span>Hoje</span>
+                <h2>Visão geral da aplicação</h2>
+                <span>Base operacional</span>
               </div>
               <div class="status-board" id="statusBoard"></div>
             </section>
             <section class="workspace-panel">
               <div class="panel-heading">
-                <h2>Próximos eventos</h2>
-                <span>7 dias</span>
+                <h2>Atividade e próximos passos</h2>
+                <span>Operação recente</span>
               </div>
               <div class="compact-list" id="dashboardEvents"></div>
             </section>
@@ -1690,16 +1658,16 @@
             </div>
             <div class="quick-status-grid">
               <article>
-                <strong>Raio de check-in</strong>
-                <p>Validação demonstrativa configurada para até 100 metros do local de trabalho.</p>
+                <strong>Modelos de relatório</strong>
+                <p>Controle dos formatos básico, detalhado e personalizado usados na geração.</p>
               </article>
               <article>
                 <strong>Perfis de acesso</strong>
-                <p>Super Admin gerencia usuários, marcas e módulos administrativos.</p>
+                <p>Admin, operador, revisor, cliente e Super Admin com permissões por etapa.</p>
               </article>
               <article>
-                <strong>Experiência mobile</strong>
-                <p>Menu lateral recolhível, atalhos inferiores e áreas de toque ampliadas.</p>
+                <strong>Rastreabilidade</strong>
+                <p>Histórico de anexos, auditorias, versões e aprovações antes do envio ao cliente.</p>
               </article>
             </div>
           </section>
@@ -1721,15 +1689,15 @@
               </article>
               <article class="list-item">
                 <div>
-                  <strong>Tentativa de check-in</strong>
-                  <small>Validação por CPF e localização preparada para auditoria</small>
+                  <strong>Auditoria executada</strong>
+                  <small>Regras de consistência aplicadas ao relatório selecionado</small>
                 </div>
                 <span class="badge manual">Monitorado</span>
               </article>
               <article class="list-item">
                 <div>
-                  <strong>Alteração cadastral</strong>
-                  <small>Histórico planejado para edições de funcionários e usuários</small>
+                  <strong>Versão gerada</strong>
+                  <small>Histórico planejado para PDF, Word, Sheets e aprovações</small>
                 </div>
                 <span class="badge warning">Protótipo</span>
               </article>
@@ -1757,7 +1725,10 @@
                   <label>
                     Perfil
                     <select name="role">
-                      <option>Supervisor</option>
+                      <option>Operador</option>
+                      <option>Revisor</option>
+                      <option>Cliente</option>
+                      <option>Admin</option>
                       <option>Super Admin</option>
                     </select>
                   </label>
@@ -1833,38 +1804,38 @@
           <div class="app-columns brand-admin-columns">
             <section class="workspace-panel">
               <div class="panel-heading">
-                <h2>Nova marca</h2>
-                <span>Carrossel público</span>
+                <h2>Nova fonte operacional</h2>
+                <span>Vitrine pública e entradas do MVP</span>
               </div>
               <form class="stack-form" id="brandLogoForm">
                 <label>
-                  Nome da empresa
-                  <input name="name" required placeholder="Nome do cliente ou parceiro" />
+                  Nome da fonte
+                  <input name="name" required placeholder="PDF do dashboard, CSV analítico, API do Acesse" />
                 </label>
                 <div class="form-row">
                   <label>
                     Sigla
-                    <input name="initials" maxlength="4" placeholder="MS" />
+                    <input name="initials" maxlength="4" placeholder="PDF" />
                   </label>
                   <label>
-                    Cor da marca
+                    Cor de identificação
                     <input name="color" type="color" value="#006783" />
                   </label>
                 </div>
                 <label>
-                  URL da logomarca
-                  <input name="logoUrl" type="url" placeholder="https://site.com/logo.png" />
+                  URL do ícone ou evidência
+                  <input name="logoUrl" type="url" placeholder="https://site.com/arquivo.png" />
                 </label>
                 <label>
-                  Link do cliente
-                  <input name="website" type="url" placeholder="https://site-do-cliente.com.br" />
+                  Link de referência
+                  <input name="website" type="url" placeholder="https://dashboard-ou-api.com.br" />
                 </label>
                 <label class="checkbox-row">
                   <input name="active" type="checkbox" checked />
-                  Exibir esta marca no site público
+                  Exibir esta fonte no site público
                 </label>
                 <div class="form-message" id="brandLogoMessage" hidden></div>
-                <button class="button button-primary" type="submit">Adicionar marca</button>
+                <button class="button button-primary" type="submit">Adicionar fonte</button>
               </form>
             </section>
 
@@ -1888,15 +1859,15 @@
 
           <section class="workspace-panel">
             <div class="panel-heading">
-              <h2>Marcas cadastradas</h2>
-              <span id="brandLogoCount">0 marcas</span>
+              <h2>Fontes cadastradas</h2>
+              <span id="brandLogoCount">0 fontes</span>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Ordem</th>
-                    <th>Marca</th>
+                    <th>Fonte</th>
                     <th>Link</th>
                     <th>Status</th>
                     <th>Ações</th>
@@ -1908,7 +1879,7 @@
           </section>
         </section>
       </main>
-      <button class="floating-checkin" type="button" id="floatingCheckinButton" data-open-checkin>
+      <button class="floating-checkin" type="button" id="floatingCheckinButton" data-open-checkin hidden aria-hidden="true">
         <span aria-hidden="true"></span>
         Bater ponto
       </button>
@@ -2214,6 +2185,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20260603-report-ai-2" defer></script>
+    <script src="app.js?v=20260606-resumo-app-1" defer></script>
   </body>
 </html>

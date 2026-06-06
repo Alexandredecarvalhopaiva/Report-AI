@@ -51,7 +51,7 @@
       content="https://alexandredecarvalhopaiva.github.io/Report-AI/assets/report-ai-logo.png"
     />
     <link rel="icon" href="assets/report-ai-logo.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260606-mobile-leads-1" />
+    <link rel="stylesheet" href="styles.css?v=20260606-leads-crud-1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -1533,6 +1533,86 @@
             </div>
             <span class="badge manual" id="leadsCount">0 leads</span>
           </div>
+          <div class="app-columns leads-crud-columns">
+            <section class="workspace-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="leadFormTitle">Novo lead</h2>
+                  <span>Cadastro manual e edição comercial</span>
+                </div>
+                <span class="badge manual" id="leadFormModeBadge">Criar</span>
+              </div>
+              <form class="stack-form" id="leadForm">
+                <input name="id" type="hidden" />
+                <div class="form-row">
+                  <label>
+                    Nome
+                    <input name="name" required placeholder="Nome do contato" autocomplete="name" />
+                  </label>
+                  <label>
+                    Empresa
+                    <input name="company" placeholder="Empresa ou produtor" autocomplete="organization" />
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    Telefone
+                    <input
+                      name="phone"
+                      required
+                      inputmode="numeric"
+                      maxlength="15"
+                      placeholder="(83) 99999-9999"
+                      autocomplete="tel"
+                    />
+                  </label>
+                  <label>
+                    Status
+                    <select name="status">
+                      <option>Novo</option>
+                      <option>Em atendimento</option>
+                      <option>Convertido</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Interesse
+                  <select name="service">
+                    <option>Demonstração do MVP</option>
+                    <option>Integração com dashboard/API</option>
+                    <option>Geração real de PDF e Word</option>
+                    <option>Auditoria avançada de inconsistências</option>
+                    <option>Plano por evento</option>
+                    <option>Plano mensal</option>
+                    <option>Enterprise</option>
+                  </select>
+                </label>
+                <label>
+                  Mensagem
+                  <textarea name="message" rows="4" maxlength="300" placeholder="Resumo da conversa ou necessidade do cliente"></textarea>
+                </label>
+                <div class="form-message" id="leadFormMessage" hidden></div>
+                <div class="modal-actions">
+                  <button class="button button-secondary" type="button" id="cancelLeadEdit">
+                    Limpar
+                  </button>
+                  <button class="button button-primary" type="submit" id="leadFormSubmit">
+                    Salvar lead
+                  </button>
+                </div>
+              </form>
+            </section>
+            <section class="workspace-panel lead-detail-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Detalhes do lead</h2>
+                  <span>Leitura e acompanhamento</span>
+                </div>
+                <span class="badge manual" id="leadDetailStatus">Sem seleção</span>
+              </div>
+              <div class="lead-detail-card" id="leadDetailContent"></div>
+            </section>
+          </div>
           <div class="toolbar">
             <input
               class="search-input"
@@ -2185,6 +2265,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20260606-resumo-app-1" defer></script>
+    <script src="app.js?v=20260606-leads-crud-1" defer></script>
   </body>
 </html>

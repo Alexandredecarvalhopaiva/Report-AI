@@ -3555,6 +3555,42 @@ tbody tr:hover {
   line-height: 1.45;
 }
 
+.leads-crud-columns {
+  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1fr);
+  margin-bottom: 18px;
+}
+
+tr.selected-row {
+  background: rgba(216, 139, 42, 0.1);
+}
+
+.lead-detail-card {
+  display: grid;
+  gap: 14px;
+}
+
+.lead-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lead-detail-message {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(243, 231, 210, 0.42);
+}
+
+.lead-detail-message strong,
+.lead-detail-message p {
+  margin: 0;
+}
+
+.lead-detail-message p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .brand-admin-columns {
   grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1fr);
 }

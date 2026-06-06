@@ -455,6 +455,9 @@ let pendingDeleteEmployeeId = null;
 let clientFormMode = "create";
 let editingClientId = null;
 let pendingDeleteClientId = null;
+let leadFormMode = "create";
+let editingLeadId = null;
+let selectedLeadId = null;
 let expandedFrequencyEmployeeId = null;
 let checkinSession = {
   employee: null,
@@ -1576,6 +1579,17 @@ function setupForms() {
   document.querySelector("#frequencyStartDate").addEventListener("change", renderFrequency);
   document.querySelector("#frequencyEndDate").addEventListener("change", renderFrequency);
   document.querySelector("#frequencyTable").addEventListener("click", handleFrequencyTableAction);
+  document.querySelector("#leadForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveLeadFromForm(event.currentTarget);
+  });
+  document.querySelector('#leadForm [name="phone"]')?.addEventListener("input", (event) => {
+    event.target.value = formatPhone(event.target.value);
+    clearFormMessage("#leadFormMessage");
+  });
+  document.querySelector("#cancelLeadEdit")?.addEventListener("click", () => {
+    resetLeadForm();
+  });
   document.querySelector("#leadSearch")?.addEventListener("input", renderLeads);
   document.querySelector("#leadStatusFilter")?.addEventListener("change", renderLeads);
   document.querySelector("#leadsTable")?.addEventListener("click", handleLeadAction);
@@ -5431,6 +5445,100 @@ function groupCalendarActivities() {
   return groups;
 }
 
+function saveLeadFromForm(form) {
+  if (!isSuperAdmin()) {
+    setFormMessage("#leadFormMessage", "Apenas Super Admin pode gerenciar leads.", "error");
+    return;
+  }
+
+  const data = Object.fromEntries(new FormData(form));
+  const name = sanitizeReportText(data.name);
+  const phone = formatPhone(data.phone);
+  const existingLead = state.leads.find((lead) => Number(lead.id) === Number(data.id));
+  const wasEditing = leadFormMode === "edit" && existingLead;
+
+  if (!name) {
+    setFormMessage("#leadFormMessage", "Informe o nome do lead.", "error");
+    return;
+  }
+
+  if (!isValidBrazilMobilePhone(phone)) {
+    setFormMessage(
+      "#leadFormMessage",
+      "Informe DDD + celular com 9 dígitos. Exemplo: (83) 99999-9999.",
+      "error",
+    );
+    return;
+  }
+
+  const leadRecord = {
+    id: existingLead?.id || Date.now(),
+    name,
+    company: sanitizeReportText(data.company) || "Não informado",
+    phone,
+    service: sanitizeReportText(data.service),
+    message: sanitizeReportText(data.message) || "Sem mensagem",
+    status: sanitizeReportText(data.status) || "Novo",
+    source: existingLead?.source || "Cadastro manual",
+    createdAt: existingLead?.createdAt || nowIso(),
+    updatedAt: nowIso(),
+  };
+
+  if (wasEditing) {
+    Object.assign(existingLead, leadRecord);
+  } else {
+    state.leads.unshift(leadRecord);
+  }
+
+  selectedLeadId = leadRecord.id;
+  saveState();
+  resetLeadForm();
+  renderLeads();
+  renderDashboard();
+  setFormMessage(
+    "#leadFormMessage",
+    wasEditing ? "Lead atualizado com sucesso." : "Lead cadastrado com sucesso.",
+    "success",
+  );
+}
+
+function prepareLeadForm(lead) {
+  const form = document.querySelector("#leadForm");
+  if (!form || !lead) return;
+
+  leadFormMode = "edit";
+  editingLeadId = lead.id;
+  selectedLeadId = lead.id;
+  form.elements.id.value = lead.id;
+  form.elements.name.value = lead.name || "";
+  form.elements.company.value = lead.company || "";
+  form.elements.phone.value = lead.phone || "";
+  form.elements.status.value = lead.status || "Novo";
+  form.elements.service.value = lead.service || "Demonstração do MVP";
+  form.elements.message.value = lead.message || "";
+  document.querySelector("#leadFormTitle").textContent = "Editar lead";
+  document.querySelector("#leadFormModeBadge").textContent = "Editar";
+  document.querySelector("#leadFormSubmit").textContent = "Atualizar lead";
+  clearFormMessage("#leadFormMessage");
+  renderLeadDetail(lead);
+}
+
+function resetLeadForm() {
+  const form = document.querySelector("#leadForm");
+  if (!form) return;
+
+  leadFormMode = "create";
+  editingLeadId = null;
+  form.reset();
+  form.elements.id.value = "";
+  form.elements.status.value = "Novo";
+  form.elements.service.value = "Demonstração do MVP";
+  document.querySelector("#leadFormTitle").textContent = "Novo lead";
+  document.querySelector("#leadFormModeBadge").textContent = "Criar";
+  document.querySelector("#leadFormSubmit").textContent = "Salvar lead";
+  clearFormMessage("#leadFormMessage");
+}
+
 function renderLeads() {
   const leadsTable = document.querySelector("#leadsTable");
   if (!leadsTable) return;
@@ -5448,13 +5556,21 @@ function renderLeads() {
         </td>
       </tr>
     `;
+    renderLeadDetail(null);
     return;
+  }
+
+  if (!state.leads.some((lead) => Number(lead.id) === Number(selectedLeadId))) {
+    selectedLeadId = leads[0]?.id || null;
   }
 
   leadsTable.innerHTML = leads
     .map(
-      (lead) => `
-        <tr>
+      (lead) => {
+        const isSelected = Number(lead.id) === Number(selectedLeadId);
+
+        return `
+        <tr class="${isSelected ? "selected-row" : ""}">
           <td data-label="Lead">
             <strong>${escapeHtml(lead.name || "Sem nome")}</strong><br>
             <small>${escapeHtml(lead.company || "Não informado")}</small>
@@ -5466,6 +5582,12 @@ function renderLeads() {
           <td data-label="Data">${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</td>
           <td data-label="Ações">
             <div class="user-actions">
+              <button type="button" data-lead-action="view" data-lead-id="${lead.id}">
+                Ver
+              </button>
+              <button type="button" data-lead-action="edit" data-lead-id="${lead.id}">
+                Editar
+              </button>
               <button type="button" data-lead-action="progress" data-lead-id="${lead.id}">
                 Atender
               </button>
@@ -5478,9 +5600,12 @@ function renderLeads() {
             </div>
           </td>
         </tr>
-      `,
+      `;
+      },
     )
     .join("");
+
+  renderLeadDetail(state.leads.find((lead) => Number(lead.id) === Number(selectedLeadId)) || leads[0]);
 }
 
 function getFilteredLeads() {
@@ -5504,25 +5629,74 @@ function handleLeadAction(event) {
   const lead = state.leads.find((item) => String(item.id) === button.dataset.leadId);
   if (!lead) return;
 
+  if (button.dataset.leadAction === "view") {
+    selectedLeadId = lead.id;
+    renderLeads();
+    return;
+  }
+
+  if (button.dataset.leadAction === "edit") {
+    prepareLeadForm(lead);
+    renderLeads();
+    return;
+  }
+
   if (button.dataset.leadAction === "progress") {
     lead.status = "Em atendimento";
     lead.updatedAt = nowIso();
+    selectedLeadId = lead.id;
     showToast("Lead marcado em atendimento.");
   }
 
   if (button.dataset.leadAction === "convert") {
     lead.status = "Convertido";
     lead.updatedAt = nowIso();
+    selectedLeadId = lead.id;
     showToast("Lead marcado como convertido.");
   }
 
   if (button.dataset.leadAction === "delete") {
     state.leads = state.leads.filter((item) => item.id !== lead.id);
+    if (Number(selectedLeadId) === Number(lead.id)) selectedLeadId = null;
+    if (Number(editingLeadId) === Number(lead.id)) resetLeadForm();
     showToast("Lead removido.");
   }
 
   saveState();
   renderLeads();
+  renderDashboard();
+}
+
+function renderLeadDetail(lead) {
+  const detail = document.querySelector("#leadDetailContent");
+  const status = document.querySelector("#leadDetailStatus");
+  if (!detail || !status) return;
+
+  if (!lead) {
+    status.textContent = "Sem seleção";
+    status.className = "badge manual";
+    detail.innerHTML = `<article class="empty-state">Selecione um lead ou cadastre um novo contato.</article>`;
+    return;
+  }
+
+  status.textContent = lead.status || "Novo";
+  status.className = `badge ${leadStatusClass(lead.status)}`;
+  detail.innerHTML = `
+    <dl class="detail-grid lead-detail-grid">
+      <div><dt>Nome</dt><dd>${escapeHtml(lead.name || "-")}</dd></div>
+      <div><dt>Empresa</dt><dd>${escapeHtml(lead.company || "-")}</dd></div>
+      <div><dt>Telefone</dt><dd>${escapeHtml(lead.phone || "-")}</dd></div>
+      <div><dt>Interesse</dt><dd>${escapeHtml(lead.service || "-")}</dd></div>
+      <div><dt>Origem</dt><dd>${escapeHtml(lead.source || "Site Acesse Report AI")}</dd></div>
+      <div><dt>Criado em</dt><dd>${lead.createdAt ? formatDateTime(lead.createdAt) : "-"}</dd></div>
+      <div><dt>Atualizado em</dt><dd>${lead.updatedAt ? formatDateTime(lead.updatedAt) : "-"}</dd></div>
+      <div><dt>Status</dt><dd>${escapeHtml(lead.status || "Novo")}</dd></div>
+    </dl>
+    <article class="lead-detail-message">
+      <strong>Mensagem</strong>
+      <p>${escapeHtml(lead.message || "Sem mensagem")}</p>
+    </article>
+  `;
 }
 
 function leadStatusClass(status) {

@@ -106,7 +106,7 @@ const initialState = {
       phone: "(83) 98888-2103",
       role: "Auxiliar de limpeza",
       registration: "MS-003",
-      client: "Evento Expo Nordeste",
+      client: "Projeto Comercial Nordeste",
       status: "Atestado",
     },
     {
@@ -156,9 +156,9 @@ const initialState = {
     {
       id: 3,
       code: "EMP-003",
-      name: "Evento Expo Nordeste",
-      type: "Evento",
-      address: "Centro de Convenções, João Pessoa - PB",
+      name: "Projeto Comercial Nordeste",
+      type: "Projeto",
+      address: "Unidade comercial, João Pessoa - PB",
       manager: "Admin MS",
       activeEmployees: 18,
       coordinates: { lat: -7.1577, lng: -34.8056 },
@@ -201,9 +201,9 @@ const initialState = {
       id: "QR-LOCAL-003",
       companyId: "MS-MULTSERV",
       clientCode: "EMP-003",
-      client: "Evento Expo Nordeste",
+      client: "Projeto Comercial Nordeste",
       token: "MS-QR-EMP-003-2026",
-      description: "QR físico de apoio do Evento Expo Nordeste",
+      description: "QR físico de apoio do Projeto Comercial Nordeste",
       active: true,
       createdAt: today(),
     },
@@ -287,10 +287,10 @@ const initialState = {
   events: [
     {
       id: 1,
-      name: "Cobertura Expo Nordeste",
-      client: "Evento Expo Nordeste",
+      name: "Relatório Comercial Nordeste",
+      client: "Projeto Comercial Nordeste",
       date: nextDate(1),
-      type: "Seminário",
+      type: "Comercial",
       team: [1, 3, 5],
       status: "Programado",
     },
@@ -341,18 +341,18 @@ const initialState = {
     events: [
       {
         id: 1,
-        eventName: "Pré-Junino",
-        clientName: "Produtor Pré-Junino",
+        eventName: "Resumo comercial mensal",
+        clientName: "Diretoria Comercial",
         companyName: "Acesse Tecnologia Operacional",
         cnpj: "00.000.000/0001-00",
         location: "João Pessoa - PB",
         startDate: "2026-05-23",
         endDate: "2026-05-24",
         days: 2,
-        agendas: "Geral, convidados, equipe técnica",
-        gates: "Entrada principal, acesso VIP",
-        devices: "Intelbras 5532 MF, 5531, 3532, catracas e LPR",
-        mainMethod: "Reconhecimento facial",
+        agendas: "Receita, vendas, atendimento",
+        gates: "CRM, ERP e planilha de fechamento",
+        devices: "Power BI, Excel, PDF de fechamento e sistema interno",
+        mainMethod: "Comercial",
         technicalOwner: "Alexandre",
         status: "Com inconsistência",
         createdAt: today(),
@@ -362,22 +362,22 @@ const initialState = {
       {
         id: 1,
         eventId: 1,
-        name: "dashboard-pre-junino.pdf",
+        name: "dashboard-comercial-mensal.pdf",
         fileType: "PDF",
         relation: "Dashboard principal",
         sourceType: "Upload manual",
-        description: "PDF do dashboard com indicadores consolidados do evento.",
+        description: "PDF do dashboard com indicadores consolidados da operação.",
         uploadedBy: "Alexandre",
         uploadedAt: today(),
       },
       {
         id: 2,
         eventId: 1,
-        name: "fluxo-por-horario.png",
+        name: "variacao-por-periodo.png",
         fileType: "Imagem",
         relation: "Evidência operacional",
         sourceType: "Upload manual",
-        description: "Imagem do gráfico de fluxo por horário com pico às 18h.",
+        description: "Imagem do gráfico de variação por período com alerta no marco crítico.",
         uploadedBy: "Alexandre",
         uploadedAt: today(),
       },
@@ -392,7 +392,7 @@ const initialState = {
         absentPublic: 2288,
         peakTime: "18:00",
         peakEntries: 375,
-        peakSpeed: "6 acessos/min",
+        peakSpeed: "6 registros/min",
         facialAccesses: 1988,
         qrCardAccesses: 31,
         otherAccesses: 0,
@@ -416,19 +416,19 @@ const initialState = {
         currentVersion: "v1.0",
         status: "Com inconsistência",
         recommendations:
-          "Confirmar a quantidade oficial de dias do evento e solicitar exportação analítica com passagens por dia, horário e categoria antes da versão final.",
+          "Confirmar a quantidade oficial de períodos analisados e solicitar exportação analítica com registros por período, fonte e categoria antes da versão final.",
         versions: [
           {
             id: 1,
             versionNumber: "v1.0",
             qualityScore: 7.9,
             status: "Com inconsistência",
-            createdBy: "Sistema",
+            createdBy: "Alexandre",
             createdAt: today(),
             changes: "Gerado automaticamente a partir de dashboard e anexos.",
-            filePdfUrl: "pre-junino-v1.pdf",
-            fileDocxUrl: "pre-junino-v1.docx",
-            fileSheetUrl: "pre-junino-v1.xlsx",
+            filePdfUrl: "resumo-comercial-mensal-v1.pdf",
+            fileDocxUrl: "resumo-comercial-mensal-v1.docx",
+            fileSheetUrl: "resumo-comercial-mensal-v1.xlsx",
           },
         ],
       },
@@ -437,7 +437,7 @@ const initialState = {
 };
 
 const reportAiScreenLabels = {
-  events: "Eventos",
+  events: "Operações",
   event: "Cadastro",
   uploads: "Uploads",
   extraction: "Dados",
@@ -619,6 +619,9 @@ function setupHeroDashboardInteraction() {
     scoreLabel: scene.querySelector("[data-hero-score-label]"),
     occupancy: scene.querySelector("[data-hero-occupancy]"),
     occupancyLabel: scene.querySelector("[data-hero-occupancy-label]"),
+    decision: scene.querySelector("[data-hero-decision]"),
+    impact: scene.querySelector("[data-hero-impact]"),
+    impactCriteria: scene.querySelector("[data-hero-impact-criteria]"),
     dayLabel: scene.querySelector("[data-hero-day-label]"),
     syncLabel: scene.querySelector("[data-hero-sync-label]"),
     auditTitle: scene.querySelector("[data-hero-audit-title]"),
@@ -745,16 +748,19 @@ function setupHeroDashboardInteraction() {
   };
 
   const presentBarData = (bar, { instant = false } = {}) => {
+    animateDataText(fields.decision, bar.dataset.decision, { instant });
+    animateDataText(fields.impact, bar.dataset.impact, { instant });
+    setText(fields.impactCriteria, bar.dataset.impactCriteria);
     animateDataText(fields.total, bar.dataset.total, { instant });
-    setText(fields.totalLabel, `${bar.dataset.day} · pico operacional`);
+    setText(fields.totalLabel, `${bar.dataset.day} · variação analisada`);
     animateDataText(fields.score, bar.dataset.score, { instant });
     setText(fields.scoreLabel, Number.parseFloat((bar.dataset.score || "").replace(",", ".")) < 8
       ? "Revisão recomendada"
       : "Alta confiabilidade");
     animateDataText(fields.occupancy, bar.dataset.occupancy, { instant });
-    setText(fields.occupancyLabel, "Público esperado");
-    setText(fields.dayLabel, `${bar.dataset.day} · ${bar.dataset.total} acessos`);
-    setText(fields.syncLabel, "Auditoria conectada ao gráfico");
+    setText(fields.occupancyLabel, "Meta ou base esperada");
+    setText(fields.dayLabel, `${bar.dataset.day} · ${bar.dataset.total} registros analisados`);
+    setText(fields.syncLabel, "Arraste para comparar ciclos");
     setText(fields.auditTitle, bar.dataset.auditTitle);
     setText(fields.auditText, bar.dataset.auditText);
     setText(fields.auditNote, bar.dataset.auditNote);
@@ -1163,6 +1169,12 @@ function setupAppNavigation() {
     closeMobileAppMenu();
   });
 
+  document.querySelector("#latestReportGenerationList")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-report-generation]");
+    if (!button) return;
+    openReportGeneration(Number(button.dataset.reportEventId));
+  });
+
   sidebarCollapseButton.addEventListener("click", (event) => {
     event.stopPropagation();
 
@@ -1231,7 +1243,7 @@ function buildMobileFooterShortcuts() {
       data-mobile-report-action
       aria-label="Inserir novo relatório"
     >
-      <svg class="nav-icon" aria-hidden="true"><use href="#icon-file"></use></svg>
+      <svg class="nav-icon" aria-hidden="true"><use href="#icon-report-add"></use></svg>
       <span>Inserir relatório</span>
     </button>
     ${shortcutMarkup.slice(2).join("")}
@@ -1988,7 +2000,7 @@ function setupForms() {
     saveState();
     event.currentTarget.reset();
     renderAll();
-    showToast("Evento cadastrado.");
+    showToast("Relatório cadastrado.");
   });
 
   document.querySelector("#timeForm").addEventListener("submit", (event) => {
@@ -3585,7 +3597,7 @@ function enterApp(user) {
   document.body.classList.add("is-logged-in");
   updateAccessControl();
   const currentRoute = getCurrentAppRoute();
-  navigateToAppView(currentRoute?.view || "reports", {
+  navigateToAppView(currentRoute?.view || "dashboard", {
     replace: !currentRoute,
   });
   renderAll();
@@ -3673,8 +3685,8 @@ function renderDashboard() {
       .join(" · ") || "Aguardando uploads";
 
   document.querySelector("#dashboardCards").innerHTML = [
-    card("Clientes cadastrados", uniqueClients.size, "Contratantes com eventos no Report AI"),
-    card("Eventos cadastrados", reportEvents.length, "Eventos com relatório operacional"),
+    card("Clientes cadastrados", uniqueClients.size, "Clientes ou áreas com relatórios no Report AI"),
+    card("Operações cadastradas", reportEvents.length, "Bases de negócio com relatório operacional"),
     card("Relatórios emitidos", totalVersions, "Versões geradas no histórico"),
     card("Arquivos emitidos", emittedFiles, "PDF, Word e Sheets simulados"),
     card("Dados estruturados", metricBlocks, "Blocos de indicadores extraídos"),
@@ -3756,6 +3768,86 @@ function renderDashboard() {
       <span class="badge manual">Resumo</span>
     </article>
   `;
+
+  renderLatestReportGenerations();
+}
+
+function getReportGenerationHistory({ userOnly = true, limit = Infinity } = {}) {
+  const reportAi = getReportAiData();
+  const owners = new Set(
+    [activeUser?.name, activeUser?.email]
+      .filter(Boolean)
+      .map((value) => normalizeReportOwner(value)),
+  );
+
+  return reportAi.reports
+    .flatMap((report) => {
+      const event = reportAi.events.find((item) => Number(item.id) === Number(report.eventId));
+      return (Array.isArray(report.versions) ? report.versions : []).map((version) => ({
+        event,
+        report,
+        version,
+      }));
+    })
+    .filter(({ version }) => {
+      if (!userOnly) return true;
+      const owner = normalizeReportOwner(version.createdBy);
+      return owner && owners.has(owner);
+    })
+    .sort((a, b) => getReportVersionSortValue(b.version) - getReportVersionSortValue(a.version))
+    .slice(0, limit);
+}
+
+function renderLatestReportGenerations() {
+  const list = document.querySelector("#latestReportGenerationList");
+  const count = document.querySelector("#latestReportGenerationCount");
+  if (!list || !count) return;
+
+  const generations = getReportGenerationHistory({ userOnly: true, limit: 6 });
+  count.textContent = `${generations.length} ${generations.length === 1 ? "geração" : "gerações"}`;
+
+  if (!generations.length) {
+    list.innerHTML = `
+      <article class="empty-state report-generation-empty">
+        Nenhum relatório gerado por ${escapeHtml(activeUser?.name || "este usuário")} ainda.
+        Gere uma versão no módulo Report AI para acompanhar o histórico aqui.
+      </article>
+    `;
+    return;
+  }
+
+  list.innerHTML = generations
+    .map(({ event, report, version }) => {
+      const fileCount =
+        Number(Boolean(version.filePdfUrl)) +
+        Number(Boolean(version.fileDocxUrl)) +
+        Number(Boolean(version.fileSheetUrl));
+      const eventName = event?.eventName || "Operação sem nome";
+      const clientName = event?.clientName || "Cliente não informado";
+      const status = version.status || report.status || "Rascunho";
+
+      return `
+        <button
+          class="report-generation-card"
+          type="button"
+          data-open-report-generation
+          data-report-event-id="${Number(report.eventId) || ""}"
+          aria-label="Abrir ${escapeHtml(version.versionNumber || "versão")} de ${escapeHtml(eventName)}"
+        >
+          <span class="badge ${statusToBadgeClass(status)}">${escapeHtml(status)}</span>
+          <strong>${escapeHtml(eventName)}</strong>
+          <small>${escapeHtml(report.reportType || "Relatório")} · ${escapeHtml(
+            version.versionNumber || report.currentVersion || "v0.1",
+          )}</small>
+          <span>
+            ${formatReportDate(version.createdAt)} · score ${formatDecimal(version.qualityScore)}/10 ·
+            ${formatInteger(fileCount)} arquivo${fileCount === 1 ? "" : "s"}
+          </span>
+          <em>${escapeHtml(clientName)} · acessar relatório</em>
+        </button>
+      `;
+    })
+    .join("");
 }
 
 function renderEmployees() {
@@ -4192,8 +4284,8 @@ function renderReports() {
   document.querySelector("#reportCurrentVersion").textContent = report.currentVersion;
 
   document.querySelector("#reportAiCards").innerHTML = [
-    card("Acessos", formatInteger(metrics.totalAccesses), "Total geral informado"),
-    card("Ocupação", `${formatDecimal(metrics.occupancyPercent)}%`, `Calculada: ${formatDecimal(audit.calculatedOccupancy)}%`),
+    card("Registros", formatInteger(metrics.totalAccesses), "Total geral informado"),
+    card("Resultado", `${formatDecimal(metrics.occupancyPercent)}%`, `Calculado: ${formatDecimal(audit.calculatedOccupancy)}%`),
     card("Anexos", attachments.length, "Fontes vinculadas"),
     card("Versão atual", report.currentVersion, report.status),
   ].join("");
@@ -4209,26 +4301,26 @@ function renderReports() {
 
 function renderEmptyReportState() {
   document.querySelector("#reportAiCards").innerHTML = [
-    card("Acessos", "0", "Sem evento selecionado"),
-    card("Ocupação", "0%", "Sem dados estruturados"),
+    card("Registros", "0", "Sem operação selecionada"),
+    card("Resultado", "0%", "Sem dados estruturados"),
     card("Anexos", "0", "Aguardando upload"),
     card("Versão atual", "-", "Rascunho"),
   ].join("");
   document.querySelector("#reportAiHeroScore").textContent = "0,0";
   document.querySelector("#reportAiHeroStatus").textContent = "Rascunho";
-  document.querySelector("#reportAttachmentList").innerHTML = `<article class="empty-state">Cadastre um evento para anexar arquivos.</article>`;
-  document.querySelector("#reportQualityChecks").innerHTML = `<article class="empty-state">Cadastre um evento para executar auditoria.</article>`;
-  document.querySelector("#reportPreview").innerHTML = `<article class="empty-state">A prévia será montada após o cadastro do evento.</article>`;
+  document.querySelector("#reportAttachmentList").innerHTML = `<article class="empty-state">Cadastre uma operação para anexar arquivos.</article>`;
+  document.querySelector("#reportQualityChecks").innerHTML = `<article class="empty-state">Cadastre uma operação para executar auditoria.</article>`;
+  document.querySelector("#reportPreview").innerHTML = `<article class="empty-state">A prévia será montada após o cadastro da operação.</article>`;
   document.querySelector("#reportVersionList").innerHTML = `<article class="empty-state">Nenhuma versão gerada.</article>`;
 }
 
 function renderReportEventList(selectedEvent) {
   const reportAi = getReportAiData();
-  document.querySelector("#reportAiEventCount").textContent = `${reportAi.events.length} eventos`;
+  document.querySelector("#reportAiEventCount").textContent = `${reportAi.events.length} operações`;
 
   if (!reportAi.events.length) {
     document.querySelector("#reportAiEventList").innerHTML = `
-      <article class="empty-state">Nenhum evento cadastrado para relatório.</article>
+      <article class="empty-state">Nenhuma operação cadastrada para relatório.</article>
     `;
     return;
   }
@@ -4252,7 +4344,7 @@ function renderReportEventList(selectedEvent) {
           <small>${formatReportDate(event.startDate)} até ${formatReportDate(event.endDate)} · ${escapeHtml(
             event.clientName,
           )}</small>
-          <span>${formatInteger(metrics.totalAccesses)} acessos · score ${formatDecimal(audit.score)}</span>
+          <span>${formatInteger(metrics.totalAccesses)} registros · score ${formatDecimal(audit.score)}</span>
         </button>
       `;
     })
@@ -4271,7 +4363,7 @@ function prepareReportEventForm(event) {
     form.elements.endDate.value = today();
     form.elements.days.value = 1;
     form.elements.companyName.value = "Acesse Tecnologia Operacional";
-    form.elements.mainMethod.value = "Reconhecimento facial";
+    form.elements.mainMethod.value = "Comercial";
     form.elements.technicalOwner.value = activeUser?.name || "Responsável técnico";
     document.querySelector("#reportSelectedEventBadge").textContent = "Novo relatório";
     return;
@@ -4338,7 +4430,7 @@ function renderReportAttachments(attachments) {
           `,
         )
         .join("")
-    : `<article class="empty-state">Nenhum anexo vinculado ao evento selecionado.</article>`;
+    : `<article class="empty-state">Nenhum anexo vinculado à operação selecionada.</article>`;
 }
 
 function renderReportAudit(audit) {
@@ -4374,16 +4466,16 @@ function renderReportPreview(event, metrics, audit, report) {
       <h3>${escapeHtml(event.eventName)}</h3>
       <p>
         No período de ${formatReportDate(event.startDate)} a ${formatReportDate(event.endDate)}, o
-        evento registrou ${formatInteger(metrics.totalAccesses)} acessos, com público cadastrado de
-        ${formatInteger(metrics.registeredPublic)} pessoas e ocupação informada de
+        negócio registrou ${formatInteger(metrics.totalAccesses)} registros, com base cadastrada de
+        ${formatInteger(metrics.registeredPublic)} itens e resultado informado de
         ${formatDecimal(metrics.occupancyPercent)}%.
       </p>
       <dl class="report-preview-grid">
-        <div><dt>Pico operacional</dt><dd>${escapeHtml(metrics.peakTime)} · ${formatInteger(
+        <div><dt>Marco crítico</dt><dd>${escapeHtml(metrics.peakTime)} · ${formatInteger(
           metrics.peakEntries,
-        )} entradas</dd></div>
-        <div><dt>Método principal</dt><dd>${escapeHtml(event.mainMethod)}</dd></div>
-        <div><dt>Soma por dia</dt><dd>${formatInteger(daySum)} passagens</dd></div>
+        )} registros</dd></div>
+        <div><dt>Indicador principal</dt><dd>${escapeHtml(event.mainMethod)}</dd></div>
+        <div><dt>Soma por período</dt><dd>${formatInteger(daySum)} registros</dd></div>
         <div><dt>Score</dt><dd>${formatDecimal(audit.score)}/10</dd></div>
       </dl>
       <p>${escapeHtml(recommendations)}</p>
@@ -4413,7 +4505,7 @@ function renderReportVersions(report) {
           `,
         )
         .join("")
-    : `<article class="empty-state">Nenhuma versão gerada para este evento.</article>`;
+    : `<article class="empty-state">Nenhuma versão gerada para esta operação.</article>`;
 }
 
 function setReportAiScreen(screen) {
@@ -4428,6 +4520,22 @@ function openReportEventDraft() {
   setReportAiScreen("event");
   prepareReportEventForm(null);
   showToast("Cadastro pronto para inserir um novo relatório.");
+}
+
+function openReportGeneration(eventId) {
+  const reportAi = getReportAiData();
+  const targetEvent = reportAi.events.find((event) => Number(event.id) === Number(eventId));
+  if (!targetEvent) {
+    showToast("Não foi possível localizar este relatório.");
+    return;
+  }
+
+  reportAi.selectedEventId = targetEvent.id;
+  reportAi.selectedScreen = "versions";
+  saveState();
+  navigateToAppView("reports");
+  renderReports();
+  showToast(`Relatório ${targetEvent.eventName} aberto em versões.`);
 }
 
 function getReportAiData() {
@@ -4484,7 +4592,7 @@ function getReportRecordForEvent(eventId) {
       currentVersion: "v0.1",
       status: "Rascunho",
       recommendations:
-        "Validar total global, indicadores por dia e anexos antes de aprovar o envio ao cliente.",
+        "Validar total global, indicadores por período e anexos antes de aprovar o envio ao cliente.",
       versions: [],
     };
     reportAi.reports.unshift(report);
@@ -4547,7 +4655,7 @@ function saveReportEventFromForm(form) {
   };
 
   if (!eventRecord.eventName || !eventRecord.clientName || !eventRecord.companyName) {
-    showToast("Informe evento, cliente e empresa responsável.");
+    showToast("Informe operação, cliente ou área e empresa responsável.");
     return;
   }
 
@@ -4563,13 +4671,13 @@ function saveReportEventFromForm(form) {
   applyReportComputedStatus();
   saveState();
   renderReports();
-  showToast(existingEvent ? "Cadastro do evento atualizado." : "Evento criado para relatório.");
+  showToast(existingEvent ? "Cadastro da operação atualizado." : "Operação criada para relatório.");
 }
 
 function saveReportAttachmentsFromForm(form) {
   const selectedEvent = getSelectedReportEvent();
   if (!selectedEvent) {
-    showToast("Cadastre um evento antes de enviar anexos.");
+    showToast("Cadastre uma operação antes de enviar anexos.");
     return;
   }
 
@@ -4604,7 +4712,7 @@ function saveReportAttachmentsFromForm(form) {
 function saveReportMetricsFromForm(form) {
   const selectedEvent = getSelectedReportEvent();
   if (!selectedEvent) {
-    showToast("Cadastre um evento antes de salvar indicadores.");
+    showToast("Cadastre uma operação antes de salvar indicadores.");
     return;
   }
 
@@ -4648,7 +4756,7 @@ function saveReportMetricsFromForm(form) {
 function generateReportVersion(form) {
   const selectedEvent = getSelectedReportEvent();
   if (!selectedEvent) {
-    showToast("Cadastre um evento antes de gerar relatório.");
+    showToast("Cadastre uma operação antes de gerar relatório.");
     return;
   }
 
@@ -4736,8 +4844,8 @@ function applyReportComputedStatus() {
 function buildReportAudit(event, metrics, attachments, report = {}) {
   const checks = [];
   const requiredFields = [
-    ["eventName", "nome do evento"],
-    ["clientName", "cliente/contratante"],
+    ["eventName", "nome da operação"],
+    ["clientName", "cliente ou área"],
     ["companyName", "empresa responsável"],
     ["location", "local"],
     ["startDate", "data inicial"],
@@ -4752,7 +4860,7 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
     title: "Completude das informações obrigatórias",
     description: missingFields.length
       ? `Campos ausentes: ${missingFields.join(", ")}.`
-      : "Identificação do evento, período, empresa e responsável técnico estão preenchidos.",
+      : "Identificação da operação, período, empresa e responsável técnico estão preenchidos.",
     suggestion: missingFields.length
       ? "Preencha os campos obrigatórios antes de gerar a versão final."
       : "Manter estes campos como capa e trilha de auditoria do relatório.",
@@ -4763,17 +4871,17 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
   const totalAccesses = toReportNumber(metrics.totalAccesses);
   addReportCheck(checks, {
     severity: dailySum === totalAccesses ? "success" : "warning",
-    title: "Total global versus acessos por dia",
+    title: "Total global versus registros por período",
     description:
       dailySum === totalAccesses
-        ? "A soma dos acessos por dia confere com o total geral."
+        ? "A soma dos registros por período confere com o total geral."
         : `Os dias somam ${formatInteger(dailySum)}, mas o total geral informado é ${formatInteger(
             totalAccesses,
           )}.`,
     suggestion:
       dailySum === totalAccesses
-        ? "Registrar a fonte da soma diária no anexo analítico."
-        : "Confirmar se o total geral representa acessos únicos e se os dias representam passagens totais.",
+        ? "Registrar a fonte da soma por período no anexo analítico."
+        : "Confirmar se o total geral representa registros únicos e se os períodos representam registros totais.",
     penalty: dailySum === totalAccesses ? 0 : 0.9,
   });
 
@@ -4783,17 +4891,17 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
   const occupancyDelta = Math.abs(calculatedOccupancy - toReportNumber(metrics.occupancyPercent));
   addReportCheck(checks, {
     severity: occupancyDelta <= 1 ? "success" : "warning",
-    title: "Cálculo de ocupação",
+    title: "Cálculo do resultado",
     description:
       occupancyDelta <= 1
-        ? "A ocupação informada está coerente com acessos únicos sobre público esperado."
-        : `A ocupação informada é ${formatDecimal(
+        ? "O resultado informado está coerente com registros únicos sobre a base esperada."
+        : `O resultado informado é ${formatDecimal(
             metrics.occupancyPercent,
           )}%, mas a regra do MVP calcula ${formatDecimal(calculatedOccupancy)}%.`,
     suggestion:
       occupancyDelta <= 1
         ? "Manter a regra explícita no rodapé metodológico."
-        : "Definir se a ocupação usa público esperado ou público cadastrado e exibir a base no relatório.",
+        : "Definir se o resultado usa base esperada, base cadastrada ou outra regra e exibir a base no relatório.",
     penalty: occupancyDelta <= 1 ? 0 : 0.4,
   });
 
@@ -4801,17 +4909,17 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
   const absentDelta = Math.abs(calculatedAbsent - toReportNumber(metrics.absentPublic));
   addReportCheck(checks, {
     severity: absentDelta <= 1 ? "success" : "warning",
-    title: "Cálculo de ausentes",
+    title: "Cálculo da diferença",
     description:
       absentDelta <= 1
-        ? "A quantidade de ausentes confere com público esperado menos acessos únicos."
+        ? "A diferença informada confere com base esperada menos registros únicos."
         : `Ausentes informados: ${formatInteger(
             metrics.absentPublic,
-          )}. Pela regra do MVP, seriam ${formatInteger(calculatedAbsent)}.`,
+          )}. Pela regra do MVP, a diferença seria ${formatInteger(calculatedAbsent)}.`,
     suggestion:
       absentDelta <= 1
-        ? "Separar esta informação dos bloqueios e recusas de acesso."
-        : "Confirmar se ausentes usam público esperado, público cadastrado ou outra base operacional.",
+        ? "Separar esta informação das perdas, exclusões ou bloqueios operacionais."
+        : "Confirmar se a diferença usa base esperada, base cadastrada ou outra base operacional.",
     penalty: absentDelta <= 1 ? 0 : 0.4,
   });
 
@@ -4821,15 +4929,15 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
     toReportNumber(metrics.otherAccesses);
   addReportCheck(checks, {
     severity: methodTotal === totalAccesses ? "success" : "danger",
-    title: "Métodos de acesso",
+    title: "Fontes de dados",
     description:
       methodTotal === totalAccesses
-        ? "Reconhecimento facial, QR/cartão e outros métodos fecham com o total autorizado."
-        : `Os métodos somam ${formatInteger(methodTotal)} contra ${formatInteger(totalAccesses)} acessos.`,
+        ? "Fonte principal, fonte secundária e outras fontes fecham com o total informado."
+        : `As fontes somam ${formatInteger(methodTotal)} contra ${formatInteger(totalAccesses)} registros.`,
     suggestion:
       methodTotal === totalAccesses
-        ? "Destacar reconhecimento facial como método predominante."
-        : "Revisar a extração dos métodos de acesso antes de aprovar o relatório.",
+        ? "Destacar a fonte predominante na metodologia do relatório."
+        : "Revisar a extração das fontes antes de aprovar o relatório.",
     penalty: methodTotal === totalAccesses ? 0 : 1,
   });
 
@@ -4853,7 +4961,7 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
     severity: attachments.length ? "success" : "warning",
     title: "Qualidade dos anexos e evidências",
     description: attachments.length
-      ? `${attachments.length} anexo(s) vinculados ao evento selecionado.`
+      ? `${attachments.length} anexo(s) vinculados à operação selecionada.`
       : "Nenhum PDF, imagem ou planilha foi vinculado ao relatório.",
     suggestion: attachments.length
       ? "Nomear anexos por indicador para facilitar auditoria futura."
@@ -4864,7 +4972,7 @@ function buildReportAudit(event, metrics, attachments, report = {}) {
   addReportCheck(checks, {
     severity: attachments.some((attachment) => attachment.sourceType === "Integração futura via API") ? "success" : "info",
     title: "Rastreabilidade das fontes",
-    description: "O MVP registra arquivo, tipo, usuário, data de upload e relação com o evento.",
+    description: "O MVP registra arquivo, tipo, usuário, data de upload e relação com o relatório.",
     suggestion: "Na versão integrada, gravar também consulta/API de origem por indicador.",
     penalty: 0.2,
   });
@@ -4965,6 +5073,17 @@ function formatDecimal(value) {
 
 function formatReportDate(value) {
   return value ? formatDate(value) : "-";
+}
+
+function normalizeReportOwner(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getReportVersionSortValue(version) {
+  const idValue = Number(version?.id || 0);
+  if (Number.isFinite(idValue) && idValue > 0) return idValue;
+  const dateValue = Date.parse(version?.createdAt || "");
+  return Number.isFinite(dateValue) ? dateValue : 0;
 }
 
 function slugifyReportName(value) {
@@ -5717,7 +5836,7 @@ function groupCalendarActivities() {
   state.events.forEach((event) => {
     add(event.date, {
       kind: "event",
-      label: "Evento",
+      label: "Relatório",
       title: event.name,
       detail: `${event.client} · ${event.team.length} pessoas`,
     });
@@ -6455,6 +6574,34 @@ function ensureStateShape(savedState) {
   return nextState;
 }
 
+function replaceLegacyReportDemoText(value) {
+  return sanitizeReportText(value)
+    .replaceAll("Produtor Pré-Junino", "Diretoria Comercial")
+    .replaceAll("Pré-Junino", "Resumo comercial mensal")
+    .replaceAll("pre-junino", "resumo-comercial-mensal")
+    .replaceAll("dashboard-pre-junino", "dashboard-comercial-mensal")
+    .replaceAll("fluxo-por-horario", "variacao-por-periodo")
+    .replaceAll("indicadores consolidados do evento", "indicadores consolidados da operação")
+    .replaceAll("gráfico de fluxo por horário com pico", "gráfico de variação por período com alerta")
+    .replaceAll("dias do evento", "períodos analisados")
+    .replaceAll("passagens por dia, horário e categoria", "registros por período, fonte e categoria");
+}
+
+function normalizeLegacyReportMethod(value) {
+  const method = replaceLegacyReportDemoText(value || "Comercial");
+  return method === "Reconhecimento facial" ? "Comercial" : method;
+}
+
+function migrateLegacyReportMetrics(metrics) {
+  const nextMetrics = {
+    ...metrics,
+  };
+  if (nextMetrics.peakSpeed === "6 acessos/min") {
+    nextMetrics.peakSpeed = "6 registros/min";
+  }
+  return nextMetrics;
+}
+
 function normalizeReportAiState(reportAiState) {
   const seed = structuredClone(initialState.reportAi);
   const reportAi = {
@@ -6465,19 +6612,19 @@ function normalizeReportAiState(reportAiState) {
   reportAi.events = Array.isArray(reportAiState?.events)
     ? reportAiState.events.map((event, index) => ({
         id: Number(event.id) || Date.now() + index,
-        eventName: sanitizeReportText(event.eventName || event.name || `Evento ${index + 1}`),
-        clientName: sanitizeReportText(event.clientName || event.client || "Cliente não informado"),
-        companyName: sanitizeReportText(event.companyName || "Acesse Tecnologia Operacional"),
+        eventName: replaceLegacyReportDemoText(event.eventName || event.name || `Operação ${index + 1}`),
+        clientName: replaceLegacyReportDemoText(event.clientName || event.client || "Cliente não informado"),
+        companyName: replaceLegacyReportDemoText(event.companyName || "Acesse Tecnologia Operacional"),
         cnpj: sanitizeReportText(event.cnpj),
-        location: sanitizeReportText(event.location || "Local não informado"),
+        location: replaceLegacyReportDemoText(event.location || "Local não informado"),
         startDate: event.startDate || event.date || today(),
         endDate: event.endDate || event.startDate || event.date || today(),
         days: Math.max(1, Number(event.days) || 1),
-        agendas: sanitizeReportText(event.agendas),
-        gates: sanitizeReportText(event.gates),
-        devices: sanitizeReportText(event.devices),
-        mainMethod: sanitizeReportText(event.mainMethod || "Reconhecimento facial"),
-        technicalOwner: sanitizeReportText(event.technicalOwner || "Responsável técnico"),
+        agendas: replaceLegacyReportDemoText(event.agendas),
+        gates: replaceLegacyReportDemoText(event.gates),
+        devices: replaceLegacyReportDemoText(event.devices),
+        mainMethod: normalizeLegacyReportMethod(event.mainMethod),
+        technicalOwner: replaceLegacyReportDemoText(event.technicalOwner || "Responsável técnico"),
         status: sanitizeReportText(event.status || "Rascunho"),
         createdAt: event.createdAt || today(),
         updatedAt: event.updatedAt || null,
@@ -6488,12 +6635,12 @@ function normalizeReportAiState(reportAiState) {
     ? reportAiState.attachments.map((attachment, index) => ({
         id: Number(attachment.id) || Date.now() + index,
         eventId: Number(attachment.eventId) || reportAi.events[0]?.id || 0,
-        name: sanitizeReportText(attachment.name || `anexo-${index + 1}.pdf`),
+        name: replaceLegacyReportDemoText(attachment.name || `anexo-${index + 1}.pdf`),
         fileType: sanitizeReportText(attachment.fileType || getReportFileType(attachment.name)),
-        relation: sanitizeReportText(attachment.relation || "Dashboard principal"),
+        relation: replaceLegacyReportDemoText(attachment.relation || "Dashboard principal"),
         sourceType: sanitizeReportText(attachment.sourceType || "Upload manual"),
-        description: sanitizeReportText(attachment.description),
-        uploadedBy: sanitizeReportText(attachment.uploadedBy || "Usuário"),
+        description: replaceLegacyReportDemoText(attachment.description),
+        uploadedBy: replaceLegacyReportDemoText(attachment.uploadedBy || "Usuário"),
         uploadedAt: attachment.uploadedAt || today(),
       }))
     : seed.attachments;
@@ -6505,7 +6652,7 @@ function normalizeReportAiState(reportAiState) {
   reportAi.events.forEach((event) => {
     reportAi.metrics[event.id] = {
       ...buildDefaultReportMetrics(event),
-      ...(reportAi.metrics[event.id] || {}),
+      ...migrateLegacyReportMetrics(reportAi.metrics[event.id] || {}),
     };
   });
 
@@ -6516,8 +6663,17 @@ function normalizeReportAiState(reportAiState) {
         reportType: sanitizeReportText(report.reportType || "Relatório Detalhado"),
         currentVersion: sanitizeReportText(report.currentVersion || "v0.1"),
         status: sanitizeReportText(report.status || "Rascunho"),
-        recommendations: sanitizeReportText(report.recommendations),
-        versions: Array.isArray(report.versions) ? report.versions : [],
+        recommendations: replaceLegacyReportDemoText(report.recommendations),
+        versions: Array.isArray(report.versions)
+          ? report.versions.map((version) => ({
+              ...version,
+              createdBy: replaceLegacyReportDemoText(version.createdBy === "Sistema" ? "Alexandre" : version.createdBy),
+              changes: replaceLegacyReportDemoText(version.changes),
+              filePdfUrl: replaceLegacyReportDemoText(version.filePdfUrl),
+              fileDocxUrl: replaceLegacyReportDemoText(version.fileDocxUrl),
+              fileSheetUrl: replaceLegacyReportDemoText(version.fileSheetUrl),
+            }))
+          : [],
       }))
     : seed.reports;
 

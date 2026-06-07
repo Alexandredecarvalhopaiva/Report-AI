@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acesse Report AI | Relatórios operacionais inteligentes para eventos</title>
+    <title>Acesse Report AI | Relatórios inteligentes para qualquer negócio</title>
     <meta
       name="description"
-      content="Acesse Report AI transforma dados de controle de acesso, reconhecimento facial, dashboards e anexos em relatórios profissionais, auditáveis e prontos para entrega."
+      content="Acesse Report AI transforma planilhas, dashboards, PDFs, imagens e indicadores de qualquer negócio em relatórios profissionais, auditáveis e prontos para decisão."
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#A85F3A" />
     <link rel="canonical" href="https://alexandredecarvalhopaiva.github.io/Report-AI/" />
     <meta
       property="og:title"
-      content="Acesse Report AI | Relatórios operacionais inteligentes para eventos"
+      content="Acesse Report AI | Relatórios inteligentes para qualquer negócio"
     />
     <meta
       property="og:description"
-      content="Gere relatórios executivos, valide inconsistências e versione entregas pós-evento a partir de dados operacionais."
+      content="Gere relatórios executivos, valide inconsistências e versione análises a partir de dados financeiros, comerciais, operacionais e estratégicos."
     />
     <meta
       property="og:image"
@@ -44,14 +44,14 @@
     />
     <meta
       name="twitter:description"
-      content="Consolide indicadores, anexos, auditoria e versionamento em relatórios profissionais para eventos."
+      content="Consolide indicadores, anexos, auditoria e versionamento em relatórios profissionais para qualquer operação de negócio."
     />
     <meta
       name="twitter:image"
       content="https://alexandredecarvalhopaiva.github.io/Report-AI/assets/report-ai-logo.png"
     />
     <link rel="icon" href="assets/report-ai-logo.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260607-hero-dynamic-2" />
+    <link rel="stylesheet" href="styles.css?v=20260607-latest-reports-1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -60,7 +60,7 @@
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
         "image": "https://alexandredecarvalhopaiva.github.io/Report-AI/assets/report-ai-logo.png",
-        "description": "Gerador inteligente de relatórios operacionais para eventos com auditoria automática, score de confiabilidade, anexos e versionamento.",
+        "description": "Gerador inteligente de relatórios para qualquer negócio com leitura de dados, auditoria automática, score de confiabilidade, anexos e versionamento.",
         "url": "https://alexandredecarvalhopaiva.github.io/Report-AI/"
       }
     </script>
@@ -104,6 +104,15 @@
         <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
         <path d="M14 3v5h5"></path>
         <path d="M9 15h6"></path>
+      </symbol>
+      <symbol id="icon-report-add" viewBox="0 0 24 24">
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"></path>
+        <path d="M14 3v5h5"></path>
+        <path d="M9 12h5"></path>
+        <path d="M9 16h3"></path>
+        <circle cx="17.5" cy="17.5" r="3.5"></circle>
+        <path d="M17.5 15.8v3.4"></path>
+        <path d="M15.8 17.5h3.4"></path>
       </symbol>
       <symbol id="icon-award" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="5"></circle>
@@ -222,7 +231,7 @@
               </a>
             </div>
             <button class="button button-dark login-entry-button" type="button" data-open-login>
-              <span>Abrir protótipo</span>
+              <span>Acessar conta</span>
             </button>
           </div>
         </nav>
@@ -236,105 +245,83 @@
                 <span></span>
                 <span></span>
                 <span></span>
-                <strong>Pré-Junino · auditoria</strong>
+                <strong>Operação comercial · auditoria</strong>
               </div>
-              <div class="scene-metrics">
-                <article>
-                  <small>Acessos do dia</small>
-                  <strong data-hero-total data-hero-dynamic>780</strong>
-                  <span data-hero-total-label>Dia 4 · pico operacional</span>
-                </article>
-                <article>
-                  <small>Score</small>
-                  <strong data-hero-score data-hero-dynamic>6,9</strong>
-                  <span data-hero-score-label>Revisão recomendada</span>
-                </article>
-                <article>
-                  <small>Ocupação</small>
-                  <strong data-hero-occupancy data-hero-dynamic>61%</strong>
-                  <span data-hero-occupancy-label>Público esperado</span>
-                </article>
+              <div class="scene-decision-card">
+                <span class="scene-decision-kicker" data-hero-day-label>Ciclo 4 · variação crítica</span>
+                <strong class="scene-decision-title" data-hero-decision data-hero-dynamic>Revisar variação</strong>
+                <p data-hero-audit-text>O ciclo 4 concentrou 780 registros e acendeu revisão automática de anomalia.</p>
+                <div class="scene-decision-meta">
+                  <span>
+                    Confiança
+                    <strong data-hero-score data-hero-dynamic>6,9</strong>
+                  </span>
+                  <span>
+                    Impacto
+                    <strong data-hero-impact data-hero-dynamic>+249</strong>
+                  </span>
+                </div>
+                <span class="scene-impact-criteria" data-hero-impact-criteria>
+                  +249 registros vs. C3 com score 6,9: revisar antes de aprovar.
+                </span>
               </div>
               <div class="scene-chart-shell">
                 <div class="scene-chart-head">
-                  <span data-hero-day-label>Dia 4 · pico de entrada</span>
-                  <strong data-hero-sync-label>Auditoria conectada ao gráfico</strong>
+                  <span data-hero-sync-label>Arraste para comparar ciclos</span>
+                  <strong data-hero-audit-note>Gerar comentário executivo antes do envio.</strong>
                 </div>
-                <div class="scene-chart" aria-label="Acessos por dia">
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 1" data-total="286" data-score="8,6" data-occupancy="38%" data-height="36" data-audit-title="Dados consistentes" data-audit-text="Dia 1 validado com entrada moderada e sem divergência entre fontes." data-audit-note="Pronto para compor o resumo executivo." data-report-version="v1.1" data-report-label="Parcial validado" data-spark-x="8" data-spark-y="28" aria-label="Dia 1, 286 acessos, score 8,6">
-                    <span class="scene-chart-value">286</span>
+                <div class="scene-chart" aria-label="Registros por ciclo">
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 1" data-total="286" data-score="8,6" data-occupancy="38%" data-impact="Base" data-impact-criteria="Linha base do negócio: score alto e sem variação anterior." data-decision="Aprovar" data-height="36" data-audit-title="Dados consistentes" data-audit-text="Volume moderado, sem divergência relevante entre as fontes." data-audit-note="Pronto para compor o resumo executivo." data-report-version="v1.1" data-report-label="Parcial validado" data-spark-x="8" data-spark-y="28" aria-label="Ciclo 1, aprovar, score 8,6">
                     <span class="scene-chart-fill" style="height: 36%"></span>
                     <span class="scene-chart-label">D1</span>
                   </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 2" data-total="412" data-score="8,2" data-occupancy="44%" data-height="48" data-audit-title="Volume em crescimento" data-audit-text="Dia 2 elevou os acessos e manteve a taxa de ocupação dentro do esperado." data-audit-note="Comparar com credenciais emitidas." data-report-version="v1.2" data-report-label="Comparativo atualizado" data-spark-x="56" data-spark-y="22" aria-label="Dia 2, 412 acessos, score 8,2">
-                    <span class="scene-chart-value">412</span>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 2" data-total="412" data-score="8,2" data-occupancy="44%" data-impact="+126" data-impact-criteria="+126 registros vs. C1 com score 8,2: acompanhar sem bloquear." data-decision="Acompanhar" data-height="48" data-audit-title="Volume em crescimento" data-audit-text="Aumento de registros com indicadores ainda dentro do esperado." data-audit-note="Comparar com a fonte principal." data-report-version="v1.2" data-report-label="Comparativo atualizado" data-spark-x="56" data-spark-y="22" aria-label="Ciclo 2, acompanhar, score 8,2">
                     <span class="scene-chart-fill" style="height: 48%"></span>
                     <span class="scene-chart-label">D2</span>
                   </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 3" data-total="531" data-score="7,8" data-occupancy="52%" data-height="64" data-audit-title="Atenção à soma diária" data-audit-text="Dia 3 indica aceleração de entrada e pede conferência da planilha de acessos únicos." data-audit-note="Anexar exportação analítica ao relatório." data-report-version="v1.3" data-report-label="Evidências anexadas" data-spark-x="104" data-spark-y="34" aria-label="Dia 3, 531 acessos, score 7,8">
-                    <span class="scene-chart-value">531</span>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 3" data-total="531" data-score="7,8" data-occupancy="52%" data-impact="+119" data-impact-criteria="+119 registros vs. C2 com score abaixo de 8: conferir base." data-decision="Conferir base" data-height="64" data-audit-title="Atenção à soma parcial" data-audit-text="Aceleração dos indicadores pede conferência dos registros únicos." data-audit-note="Anexar base analítica ao relatório." data-report-version="v1.3" data-report-label="Evidências anexadas" data-spark-x="104" data-spark-y="34" aria-label="Ciclo 3, conferir base, score 7,8">
                     <span class="scene-chart-fill" style="height: 64%"></span>
                     <span class="scene-chart-label">D3</span>
                   </button>
-                  <button class="scene-chart-bar is-active" type="button" data-hero-bar data-day="Dia 4" data-total="780" data-score="6,9" data-occupancy="61%" data-height="88" data-audit-title="Pico operacional" data-audit-text="Dia 4 concentrou 780 acessos e acendeu a revisão automática de pico por hora." data-audit-note="Gerar comentário executivo antes do envio." data-report-version="v1.4" data-report-label="Pico explicado" data-spark-x="152" data-spark-y="18" aria-label="Dia 4, 780 acessos, score 6,9">
-                    <span class="scene-chart-value">780</span>
+                  <button class="scene-chart-bar is-active" type="button" data-hero-bar data-day="Ciclo 4" data-total="780" data-score="6,9" data-occupancy="61%" data-impact="+249" data-impact-criteria="+249 registros vs. C3 com score 6,9: revisar antes de aprovar." data-decision="Revisar variação" data-height="88" data-audit-title="Variação crítica" data-audit-text="Maior concentração de registros; revisão automática antes do envio." data-audit-note="Gerar comentário executivo antes do envio." data-report-version="v1.4" data-report-label="Variação explicada" data-spark-x="152" data-spark-y="18" aria-label="Ciclo 4, revisar variação, score 6,9">
                     <span class="scene-chart-fill" style="height: 88%"></span>
                     <span class="scene-chart-label">D4</span>
                   </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 5" data-total="509" data-score="8,4" data-occupancy="53%" data-height="54" data-audit-title="Retomada estável" data-audit-text="Dia 5 reduziu o pico e estabilizou a curva de acessos com baixa divergência." data-audit-note="Resumo pronto para aprovação." data-report-version="v1.5" data-report-label="Curva estabilizada" data-spark-x="200" data-spark-y="42" aria-label="Dia 5, 509 acessos, score 8,4">
-                    <span class="scene-chart-value">509</span>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 5" data-total="509" data-score="8,4" data-occupancy="53%" data-impact="-271" data-impact-criteria="-271 registros vs. C4 e score 8,4: variação estabilizada." data-decision="Aprovar" data-height="54" data-audit-title="Retomada estável" data-audit-text="Queda da variação crítica e curva estabilizada com baixa divergência." data-audit-note="Resumo pronto para aprovação." data-report-version="v1.5" data-report-label="Curva estabilizada" data-spark-x="200" data-spark-y="42" aria-label="Ciclo 5, aprovar, score 8,4">
                     <span class="scene-chart-fill" style="height: 54%"></span>
                     <span class="scene-chart-label">D5</span>
                   </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 6" data-total="372" data-score="8,8" data-occupancy="41%" data-height="42" data-audit-title="Fechamento consistente" data-audit-text="Dia 6 encerrou o ciclo com queda prevista de fluxo e alta confiabilidade." data-audit-note="Liberar versão final do relatório." data-report-version="v1.6" data-report-label="Entrega final" data-spark-x="248" data-spark-y="31" aria-label="Dia 6, 372 acessos, score 8,8">
-                    <span class="scene-chart-value">372</span>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 6" data-total="372" data-score="8,8" data-occupancy="41%" data-impact="Baixo risco" data-impact-criteria="-137 registros vs. C5 com score 8,8: liberar relatório final." data-decision="Liberar relatório" data-height="42" data-audit-title="Fechamento consistente" data-audit-text="Queda prevista dos indicadores e alta confiabilidade no encerramento." data-audit-note="Liberar versão final do relatório." data-report-version="v1.6" data-report-label="Relatório final" data-spark-x="248" data-spark-y="31" aria-label="Ciclo 6, liberar relatório, score 8,8">
                     <span class="scene-chart-fill" style="height: 42%"></span>
                     <span class="scene-chart-label">D6</span>
                   </button>
-                </div>
-                <div class="scene-sparkline" aria-hidden="true">
-                  <span>Score de confiança</span>
-                  <svg viewBox="0 0 260 72" preserveAspectRatio="none">
-                    <polyline points="8,28 56,22 104,34 152,18 200,42 248,31"></polyline>
-                    <circle data-hero-spark-point cx="152" cy="18" r="5"></circle>
-                  </svg>
                 </div>
                 <div class="scene-presentation-progress" aria-hidden="true">
                   <span data-hero-progress></span>
                 </div>
               </div>
             </div>
-            <div class="scene-window scene-audit">
-              <strong data-hero-audit-title>Pico operacional</strong>
-              <p data-hero-audit-text>Dia 4 concentrou 780 acessos e acendeu a revisão automática de pico por hora.</p>
-              <span data-hero-audit-note>Gerar comentário executivo antes do envio.</span>
-            </div>
-            <div class="scene-window scene-report">
-              <strong data-hero-report-version data-hero-dynamic>v1.4</strong>
-              <span data-hero-report-label>Pico explicado</span>
-              <span>PDF · Word · Sheets</span>
-            </div>
           </div>
           <div class="hero-content">
-            <p class="eyebrow">Relatórios operacionais para eventos</p>
+            <p class="eyebrow">Relatórios inteligentes para qualquer negócio</p>
             <h1>Acesse Report AI</h1>
             <p class="hero-lead">
-              Transforme dados de controle de acesso, reconhecimento facial, dashboards e
-              anexos em relatórios executivos, auditáveis e prontos para entregar ao produtor.
+              Transforme planilhas, dashboards, PDFs, imagens e indicadores financeiros,
+              comerciais ou operacionais em relatórios executivos, auditáveis e prontos para decisão.
             </p>
             <div class="hero-actions">
-              <button class="button button-primary" type="button" data-open-login>Entrar no protótipo</button>
-              <a class="button button-light" href="#servicos">Ver fluxo do produto</a>
+              <button class="button button-primary" type="button" data-open-login>Acessar minha conta</button>
+              <a class="button button-light" href="#servicos">Ver fluxo de análise</a>
             </div>
           </div>
           <div class="hero-metrics" aria-label="Indicadores do produto">
             <article>
-              <strong>7 telas</strong>
-              <span>login, eventos, anexos, dados, auditoria, geração e versões</span>
+              <strong>7 etapas</strong>
+              <span>fontes, dados, auditoria, decisão, geração e versões</span>
             </article>
             <article>
               <strong>0 a 10</strong>
-              <span>score de confiabilidade antes da entrega final</span>
+              <span>score de confiabilidade antes da aprovação</span>
             </article>
             <article>
               <strong>PDF/Word</strong>
@@ -346,12 +333,13 @@
         <section class="section intro-section" id="sobre">
           <div class="section-copy">
             <p class="eyebrow">Visão do produto</p>
-            <h2>Uma camada inteligente para transformar operação em prestação de contas.</h2>
+            <h2>Uma camada inteligente para transformar dados de negócio em prestação de contas.</h2>
           </div>
           <p>
-            O dashboard já mostra o evento em tempo real. O Acesse Report AI resolve o
-            pós-evento: consolida indicadores, confere cálculos, registra fontes, aponta
-            pendências e monta um documento executivo com linguagem profissional.
+            Todo negócio já tem dados espalhados em planilhas, sistemas, dashboards e PDFs.
+            O Acesse Report AI lê essas fontes, consolida indicadores, confere cálculos,
+            registra evidências, aponta pendências e monta um documento executivo com
+            linguagem profissional.
           </p>
         </section>
 
@@ -369,12 +357,12 @@
             <article class="service-card">
               <span class="card-icon building-icon"></span>
               <h3>Dados estruturados</h3>
-              <p>Evento, dias, acessos, público esperado, ocupação, ausentes e pico.</p>
+              <p>Receita, custos, vendas, clientes, estoque, atendimento, produção ou indicadores próprios.</p>
             </article>
             <article class="service-card">
               <span class="card-icon event-icon"></span>
               <h3>Auditoria automática</h3>
-              <p>Regras matemáticas conferem totais, métodos de acesso e rastreabilidade.</p>
+              <p>Regras matemáticas conferem totais, variações, metas, duplicidades e rastreabilidade.</p>
             </article>
             <article class="service-card">
               <span class="card-icon support-icon"></span>
@@ -388,33 +376,33 @@
           <div class="section portfolio-heading">
             <div>
               <p class="eyebrow">Auditoria</p>
-              <h2>Relatórios bonitos não bastam. Os números precisam fechar.</h2>
+              <h2>Relatórios bonitos não bastam. Os indicadores precisam sustentar a decisão.</h2>
             </div>
             <p>
-              A IA não escreve apenas a conclusão. Ela testa se o total global bate com a
-              soma diária, se a ocupação faz sentido, se os ausentes foram calculados e se as
-              fontes estão anexadas antes da aprovação.
+              A IA não escreve apenas a conclusão. Ela testa se totais, metas, variações,
+              bases e fontes estão coerentes antes de transformar os dados em análise
+              executiva para decisão.
             </p>
           </div>
           <div class="portfolio-grid">
             <article class="portfolio-card audit-card-public">
               <div class="audit-card-visual">
                 <strong>2.019</strong>
-                <span>Total geral informado</span>
+                <span>Total informado</span>
               </div>
               <div>
                 <span>Inconsistência</span>
-                <h3>Soma diária indica 2.310 acessos no período.</h3>
+                <h3>Soma das fontes indica 2.310 registros no período.</h3>
               </div>
             </article>
             <article class="portfolio-card audit-card-public">
               <div class="audit-card-visual">
                 <strong>47%</strong>
-                <span>Ocupação estimada</span>
+                <span>Meta atingida</span>
               </div>
               <div>
                 <span>Validação</span>
-                <h3>Ocupação calculada com acessos únicos e público esperado.</h3>
+                <h3>Resultado recalculado com base validada e meta declarada.</h3>
               </div>
             </article>
             <article class="portfolio-card audit-card-public">
@@ -430,16 +418,16 @@
           </div>
           <div class="section client-strip" aria-label="Regras de validação do relatório">
             <article>
-              <strong>Total de acessos</strong>
-              <span>Total global versus soma por dia</span>
+              <strong>Total</strong>
+              <span>Total global versus soma das fontes</span>
             </article>
             <article>
-              <strong>Ausentes</strong>
-              <span>Público esperado menos pessoas que acessaram</span>
+              <strong>Variação</strong>
+              <span>Período atual versus base comparativa</span>
             </article>
             <article>
-              <strong>Métodos</strong>
-              <span>Facial, QR/cartão e outros fechando no total</span>
+              <strong>Metas</strong>
+              <span>Resultado realizado versus objetivo declarado</span>
             </article>
             <article>
               <strong>Fontes</strong>
@@ -468,22 +456,22 @@
               <p class="eyebrow">MVP</p>
               <h2>Sete telas para sair da ideia e chegar a um produto demonstrável.</h2>
               <p>
-                O protótipo concentra o fluxo principal: login, evento, anexos, dados
+                O protótipo concentra o fluxo principal: login, operação, anexos, dados
                 extraídos, auditoria, geração e versionamento.
               </p>
             </div>
             <div class="testimonial-grid">
               <article class="testimonial-card">
                 <p>
-                  Cadastro do evento com cliente, período, local, agendas, portões,
-                  equipamentos, método de acesso e responsável técnico.
+                  Cadastro da operação com cliente, período, área, fonte principal,
+                  indicadores esperados e responsável técnico.
                 </p>
                 <strong>1 a 3</strong>
                 <span>Login, lista e cadastro</span>
               </article>
               <article class="testimonial-card">
                 <p>
-                  Central de anexos para PDF, imagens, CSV e XLSX, com relação ao evento,
+                  Central de anexos para PDF, imagens, CSV e XLSX, com relação ao negócio,
                   tipo de fonte, descrição e responsável pelo upload.
                 </p>
                 <strong>4 e 5</strong>
@@ -504,7 +492,7 @@
         <section class="section contact-section" id="contato">
           <div>
             <p class="eyebrow">Demonstração</p>
-            <h2>Valide o Report AI com um evento real ou com o Pré-Junino demonstrativo.</h2>
+            <h2>Valide o Report AI com uma base real de negócio ou com a operação demonstrativa.</h2>
             <p>
               Use o painel interno para navegar pelo MVP ou envie uma mensagem para evoluir
               o protótipo para integração com API, banco, PDF real e Word.
@@ -548,7 +536,7 @@
                 id="contactMessage"
                 rows="4"
                 name="mensagem"
-                placeholder="Conte qual evento ou fluxo você quer validar"
+                placeholder="Conte qual negócio, setor ou fluxo você quer validar"
                 maxlength="250"
                 aria-describedby="contactMessageCounter"
               ></textarea>
@@ -576,11 +564,11 @@
             <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
             <span>
               <strong>Acesse Report AI</strong>
-              <small>Relatórios operacionais para eventos</small>
+              <small>Relatórios inteligentes para negócios</small>
             </span>
           </a>
           <address class="footer-address">
-            MVP demonstrativo para geração, auditoria e versionamento de relatórios de eventos.
+            MVP demonstrativo para leitura de dados, auditoria e versionamento de relatórios de negócio.
             <a
               href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20validar%20o%20Acesse%20Report%20AI."
               target="_blank"
@@ -590,18 +578,6 @@
             </a>
           </address>
         </div>
-
-        <section class="footer-location" aria-labelledby="footerLocationTitle">
-          <h2 id="footerLocationTitle">Entrega do produto</h2>
-          <div class="footer-product-grid">
-            <span>Relatório básico</span>
-            <span>Relatório detalhado</span>
-            <span>Auditoria automática</span>
-            <span>Score 0 a 10</span>
-            <span>Anexos rastreáveis</span>
-            <span>PDF, Word e Sheets</span>
-          </div>
-        </section>
       </footer>
     </div>
 
@@ -614,7 +590,7 @@
           <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
           <strong>Acesse Report AI</strong>
         </div>
-        <h2>Acesso ao protótipo</h2>
+        <h2>Acesse sua conta</h2>
         <p>Entre como Revisor ou Super Admin para navegar pelo MVP de relatórios operacionais.</p>
         <form class="login-form" id="loginForm">
           <button class="button button-google" type="button" id="googleLogin">
@@ -816,6 +792,16 @@
 
         <section class="app-view active" data-panel="dashboard">
           <div class="dashboard-grid" id="dashboardCards"></div>
+          <section class="workspace-panel latest-reports-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Suas últimas gerações de relatórios</h2>
+                <span>Continue de onde parou</span>
+              </div>
+              <span class="badge manual" id="latestReportGenerationCount">0 gerações</span>
+            </div>
+            <div class="report-generation-grid" id="latestReportGenerationList"></div>
+          </section>
           <div class="app-columns">
             <section class="workspace-panel">
               <div class="panel-heading">
@@ -880,15 +866,15 @@
           <div class="app-columns">
             <section class="workspace-panel">
               <div class="panel-heading">
-                <h2>Cadastrar evento</h2>
+                <h2>Cadastrar relatório</h2>
               </div>
               <form class="stack-form" id="eventForm">
                 <label>
-                  Nome do evento
-                  <input name="name" required placeholder="Ex: Cobertura de seminário" />
+                  Nome do relatório
+                  <input name="name" required placeholder="Ex: Resultado comercial mensal" />
                 </label>
                 <label>
-                  Empreendimento
+                  Negócio ou cliente
                   <select name="client" id="eventClient"></select>
                 </label>
                 <label>
@@ -898,34 +884,34 @@
                 <label>
                   Tipo
                   <select name="type">
-                    <option>Seminário</option>
-                    <option>Show</option>
-                    <option>Treinamento</option>
-                    <option>Condomínio</option>
+                    <option>Comercial</option>
+                    <option>Financeiro</option>
+                    <option>Operacional</option>
+                    <option>Atendimento</option>
                     <option>Demanda especial</option>
                   </select>
                 </label>
-                <button class="button button-primary" type="submit">Salvar evento</button>
+                <button class="button button-primary" type="submit">Salvar relatório</button>
               </form>
             </section>
             <section class="workspace-panel">
               <div class="panel-heading">
-                <h2>Montar equipe</h2>
-                <span id="selectedEventName">Selecione um evento</span>
+                <h2>Vincular responsáveis</h2>
+                <span id="selectedEventName">Selecione um relatório</span>
               </div>
               <select class="wide-field" id="eventSelect"></select>
               <input
                 class="search-input"
                 id="eventEmployeeSearch"
                 type="search"
-                placeholder="Pesquisar funcionário para adicionar"
+                placeholder="Pesquisar responsável para adicionar"
               />
               <div class="team-picker" id="teamPicker"></div>
             </section>
           </div>
           <section class="workspace-panel">
             <div class="panel-heading">
-              <h2>Eventos cadastrados</h2>
+              <h2>Relatórios cadastrados</h2>
             </div>
             <div class="compact-list" id="eventList"></div>
           </section>
@@ -1189,10 +1175,10 @@
             <section class="report-ai-hero">
               <div>
                 <p class="eyebrow">Acesse Report AI</p>
-                <h2>Gerador inteligente de relatórios operacionais para eventos</h2>
+                <h2>Gerador inteligente de relatórios para qualquer negócio</h2>
                 <p>
-                  Consolide dashboard, anexos, dados de acesso e auditoria automática em uma
-                  entrega executiva pronta para produtor, revisor e cliente.
+                  Consolide dashboards, planilhas, PDFs, imagens e indicadores em uma
+                  análise executiva pronta para gestores, revisores e clientes.
                 </p>
               </div>
               <div class="report-score-card" aria-label="Score de confiabilidade do relatório">
@@ -1205,7 +1191,7 @@
             <div class="dashboard-grid dashboard-grid-compact report-ai-metrics" id="reportAiCards"></div>
 
             <nav class="report-step-tabs" aria-label="Fluxo do Acesse Report AI">
-              <button class="active" type="button" data-report-screen="events">Eventos</button>
+              <button class="active" type="button" data-report-screen="events">Operações</button>
               <button type="button" data-report-screen="event">Cadastro</button>
               <button type="button" data-report-screen="uploads">Uploads</button>
               <button type="button" data-report-screen="extraction">Dados</button>
@@ -1219,8 +1205,8 @@
                 <section class="workspace-panel">
                   <div class="panel-heading">
                     <div>
-                      <h2>Eventos com relatório</h2>
-                      <span id="reportAiEventCount">0 eventos</span>
+                      <h2>Operações com relatório</h2>
+                      <span id="reportAiEventCount">0 operações</span>
                     </div>
                     <button class="button button-primary" type="button" id="startNewReportEvent">
                       Novo relatório
@@ -1235,8 +1221,8 @@
                   </div>
                   <div class="report-workflow">
                     <article><strong>1</strong><span>Login com Gmail e perfis de acesso</span></article>
-                    <article><strong>2</strong><span>Lista de eventos e status de entrega</span></article>
-                    <article><strong>3</strong><span>Cadastro operacional do evento</span></article>
+                    <article><strong>2</strong><span>Lista de operações e status do relatório</span></article>
+                    <article><strong>3</strong><span>Cadastro operacional do negócio</span></article>
                     <article><strong>4</strong><span>Upload de PDF, imagem, CSV ou XLSX</span></article>
                     <article><strong>5</strong><span>Prévia dos indicadores extraídos</span></article>
                     <article><strong>6</strong><span>Auditoria com nota de confiabilidade</span></article>
@@ -1250,21 +1236,21 @@
               <section class="workspace-panel">
                 <div class="panel-heading">
                   <div>
-                    <h2>Cadastro do evento</h2>
+                    <h2>Cadastro da operação</h2>
                     <span>Identificação, período e operação</span>
                   </div>
-                  <span class="badge active" id="reportSelectedEventBadge">Evento selecionado</span>
+                  <span class="badge active" id="reportSelectedEventBadge">Operação selecionada</span>
                 </div>
                 <form class="stack-form" id="reportAiEventForm">
                   <input name="id" type="hidden" />
                   <div class="form-row">
                     <label>
-                      Nome do evento
-                      <input name="eventName" required placeholder="Pré-Junino" />
+                      Nome da operação
+                      <input name="eventName" required placeholder="Resumo comercial mensal" />
                     </label>
                     <label>
-                      Cliente/contratante
-                      <input name="clientName" required placeholder="Produtor ou contratante" />
+                      Cliente ou área
+                      <input name="clientName" required placeholder="Diretoria, cliente ou unidade" />
                     </label>
                   </div>
                   <div class="form-row">
@@ -1278,8 +1264,8 @@
                     </label>
                   </div>
                   <label>
-                    Local
-                    <input name="location" required placeholder="Local do evento" />
+                    Área, unidade ou contexto
+                    <input name="location" required placeholder="Comercial, financeiro, operação ou filial" />
                   </label>
                   <div class="form-row">
                     <label>
@@ -1291,32 +1277,32 @@
                       <input name="endDate" type="date" required />
                     </label>
                     <label>
-                      Quantidade de dias
+                      Períodos analisados
                       <input name="days" type="number" min="1" step="1" required />
                     </label>
                   </div>
                   <div class="form-row">
                     <label>
-                      Agendas vinculadas
-                      <input name="agendas" placeholder="Geral, VIP, Equipe" />
+                      Categorias ou segmentos
+                      <input name="agendas" placeholder="Receita, custos, vendas, atendimento" />
                     </label>
                     <label>
-                      Portões utilizados
-                      <input name="gates" placeholder="Entrada A, Entrada B" />
+                      Fontes principais
+                      <input name="gates" placeholder="ERP, CRM, planilha, dashboard" />
                     </label>
                   </div>
                   <div class="form-row">
                     <label>
-                      Equipamentos utilizados
-                      <input name="devices" placeholder="Intelbras 5532 MF, LPR, catracas" />
+                      Sistemas ou documentos usados
+                      <input name="devices" placeholder="Power BI, Excel, PDF, sistema interno" />
                     </label>
                     <label>
-                      Método principal de acesso
+                      Tipo principal de indicador
                       <select name="mainMethod">
-                        <option>Reconhecimento facial</option>
-                        <option>QR Code</option>
-                        <option>Cartão RFID</option>
-                        <option>Lista manual</option>
+                        <option>Financeiro</option>
+                        <option>Comercial</option>
+                        <option>Operacional</option>
+                        <option>Atendimento</option>
                         <option>Misto</option>
                       </select>
                     </label>
@@ -1355,7 +1341,7 @@
                     </label>
                     <div class="form-row">
                       <label>
-                        Relação com o evento
+                        Relação com o relatório
                         <select name="relation">
                           <option>Dashboard principal</option>
                           <option>Exportação analítica</option>
@@ -1402,73 +1388,73 @@
                 <form class="stack-form report-metrics-form" id="reportMetricsForm">
                   <div class="form-row">
                     <label>
-                      Público cadastrado
+                      Base cadastrada
                       <input name="registeredPublic" type="number" min="0" step="1" required />
                     </label>
                     <label>
-                      Público esperado
+                      Meta ou base esperada
                       <input name="expectedPublic" type="number" min="0" step="1" required />
                     </label>
                     <label>
-                      Total de acessos
+                      Total de registros
                       <input name="totalAccesses" type="number" min="0" step="1" required />
                     </label>
                     <label>
-                      Acessos únicos
+                      Registros únicos
                       <input name="uniqueAccesses" type="number" min="0" step="1" required />
                     </label>
                   </div>
                   <div class="form-row">
                     <label>
-                      Ocupação informada (%)
+                      Resultado informado (%)
                       <input name="occupancyPercent" type="number" min="0" max="100" step="0.1" required />
                     </label>
                     <label>
-                      Ausentes informados
+                      Diferença informada
                       <input name="absentPublic" type="number" min="0" step="1" required />
                     </label>
                     <label>
-                      Horário de pico
+                      Marco crítico
                       <input name="peakTime" type="time" required />
                     </label>
                     <label>
-                      Entradas no pico
+                      Volume no marco
                       <input name="peakEntries" type="number" min="0" step="1" required />
                     </label>
                   </div>
                   <div class="form-row">
                     <label>
-                      Velocidade no pico
-                      <input name="peakSpeed" placeholder="6 acessos/min" />
+                      Ritmo no marco
+                      <input name="peakSpeed" placeholder="6 registros/min" />
                     </label>
                     <label>
-                      Reconhecimento facial
+                      Fonte principal
                       <input name="facialAccesses" type="number" min="0" step="1" />
                     </label>
                     <label>
-                      QR/cartão
+                      Fonte secundária
                       <input name="qrCardAccesses" type="number" min="0" step="1" />
                     </label>
                     <label>
-                      Outros métodos
+                      Outras fontes
                       <input name="otherAccesses" type="number" min="0" step="1" />
                     </label>
                   </div>
                   <div class="form-row">
                     <label>
-                      Dia 1
+                      Período 1
                       <input name="dayOneDate" type="date" required />
                     </label>
                     <label>
-                      Acessos dia 1
+                      Registros período 1
                       <input name="dayOneAccesses" type="number" min="0" step="1" required />
                     </label>
                     <label>
-                      Dia 2
+                      Período 2
                       <input name="dayTwoDate" type="date" required />
                     </label>
                     <label>
-                      Acessos dia 2
+                      Registros período 2
                       <input name="dayTwoAccesses" type="number" min="0" step="1" required />
                     </label>
                   </div>
@@ -1591,7 +1577,7 @@
                   </label>
                   <label>
                     Empresa
-                    <input name="company" placeholder="Empresa ou produtor" autocomplete="organization" />
+                    <input name="company" placeholder="Empresa ou cliente" autocomplete="organization" />
                   </label>
                 </div>
                 <div class="form-row">
@@ -1622,7 +1608,7 @@
                     <option>Integração com dashboard/API</option>
                     <option>Geração real de PDF e Word</option>
                     <option>Auditoria avançada de inconsistências</option>
-                    <option>Plano por evento</option>
+                    <option>Plano por relatório</option>
                     <option>Plano mensal</option>
                     <option>Enterprise</option>
                   </select>
@@ -1741,7 +1727,7 @@
               </button>
             </div>
             <div class="calendar-legend">
-              <span><i class="legend-dot event"></i>Eventos</span>
+              <span><i class="legend-dot event"></i>Relatórios</span>
               <span><i class="legend-dot certificate"></i>Atestados</span>
               <span><i class="legend-dot point"></i>Ponto/ocorrência</span>
             </div>
@@ -1797,7 +1783,7 @@
           <section class="workspace-panel">
             <div class="panel-heading">
               <h2>Logs e auditoria</h2>
-              <span>Eventos recentes</span>
+              <span>Registros recentes</span>
             </div>
             <div class="compact-list">
               <article class="list-item">
@@ -2033,7 +2019,7 @@
             <select name="type">
               <option>Empresa</option>
               <option>Condomínio</option>
-              <option>Evento</option>
+              <option>Projeto</option>
               <option>Hospital</option>
               <option>Outro</option>
             </select>
@@ -2305,6 +2291,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20260607-hero-dynamic-2" defer></script>
+    <script src="app.js?v=20260607-latest-reports-1" defer></script>
   </body>
 </html>

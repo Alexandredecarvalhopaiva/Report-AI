@@ -51,7 +51,7 @@
       content="https://alexandredecarvalhopaiva.github.io/Report-AI/assets/report-ai-logo.png"
     />
     <link rel="icon" href="assets/report-ai-logo.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=20260606-leads-crud-1" />
+    <link rel="stylesheet" href="styles.css?v=20260607-hero-dynamic-2" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -230,7 +230,7 @@
 
       <main>
         <section class="hero hero-product" id="inicio">
-          <div class="hero-dashboard-scene" aria-hidden="true">
+          <div class="hero-dashboard-scene" data-hero-dashboard aria-label="Painel demonstrativo interativo de indicadores do relatório">
             <div class="scene-window scene-main">
               <div class="scene-topbar">
                 <span></span>
@@ -240,38 +240,78 @@
               </div>
               <div class="scene-metrics">
                 <article>
-                  <small>Total de acessos</small>
-                  <strong>2.019</strong>
-                  <span>Registros no período</span>
+                  <small>Acessos do dia</small>
+                  <strong data-hero-total data-hero-dynamic>780</strong>
+                  <span data-hero-total-label>Dia 4 · pico operacional</span>
                 </article>
                 <article>
                   <small>Score</small>
-                  <strong>7,9</strong>
-                  <span>Com inconsistência</span>
+                  <strong data-hero-score data-hero-dynamic>6,9</strong>
+                  <span data-hero-score-label>Revisão recomendada</span>
                 </article>
                 <article>
                   <small>Ocupação</small>
-                  <strong>47%</strong>
-                  <span>Público esperado</span>
+                  <strong data-hero-occupancy data-hero-dynamic>61%</strong>
+                  <span data-hero-occupancy-label>Público esperado</span>
                 </article>
               </div>
-              <div class="scene-chart">
-                <span style="height: 36%"></span>
-                <span style="height: 48%"></span>
-                <span style="height: 64%"></span>
-                <span style="height: 88%"></span>
-                <span style="height: 54%"></span>
-                <span style="height: 42%"></span>
+              <div class="scene-chart-shell">
+                <div class="scene-chart-head">
+                  <span data-hero-day-label>Dia 4 · pico de entrada</span>
+                  <strong data-hero-sync-label>Auditoria conectada ao gráfico</strong>
+                </div>
+                <div class="scene-chart" aria-label="Acessos por dia">
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 1" data-total="286" data-score="8,6" data-occupancy="38%" data-height="36" data-audit-title="Dados consistentes" data-audit-text="Dia 1 validado com entrada moderada e sem divergência entre fontes." data-audit-note="Pronto para compor o resumo executivo." data-report-version="v1.1" data-report-label="Parcial validado" data-spark-x="8" data-spark-y="28" aria-label="Dia 1, 286 acessos, score 8,6">
+                    <span class="scene-chart-value">286</span>
+                    <span class="scene-chart-fill" style="height: 36%"></span>
+                    <span class="scene-chart-label">D1</span>
+                  </button>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 2" data-total="412" data-score="8,2" data-occupancy="44%" data-height="48" data-audit-title="Volume em crescimento" data-audit-text="Dia 2 elevou os acessos e manteve a taxa de ocupação dentro do esperado." data-audit-note="Comparar com credenciais emitidas." data-report-version="v1.2" data-report-label="Comparativo atualizado" data-spark-x="56" data-spark-y="22" aria-label="Dia 2, 412 acessos, score 8,2">
+                    <span class="scene-chart-value">412</span>
+                    <span class="scene-chart-fill" style="height: 48%"></span>
+                    <span class="scene-chart-label">D2</span>
+                  </button>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 3" data-total="531" data-score="7,8" data-occupancy="52%" data-height="64" data-audit-title="Atenção à soma diária" data-audit-text="Dia 3 indica aceleração de entrada e pede conferência da planilha de acessos únicos." data-audit-note="Anexar exportação analítica ao relatório." data-report-version="v1.3" data-report-label="Evidências anexadas" data-spark-x="104" data-spark-y="34" aria-label="Dia 3, 531 acessos, score 7,8">
+                    <span class="scene-chart-value">531</span>
+                    <span class="scene-chart-fill" style="height: 64%"></span>
+                    <span class="scene-chart-label">D3</span>
+                  </button>
+                  <button class="scene-chart-bar is-active" type="button" data-hero-bar data-day="Dia 4" data-total="780" data-score="6,9" data-occupancy="61%" data-height="88" data-audit-title="Pico operacional" data-audit-text="Dia 4 concentrou 780 acessos e acendeu a revisão automática de pico por hora." data-audit-note="Gerar comentário executivo antes do envio." data-report-version="v1.4" data-report-label="Pico explicado" data-spark-x="152" data-spark-y="18" aria-label="Dia 4, 780 acessos, score 6,9">
+                    <span class="scene-chart-value">780</span>
+                    <span class="scene-chart-fill" style="height: 88%"></span>
+                    <span class="scene-chart-label">D4</span>
+                  </button>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 5" data-total="509" data-score="8,4" data-occupancy="53%" data-height="54" data-audit-title="Retomada estável" data-audit-text="Dia 5 reduziu o pico e estabilizou a curva de acessos com baixa divergência." data-audit-note="Resumo pronto para aprovação." data-report-version="v1.5" data-report-label="Curva estabilizada" data-spark-x="200" data-spark-y="42" aria-label="Dia 5, 509 acessos, score 8,4">
+                    <span class="scene-chart-value">509</span>
+                    <span class="scene-chart-fill" style="height: 54%"></span>
+                    <span class="scene-chart-label">D5</span>
+                  </button>
+                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Dia 6" data-total="372" data-score="8,8" data-occupancy="41%" data-height="42" data-audit-title="Fechamento consistente" data-audit-text="Dia 6 encerrou o ciclo com queda prevista de fluxo e alta confiabilidade." data-audit-note="Liberar versão final do relatório." data-report-version="v1.6" data-report-label="Entrega final" data-spark-x="248" data-spark-y="31" aria-label="Dia 6, 372 acessos, score 8,8">
+                    <span class="scene-chart-value">372</span>
+                    <span class="scene-chart-fill" style="height: 42%"></span>
+                    <span class="scene-chart-label">D6</span>
+                  </button>
+                </div>
+                <div class="scene-sparkline" aria-hidden="true">
+                  <span>Score de confiança</span>
+                  <svg viewBox="0 0 260 72" preserveAspectRatio="none">
+                    <polyline points="8,28 56,22 104,34 152,18 200,42 248,31"></polyline>
+                    <circle data-hero-spark-point cx="152" cy="18" r="5"></circle>
+                  </svg>
+                </div>
+                <div class="scene-presentation-progress" aria-hidden="true">
+                  <span data-hero-progress></span>
+                </div>
               </div>
             </div>
             <div class="scene-window scene-audit">
-              <strong>Inconsistência detectada</strong>
-              <p>Total geral: 2.019 · soma diária: 2.310</p>
-              <span>Solicitar exportação analítica antes do envio</span>
+              <strong data-hero-audit-title>Pico operacional</strong>
+              <p data-hero-audit-text>Dia 4 concentrou 780 acessos e acendeu a revisão automática de pico por hora.</p>
+              <span data-hero-audit-note>Gerar comentário executivo antes do envio.</span>
             </div>
             <div class="scene-window scene-report">
-              <strong>v1.0</strong>
-              <span>Relatório detalhado</span>
+              <strong data-hero-report-version data-hero-dynamic>v1.4</strong>
+              <span data-hero-report-label>Pico explicado</span>
               <span>PDF · Word · Sheets</span>
             </div>
           </div>
@@ -2265,6 +2305,6 @@
       </form>
     </dialog>
 
-    <script src="app.js?v=20260606-leads-crud-1" defer></script>
+    <script src="app.js?v=20260607-hero-dynamic-2" defer></script>
   </body>
 </html>

@@ -512,6 +512,7 @@ function setupPublicSite() {
   setupSiteNavObserver();
   setActiveSiteNavLink(window.location.hash);
   setupContactForm();
+  setupHeroDashboardInteraction();
 
   const setPublicMenuOpen = (isOpen) => {
     siteNav.classList.toggle("open", isOpen);
@@ -602,6 +603,306 @@ function setupPublicSite() {
       setPublicMenuOpen(false);
     }
   });
+}
+
+function setupHeroDashboardInteraction() {
+  const scene = document.querySelector("[data-hero-dashboard]");
+  if (!scene) return;
+
+  const bars = Array.from(scene.querySelectorAll("[data-hero-bar]"));
+  if (!bars.length) return;
+
+  const fields = {
+    total: scene.querySelector("[data-hero-total]"),
+    totalLabel: scene.querySelector("[data-hero-total-label]"),
+    score: scene.querySelector("[data-hero-score]"),
+    scoreLabel: scene.querySelector("[data-hero-score-label]"),
+    occupancy: scene.querySelector("[data-hero-occupancy]"),
+    occupancyLabel: scene.querySelector("[data-hero-occupancy-label]"),
+    dayLabel: scene.querySelector("[data-hero-day-label]"),
+    syncLabel: scene.querySelector("[data-hero-sync-label]"),
+    auditTitle: scene.querySelector("[data-hero-audit-title]"),
+    auditText: scene.querySelector("[data-hero-audit-text]"),
+    auditNote: scene.querySelector("[data-hero-audit-note]"),
+    reportVersion: scene.querySelector("[data-hero-report-version]"),
+    reportLabel: scene.querySelector("[data-hero-report-label]"),
+  };
+  const metricCards = Array.from(scene.querySelectorAll(".scene-metrics article"));
+  const chart = scene.querySelector(".scene-chart");
+  const chartShell = scene.querySelector(".scene-chart-shell");
+  const progressBar = scene.querySelector("[data-hero-progress]");
+  const sparkPoint = scene.querySelector("[data-hero-spark-point]");
+  const reducedMotionQuery = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : { matches: false };
+  let activeIndex = Math.max(0, bars.findIndex((bar) => bar.classList.contains("is-active")));
+  let intervalId = null;
+  let changeTimer = null;
+  let interactionTimer = null;
+  let changeToken = 0;
+  const activeAnimations = new Map();
+
+  const setText = (element, value) => {
+    if (element && value) {
+      element.textContent = value;
+    }
+  };
+
+  const parseHeroNumber = (value) => {
+    const normalized = String(value ?? "")
+      .replace(/^v/i, "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .replace(/[^\d.-]/g, "");
+    const number = Number.parseFloat(normalized);
+    return Number.isFinite(number) ? number : null;
+  };
+
+  const formatHeroNumber = (number, template) => {
+    if (String(template).includes("%")) {
+      return `${Math.round(number)}%`;
+    }
+    if (String(template).includes(",")) {
+      const decimals = String(template).split(",")[1]?.replace(/\D/g, "").length || 1;
+      return number.toFixed(decimals).replace(".", ",");
+    }
+    return Math.round(number).toLocaleString("pt-BR");
+  };
+
+  const replayDataMotion = (element) => {
+    if (!element || reducedMotionQuery.matches) return;
+    element.classList.remove("is-presenting");
+    void element.offsetWidth;
+    element.classList.add("is-presenting");
+    window.setTimeout(() => element.classList.remove("is-presenting"), 720);
+  };
+
+  const animateDataText = (element, value, { instant = false } = {}) => {
+    if (!element || !value) return;
+
+    const targetText = String(value);
+    const targetNumber = parseHeroNumber(targetText);
+    const currentNumber = parseHeroNumber(element.textContent);
+    const shouldCount =
+      !instant &&
+      !reducedMotionQuery.matches &&
+      !targetText.trim().toLowerCase().startsWith("v") &&
+      targetNumber !== null &&
+      currentNumber !== null;
+
+    if (activeAnimations.has(element)) {
+      window.cancelAnimationFrame(activeAnimations.get(element));
+      activeAnimations.delete(element);
+    }
+
+    if (!shouldCount) {
+      element.textContent = targetText;
+      replayDataMotion(element);
+      return;
+    }
+
+    const duration = 820;
+    const start = currentNumber;
+    const delta = targetNumber - start;
+    const startTime = window.performance.now();
+
+    const tick = (time) => {
+      const progress = Math.min((time - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      element.textContent = formatHeroNumber(start + delta * eased, targetText);
+      if (progress < 1) {
+        activeAnimations.set(element, window.requestAnimationFrame(tick));
+      } else {
+        element.textContent = targetText;
+        activeAnimations.delete(element);
+      }
+    };
+
+    replayDataMotion(element);
+    activeAnimations.set(element, window.requestAnimationFrame(tick));
+  };
+
+  const setProgress = (index) => {
+    if (!progressBar) return;
+    progressBar.style.setProperty("--hero-progress", `${((index + 1) / bars.length) * 100}%`);
+  };
+
+  const setFocusLine = (index) => {
+    if (!chartShell) return;
+    chartShell.style.setProperty("--hero-chart-focus-x", `${((index + 0.5) / bars.length) * 100}%`);
+  };
+
+  const showInteraction = () => {
+    window.clearTimeout(interactionTimer);
+    scene.classList.add("is-interacting");
+  };
+
+  const settleInteraction = () => {
+    window.clearTimeout(interactionTimer);
+    interactionTimer = window.setTimeout(() => {
+      scene.classList.remove("is-interacting");
+    }, 720);
+  };
+
+  const presentBarData = (bar, { instant = false } = {}) => {
+    animateDataText(fields.total, bar.dataset.total, { instant });
+    setText(fields.totalLabel, `${bar.dataset.day} · pico operacional`);
+    animateDataText(fields.score, bar.dataset.score, { instant });
+    setText(fields.scoreLabel, Number.parseFloat((bar.dataset.score || "").replace(",", ".")) < 8
+      ? "Revisão recomendada"
+      : "Alta confiabilidade");
+    animateDataText(fields.occupancy, bar.dataset.occupancy, { instant });
+    setText(fields.occupancyLabel, "Público esperado");
+    setText(fields.dayLabel, `${bar.dataset.day} · ${bar.dataset.total} acessos`);
+    setText(fields.syncLabel, "Auditoria conectada ao gráfico");
+    setText(fields.auditTitle, bar.dataset.auditTitle);
+    setText(fields.auditText, bar.dataset.auditText);
+    setText(fields.auditNote, bar.dataset.auditNote);
+    animateDataText(fields.reportVersion, bar.dataset.reportVersion, { instant });
+    setText(fields.reportLabel, bar.dataset.reportLabel);
+
+    metricCards.forEach((card) => {
+      card.classList.remove("is-presenting");
+      if (!reducedMotionQuery.matches && !instant) {
+        void card.offsetWidth;
+        card.classList.add("is-presenting");
+        window.setTimeout(() => card.classList.remove("is-presenting"), 420);
+      }
+    });
+
+    if (sparkPoint) {
+      sparkPoint.setAttribute("cx", bar.dataset.sparkX || "152");
+      sparkPoint.setAttribute("cy", bar.dataset.sparkY || "18");
+    }
+  };
+
+  const setActiveBar = (index, { instant = false } = {}) => {
+    const bar = bars[index];
+    if (!bar) return;
+
+    activeIndex = index;
+    setProgress(activeIndex);
+    setFocusLine(activeIndex);
+    bars.forEach((item, itemIndex) => {
+      item.classList.toggle("is-active", itemIndex === activeIndex);
+      item.setAttribute("aria-pressed", String(itemIndex === activeIndex));
+    });
+
+    if (instant || reducedMotionQuery.matches) {
+      scene.classList.remove("is-changing");
+      presentBarData(bar, { instant: true });
+      return;
+    }
+
+    const token = ++changeToken;
+    window.clearTimeout(changeTimer);
+    scene.classList.add("is-changing");
+    changeTimer = window.setTimeout(() => {
+      if (token !== changeToken) return;
+      presentBarData(bar);
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => scene.classList.remove("is-changing"), 80);
+      });
+    }, 180);
+  };
+
+  const stopAutoplay = () => {
+    if (intervalId) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+    }
+    scene.classList.remove("is-autoplaying");
+  };
+
+  const startAutoplay = () => {
+    if (reducedMotionQuery.matches || intervalId || bars.length < 2) return;
+    scene.classList.add("is-autoplaying");
+    intervalId = window.setInterval(() => {
+      setActiveBar((activeIndex + 1) % bars.length);
+    }, 3200);
+  };
+
+  bars.forEach((bar, index) => {
+    bar.addEventListener("pointerenter", () => {
+      showInteraction();
+      setActiveBar(index);
+    });
+    bar.addEventListener("focus", () => {
+      showInteraction();
+      setActiveBar(index);
+    });
+    bar.addEventListener("click", () => {
+      showInteraction();
+      setActiveBar(index);
+      settleInteraction();
+    });
+    bar.addEventListener("touchstart", () => {
+      showInteraction();
+      setActiveBar(index);
+      settleInteraction();
+    }, { passive: true });
+    bar.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      showInteraction();
+      const nextIndex = event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? bars.length - 1
+          : event.key === "ArrowLeft"
+            ? Math.max(0, index - 1)
+            : Math.min(bars.length - 1, index + 1);
+      bars[nextIndex]?.focus();
+      setActiveBar(nextIndex);
+    });
+  });
+
+  chart?.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "mouse" && event.buttons > 1) return;
+    const rect = chart.getBoundingClientRect();
+    const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 0.999);
+    const index = Math.min(bars.length - 1, Math.floor(ratio * bars.length));
+    showInteraction();
+    if (index !== activeIndex) {
+      setActiveBar(index);
+    } else {
+      setFocusLine(index);
+    }
+  });
+
+  scene.addEventListener("pointerenter", () => {
+    showInteraction();
+    stopAutoplay();
+  });
+  scene.addEventListener("pointerleave", () => {
+    settleInteraction();
+    startAutoplay();
+  });
+  scene.addEventListener("focusin", () => {
+    showInteraction();
+    stopAutoplay();
+  });
+  scene.addEventListener("focusout", () => {
+    window.setTimeout(() => {
+      if (!scene.contains(document.activeElement)) {
+        settleInteraction();
+        startAutoplay();
+      }
+    }, 0);
+  });
+
+  if (typeof reducedMotionQuery.addEventListener === "function") {
+    reducedMotionQuery.addEventListener("change", (event) => {
+      if (event.matches) {
+        stopAutoplay();
+      } else {
+        startAutoplay();
+      }
+    });
+  }
+
+  setActiveBar(activeIndex, { instant: true });
+  startAutoplay();
 }
 
 function setupContactForm() {

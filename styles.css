@@ -611,7 +611,7 @@ button:focus-visible {
 }
 
 .hero-product {
-  min-height: 94svh;
+  min-height: 82svh;
   overflow: hidden;
   background: var(--nordeste-noite);
   isolation: isolate;
@@ -1278,7 +1278,7 @@ button:focus-visible {
 .section {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: clamp(58px, 7vw, 82px) 0;
+  padding: clamp(40px, 5vw, 62px) 0;
 }
 
 .intro-section,
@@ -4593,6 +4593,72 @@ button.calendar-day:focus-visible {
 
 .modal-content {
   width: 100%;
+}
+
+/* ─── Desktop hero: 2-column layout ─── */
+@media (min-width: 781px) {
+  .hero-product {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "content scene"
+      "metrics metrics";
+    align-items: center;
+    padding: clamp(86px, 10vh, 112px) var(--page-gutter) 0;
+    gap: 0 clamp(24px, 3vw, 52px);
+    overflow: visible;
+  }
+
+  .hero-content {
+    grid-area: content;
+    max-width: none;
+    padding-bottom: 40px;
+  }
+
+  .hero-dashboard-scene {
+    grid-area: scene;
+    position: relative;
+    inset: auto;
+    overflow: visible;
+    pointer-events: auto;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .hero-product .scene-main {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .hero-metrics {
+    grid-area: metrics;
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .hero-product h1 {
+    font-size: clamp(2.4rem, 4vw, 3.8rem);
+    line-height: 1;
+  }
+
+  .hero-lead {
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    margin-top: 18px;
+  }
+
+  .hero-actions {
+    margin-top: 22px;
+  }
 }
 
 @media (max-width: 1060px) {

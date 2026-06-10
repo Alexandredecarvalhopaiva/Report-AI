@@ -7036,3 +7036,53 @@ function showToast(message) {
   window.addEventListener('scroll', updateActive, { passive: true });
   updateActive();
 })();
+
+// ─── Mobile slide-in nav: close via backdrop, close-btn and links ───
+(function () {
+  const nav = document.getElementById('siteNav');
+  const menuBtn = document.getElementById('menuButton');
+  const closeBtn = document.getElementById('siteNavClose');
+  const backdrop = document.getElementById('siteNavBackdrop');
+  if (!nav) return;
+
+  function closeNav() {
+    nav.classList.remove('open');
+    if (menuBtn) {
+      menuBtn.classList.remove('is-open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = '';
+  }
+
+  function openNav() {
+    nav.classList.add('open');
+    if (menuBtn) {
+      menuBtn.classList.add('is-open');
+      menuBtn.setAttribute('aria-expanded', 'true');
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (menuBtn) {
+    // Override do event listener existente para mobile
+    const origHandler = menuBtn.onclick;
+    menuBtn.addEventListener('click', function (e) {
+      if (window.innerWidth > 780) return;
+      e.stopPropagation();
+      nav.classList.contains('open') ? closeNav() : openNav();
+    }, true);
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeNav);
+  if (backdrop) backdrop.addEventListener('click', closeNav);
+
+  // Fechar ao clicar em qualquer link com data-close-nav
+  nav.querySelectorAll('[data-close-nav]').forEach(el => {
+    el.addEventListener('click', closeNav);
+  });
+
+  // Fechar com ESC
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeNav();
+  });
+})();

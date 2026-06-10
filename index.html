@@ -199,38 +199,76 @@
         </button>
 
         <nav class="site-nav" id="siteNav" aria-label="Navegação principal">
+          <div class="site-nav-backdrop" id="siteNavBackdrop" aria-hidden="true"></div>
           <div class="site-nav-panel">
-            <div class="site-nav-panel-heading" aria-hidden="true">
-              <span>Destaques</span>
+            <!-- Cabeçalho do painel -->
+            <div class="site-nav-header">
+              <a class="site-nav-brand-link" href="#inicio">
+                <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
+                <span>
+                  <strong>Report AI</strong>
+                  <small>Especialistas digitais em análise</small>
+                </span>
+              </a>
+              <button class="site-nav-close-btn" type="button" id="siteNavClose" aria-label="Fechar menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M15 6l-6 6 6 6"/>
+                </svg>
+              </button>
             </div>
-            <div class="site-nav-links">
-              <a class="mobile-menu-link" href="#inicio">
-                <svg aria-hidden="true"><use href="#icon-home"></use></svg>
-                <span>Início</span>
-              </a>
-              <a href="#servicos">
-                <svg aria-hidden="true"><use href="#icon-activity"></use></svg>
-                <span>Produto</span>
-              </a>
-              <a class="mobile-menu-link" href="#sobre">
-                <svg aria-hidden="true"><use href="#icon-users"></use></svg>
-                <span>Visão</span>
-              </a>
-              <a class="desktop-menu-link" href="#clientes">
-                <span>Auditoria</span>
-              </a>
-              <a class="desktop-menu-link" href="#depoimentos">
-                <span>MVP</span>
-              </a>
-              <a class="mobile-menu-link" href="#contato">
-                <svg aria-hidden="true"><use href="#icon-message"></use></svg>
-                <span>Demonstração</span>
-              </a>
-              <a class="desktop-menu-link" href="#contato">
-                <span>Contato</span>
-              </a>
+
+            <!-- Seção Produto -->
+            <div class="site-nav-section">
+              <span class="site-nav-section-title">Produto</span>
+              <div class="site-nav-links">
+                <a href="#inicio" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-home"></use></svg>
+                  <span>Início</span>
+                </a>
+                <a href="#servicos" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-activity"></use></svg>
+                  <span>Como funciona</span>
+                </a>
+                <a href="#sobre" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-users"></use></svg>
+                  <span>Visão do produto</span>
+                </a>
+              </div>
             </div>
-            <a class="button button-dark" href="report-generator.html">
+
+            <!-- Seção Recursos -->
+            <div class="site-nav-section">
+              <span class="site-nav-section-title">Recursos</span>
+              <div class="site-nav-links">
+                <a href="#clientes" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-award"></use></svg>
+                  <span>Auditoria automática</span>
+                </a>
+                <a href="#depoimentos" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-report"></use></svg>
+                  <span>Fluxo do produto</span>
+                </a>
+                <a href="#contato" data-close-nav>
+                  <svg aria-hidden="true"><use href="#icon-message"></use></svg>
+                  <span>Demonstração</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Desktop links (hidden on mobile, needed for desktop nav) -->
+            <div class="site-nav-links site-nav-desktop-links">
+              <a class="desktop-menu-link" href="#clientes"><span>Auditoria</span></a>
+              <a class="desktop-menu-link" href="#depoimentos"><span>MVP</span></a>
+              <a class="desktop-menu-link" href="#contato"><span>Contato</span></a>
+            </div>
+
+            <!-- CTA -->
+            <a class="button button-primary site-nav-cta" href="report-generator.html">
+              ✨ Gerar relatório agora
+            </a>
+
+            <!-- Desktop CTA original -->
+            <a class="button button-dark site-nav-desktop-cta" href="report-generator.html">
               <span>Gerar relatório</span>
             </a>
           </div>

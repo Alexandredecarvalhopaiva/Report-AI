@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerar Relatório — Report AI</title>
+  <meta name="robots" content="noindex" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #A85F3A;
+      --brand-light: #F3EAE4;
+      --brand-dark: #7A3F22;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #fafafa;
+      --white: #ffffff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --error: #dc2626;
+      --radius: 12px;
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+    /* ── Header ── */
+    .top-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .top-bar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .top-bar-brand img { width: 28px; height: 28px; border-radius: 6px; }
+    .top-bar-brand strong { font-size: 15px; }
+    .top-bar-brand span { font-size: 12px; color: var(--muted); }
+    .back-link { font-size: 13px; color: var(--brand); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+    .page-title { margin-bottom: 32px; }
+    .page-title h1 { font-size: 26px; font-weight: 700; color: var(--brand); }
+    .page-title p { color: var(--muted); font-size: 15px; margin-top: 4px; }
+
+    /* ── Steps ── */
+    .steps { display: flex; gap: 0; margin-bottom: 36px; }
+    .step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; top: 16px; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+    .step.active:not(:last-child)::after, .step.done:not(:last-child)::after { background: var(--brand); }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--border); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; z-index: 1; transition: all .2s; }
+    .step.active .step-num { background: var(--brand); color: #fff; }
+    .step.done .step-num { background: var(--brand-dark); color: #fff; }
+    .step-label { font-size: 11px; color: var(--muted); text-align: center; }
+    .step.active .step-label { color: var(--brand); font-weight: 600; }
+
+    /* ── Cards / Sections ── */
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title .icon { width: 28px; height: 28px; background: var(--brand-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+    /* ── Form ── */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .field label span { color: var(--muted); font-weight: 400; }
+    .field select, .field input[type=text], .field input[type=date] {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; background: var(--white); color: var(--text);
+      transition: border-color .15s;
+    }
+    .field select:focus, .field input:focus { outline: none; border-color: var(--brand); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── Report type grid ── */
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .type-card { border: 2px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .15s; text-align: center; }
+    .type-card:hover { border-color: var(--brand); background: var(--brand-light); }
+    .type-card.selected { border-color: var(--brand); background: var(--brand-light); }
+    .type-card .type-icon { font-size: 22px; margin-bottom: 6px; }
+    .type-card .type-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
+    .type-card .type-specialist { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Upload ── */
+    .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px 20px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
+    .upload-zone:hover, .upload-zone.dragging { border-color: var(--brand); background: var(--brand-light); }
+    .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-zone .upload-icon { font-size: 32px; margin-bottom: 8px; }
+    .upload-zone p { font-size: 14px; color: var(--muted); }
+    .upload-zone strong { color: var(--brand); }
+
+    .file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .file-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+    .file-item .file-icon { font-size: 18px; }
+    .file-item .file-info { flex: 1; min-width: 0; }
+    .file-item .file-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-item .file-size { font-size: 11px; color: var(--muted); }
+    .file-item .file-status { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+    .file-item .file-status.ok { background: #dcfce7; color: var(--success); }
+    .file-item .file-status.reading { background: #fef9c3; color: var(--warning); }
+    .file-item .file-status.error { background: #fee2e2; color: var(--error); }
+    .file-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 2px 6px; border-radius: 4px; }
+    .file-remove:hover { background: #fee2e2; color: var(--error); }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; }
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-primary:hover { background: var(--brand-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-outline { background: transparent; color: var(--brand); border: 2px solid var(--brand); }
+    .btn-outline:hover { background: var(--brand-light); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #15803d; }
+    .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+    /* ── Loading ── */
+    .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.92); z-index: 200; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .loading-overlay.visible { display: flex; }
+    .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 15px; color: var(--text); font-weight: 600; }
+    .loading-sub { font-size: 13px; color: var(--muted); }
+
+    /* ── Report view ── */
+    #reportView { display: none; }
+    .report-header { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%); color: #fff; border-radius: var(--radius); padding: 32px; margin-bottom: 24px; }
+    .report-header .badge { display: inline-block; background: rgba(255,255,255,.2); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; letter-spacing: .5px; text-transform: uppercase; }
+    .report-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .report-header .report-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; opacity: .85; margin-top: 12px; }
+    .report-header .report-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .score-bar { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+    .score-label { font-size: 12px; font-weight: 700; }
+    .score-track { flex: 1; height: 8px; background: rgba(255,255,255,.3); border-radius: 4px; overflow: hidden; }
+    .score-fill { height: 100%; background: #fff; border-radius: 4px; transition: width 1s ease; }
+    .score-value { font-size: 18px; font-weight: 800; min-width: 40px; text-align: right; }
+
+    .report-section { margin-bottom: 20px; }
+    .report-section-title { font-size: 13px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .report-section-title::after { content: ''; flex: 1; height: 1px; background: var(--brand-light); }
+    .summary-text { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+    .indicators-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .indicator-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .indicator-name { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+    .indicator-value { font-size: 20px; font-weight: 800; color: var(--brand); margin: 4px 0 6px; }
+    .indicator-interp { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+    .list-items { display: flex; flex-direction: column; gap: 8px; }
+    .list-item { display: flex; gap: 10px; font-size: 14px; line-height: 1.5; padding: 10px 12px; border-radius: 8px; background: var(--bg); border-left: 3px solid var(--border); }
+    .list-item.attention { border-left-color: var(--warning); background: #fffbeb; }
+    .list-item.inconsistency { border-left-color: var(--error); background: #fef2f2; }
+    .list-item.recommendation { border-left-color: var(--success); background: #f0fdf4; }
+    .list-item .item-num { font-weight: 700; color: var(--muted); min-width: 20px; }
+
+    .conclusion-box { background: var(--brand-light); border: 1px solid #e8d5ca; border-radius: var(--radius); padding: 20px; font-size: 14px; line-height: 1.8; font-style: italic; }
+
+    .download-bar { position: sticky; bottom: 0; background: var(--white); border-top: 1px solid var(--border); padding: 14px 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; z-index: 50; }
+    .download-bar .dl-label { font-size: 13px; color: var(--muted); flex: 1; }
+
+    /* ── Alert ── */
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: flex; gap: 8px; }
+    .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+      .type-grid { grid-template-columns: repeat(2, 1fr); }
+      .indicators-grid { grid-template-columns: 1fr; }
+      .steps { gap: 0; }
+      .step-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Especialista analisando seus dados…</div>
+  <div class="loading-sub" id="loadingSub">Isso pode levar até 30 segundos</div>
+</div>
+
+<!-- Header -->
+<div class="top-bar">
+  <a class="top-bar-brand" href="index.html">
+    <img src="assets/report-ai-logo.png" alt="Report AI" onerror="this.style.display='none'" />
+    <div><strong>Report AI</strong> <span>Gerador de relatórios</span></div>
+  </a>
+  <a class="back-link" href="index.html">← Voltar ao site</a>
+</div>
+
+<div class="page">
+  <div class="page-title">
+    <h1>Gerar relatório com especialista</h1>
+    <p>Envie seus dados, escolha o tipo de análise e receba um relatório profissional em segundos.</p>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps" id="stepsBar">
+    <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Tipo</div></div>
+    <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">Dados</div></div>
+    <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Configurar</div></div>
+    <div class="step" id="step-ind-4"><div class="step-num">4</div><div class="step-label">Relatório</div></div>
+  </div>
+
+  <!-- ── STEP 1: Tipo de relatório ── -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> Qual tipo de relatório deseja gerar?</div>
+      <div class="type-grid">
+        <div class="type-card selected" data-type="financial" onclick="selectType(this)">
+          <div class="type-icon">💰</div>
+          <div class="type-name">Financeiro</div>
+          <div class="type-specialist">Especialista Financeiro</div>
+        </div>
+        <div class="type-card" data-type="commercial" onclick="selectType(this)">
+          <div class="type-icon">📈</div>
+          <div class="type-name">Comercial</div>
+          <div class="type-specialist">Especialista Comercial</div>
+        </div>
+        <div class="type-card" data-type="hr" onclick="selectType(this)">
+          <div class="type-icon">👥</div>
+          <div class="type-name">Recursos Humanos</div>
+          <div class="type-specialist">Especialista em RH</div>
+        </div>
+        <div class="type-card" data-type="operational" onclick="selectType(this)">
+          <div class="type-icon">⚙️</div>
+          <div class="type-name">Operacional</div>
+          <div class="type-specialist">Especialista Operacional</div>
+        </div>
+        <div class="type-card" data-type="events" onclick="selectType(this)">
+          <div class="type-icon">🎫</div>
+          <div class="type-name">Eventos</div>
+          <div class="type-specialist">Especialista em Eventos</div>
+        </div>
+        <div class="type-card" data-type="marketing" onclick="selectType(this)">
+          <div class="type-icon">📣</div>
+          <div class="type-name">Marketing</div>
+          <div class="type-specialist">Especialista em Marketing</div>
+        </div>
+        <div class="type-card" data-type="customer_service" onclick="selectType(this)">
+          <div class="type-icon">🎧</div>
+          <div class="type-name">Atendimento</div>
+          <div class="type-specialist">Especialista em Atendimento</div>
+        </div>
+        <div class="type-card" data-type="productivity" onclick="selectType(this)">
+          <div class="type-icon">🚀</div>
+          <div class="type-name">Produtividade</div>
+          <div class="type-specialist">Especialista em Produtividade</div>
+        </div>
+        <div class="type-card" data-type="engineering" onclick="selectType(this)">
+          <div class="type-icon">🏗️</div>
+          <div class="type-name">Engenharia</div>
+          <div class="type-specialist">Especialista em Engenharia</div>
+        </div>
+        <div class="type-card" data-type="security" onclick="selectType(this)">
+          <div class="type-icon">🔒</div>
+          <div class="type-name">Segurança</div>
+          <div class="type-specialist">Especialista em Segurança</div>
+        </div>
+        <div class="type-card" data-type="educational" onclick="selectType(this)">
+          <div class="type-icon">🎓</div>
+          <div class="type-name">Educacional</div>
+          <div class="type-specialist">Especialista Educacional</div>
+        </div>
+        <div class="type-card" data-type="executive" onclick="selectType(this)">
+          <div class="type-icon">📊</div>
+          <div class="type-name">Executivo</div>
+          <div class="type-specialist">Analista Executivo</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="goToStep(2)">Próximo →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Upload de dados ── -->
+  <div id="step2" style="display:none">
+    <div class="card">
+      <div class="card-title"><span class="icon">📁</span> Envie seus dados</div>
+      <div class="alert alert-info">
+        💡 Aceito: <strong>CSV, Excel (XLSX), TXT, JSON</strong>. Para PDFs e imagens, copie o texto relevante em um arquivo .txt.
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.txt,.json" onchange="handleFiles(this.files)" />
+        <div class="upload-icon">☁️</div>
+        <p><strong>Clique para selecionar</strong> ou arraste os arquivos aqui</p>
+        <p style="font-size:12px;margin-top:4px">CSV · XLSX · TXT · JSON</p>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="goToStep(1)">← Voltar</button>
+        <button class="btn btn-primary" onclick="goToStep(3)">Próximo →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Configurações ── -->
+  <div id="step3" style="display:none">
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> Configure o relatório</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Objetivo <span>(tipo de entrega)</span></label>
+          <select id="objective">
+            <option value="executive">Relatório Executivo</option>
+            <option value="managerial">Relatório Gerencial</option>
+            <option value="technical">Relatório Técnico</option>
+            <option value="board">Para Diretoria</option>
+            <option value="client">Para Cliente Final</option>
+            <option value="audit">Relatório de Auditoria</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Público-alvo <span>(opcional)</span></label>
+          <input type="text" id="audience" placeholder="Ex: Diretoria, Gerência, Cliente..." />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Período — início</label>
+          <input type="date" id="periodStart" />
+        </div>
+        <div class="field">
+          <label>Período — fim</label>
+          <input type="date" id="periodEnd" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="goToStep(2)">← Voltar</button>
+        <button class="btn btn-primary" id="generateBtn" onclick="generateReport()">
+          ✨ Gerar relatório com especialista
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Relatório gerado ── -->
+  <div id="reportView">
+    <div class="report-header" id="reportHeader">
+      <div class="badge" id="rBadge">Report AI</div>
+      <h2 id="rTitle">Relatório</h2>
+      <div class="report-meta">
+        <span>👤 <span id="rSpecialist"></span></span>
+        <span>📅 <span id="rPeriod"></span></span>
+        <span>🎯 <span id="rObjective"></span></span>
+        <span>🏢 <span id="rAudience"></span></span>
+      </div>
+      <div class="score-bar">
+        <div class="score-label">Score de confiabilidade</div>
+        <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+        <div class="score-value" id="scoreValue">—</div>
+      </div>
+      <div id="rScoreInterp" style="font-size:12px;opacity:.8;margin-top:6px;"></div>
+    </div>
+
+    <div class="card report-section">
+      <div class="report-section-title">Resumo Executivo</div>
+      <div class="summary-text" id="rSummary"></div>
+    </div>
+
+    <div class="card report-section" id="rIndicatorsSection">
+      <div class="report-section-title">Principais Indicadores</div>
+      <div class="indicators-grid" id="rIndicators"></div>
+    </div>
+
+    <div class="card report-section" id="rInsightsSection">
+      <div class="report-section-title">Análise dos Dados</div>
+      <div class="list-items" id="rInsights"></div>
+    </div>
+
+    <div class="card report-section" id="rAttentionSection">
+      <div class="report-section-title">Pontos de Atenção</div>
+      <div class="list-items" id="rAttention"></div>
+    </div>
+
+    <div class="card report-section" id="rInconsistenciesSection">
+      <div class="report-section-title">Inconsistências Identificadas</div>
+      <div class="list-items" id="rInconsistencies"></div>
+    </div>
+
+    <div class="card report-section" id="rRecommendationsSection">
+      <div class="report-section-title">Recomendações</div>
+      <div class="list-items" id="rRecommendations"></div>
+    </div>
+
+    <div class="card report-section">
+      <div class="report-section-title">Conclusão</div>
+      <div class="conclusion-box" id="rConclusion"></div>
+    </div>
+
+    <div style="height:80px"></div>
+  </div>
+</div>
+
+<!-- Download bar (sticky) -->
+<div class="download-bar" id="downloadBar" style="display:none">
+  <div class="dl-label">Relatório gerado com sucesso · Baixe ou crie um novo</div>
+  <button class="btn btn-outline" onclick="downloadPDF()">⬇ Baixar PDF</button>
+  <button class="btn btn-success" onclick="downloadWord()">⬇ Baixar Word (.txt)</button>
+  <button class="btn btn-secondary" onclick="newReport()">+ Novo relatório</button>
+</div>
+
+<script>
+  let selectedType = 'financial';
+  let uploadedFiles = [];
+  let currentReport = null;
+
+  // ── Type selection ──
+  function selectType(card) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedType = card.dataset.type;
+  }
+
+  // ── Step navigation ──
+  function goToStep(n) {
+    [1, 2, 3].forEach(i => {
+      document.getElementById(`step${i}`).style.display = i === n ? 'block' : 'none';
+    });
+    document.getElementById('reportView').style.display = 'none';
+    document.getElementById('downloadBar').style.display = 'none';
+    updateSteps(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateSteps(active) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById(`step-ind-${i}`);
+      el.classList.remove('active', 'done');
+      if (i === active) el.classList.add('active');
+      else if (i < active) el.classList.add('done');
+    }
+  }
+
+  // ── File handling ──
+  const uploadZone = document.getElementById('uploadZone');
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragging'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragging'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragging');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  async function handleFiles(files) {
+    for (const file of files) {
+      if (uploadedFiles.find(f => f.name === file.name)) continue;
+      const item = { name: file.name, type: detectType(file.name), content: '', status: 'reading' };
+      uploadedFiles.push(item);
+      renderFileList();
+      try {
+        item.content = await readFile(file);
+        item.status = 'ok';
+      } catch {
+        item.status = 'error';
+      }
+      renderFileList();
+    }
+  }
+
+  function detectType(name) {
+    const ext = name.split('.').pop().toLowerCase();
+    const map = { csv: 'CSV', xlsx: 'Excel', xls: 'Excel', txt: 'Texto', json: 'JSON' };
+    return map[ext] || ext.toUpperCase();
+  }
+
+  function fileIcon(type) {
+    const icons = { CSV: '📊', Excel: '📗', Texto: '📄', JSON: '📦' };
+    return icons[type] || '📎';
+  }
+
+  async function readFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv' || ext === 'txt' || ext === 'json') {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.slice(0, 12000));
+        reader.onerror = reject;
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
+    if (ext === 'xlsx' || ext === 'xls') {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+            let text = '';
+            wb.SheetNames.forEach(name => {
+              const ws = wb.Sheets[name];
+              text += `=== Planilha: ${name} ===\n`;
+              text += XLSX.utils.sheet_to_csv(ws) + '\n\n';
+            });
+            resolve(text.slice(0, 14000));
+          } catch(err) { reject(err); }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+    throw new Error('Tipo não suportado');
+  }
+
+  function removeFile(name) {
+    uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById('fileList');
+    list.innerHTML = uploadedFiles.map(f => `
+      <div class="file-item">
+        <span class="file-icon">${fileIcon(f.type)}</span>
+        <div class="file-info">
+          <div class="file-name">${f.name}</div>
+          <div class="file-size">${f.type}</div>
+        </div>
+        <span class="file-status ${f.status}">${f.status === 'ok' ? '✓ Lido' : f.status === 'reading' ? '⏳ Lendo…' : '✕ Erro'}</span>
+        <button class="file-remove" onclick="removeFile('${f.name}')" title="Remover">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Generate ──
+  async function generateReport() {
+    const objective = document.getElementById('objective').value;
+    const audience = document.getElementById('audience').value;
+    const ps = document.getElementById('periodStart').value;
+    const pe = document.getElementById('periodEnd').value;
+    const period = ps && pe ? `${formatDate(ps)} a ${formatDate(pe)}` : ps || '';
+
+    const sources = uploadedFiles.filter(f => f.status === 'ok').map(f => ({
+      name: f.name, type: f.type, content: f.content
+    }));
+
+    showLoading('Especialista analisando seus dados…', 'Isso pode levar até 30 segundos');
+
+    try {
+      const res = await fetch('/.netlify/functions/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportType: selectedType, objective, audience, period, sources }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      currentReport = await res.json();
+      hideLoading();
+      renderReport(currentReport);
+    } catch (err) {
+      hideLoading();
+      alert(`Erro ao gerar relatório: ${err.message}\n\nVerifique se a chave OpenAI está configurada no Netlify.`);
+    }
+  }
+
+  function renderReport(r) {
+    // Esconde steps
+    [1,2,3].forEach(i => document.getElementById(`step${i}`).style.display = 'none');
+    updateSteps(4);
+
+    // Header
+    document.getElementById('rBadge').textContent = r.specialist_area || 'Report AI';
+    document.getElementById('rTitle').textContent = r.title || 'Relatório Gerado';
+    document.getElementById('rSpecialist').textContent = r.specialist_name || '';
+    document.getElementById('rPeriod').textContent = r.period || 'Período não informado';
+    document.getElementById('rObjective').textContent = r.objective || '';
+    document.getElementById('rAudience').textContent = r.audience || '—';
+
+    const score = parseFloat(r.confidence_score) || 0;
+    document.getElementById('scoreValue').textContent = `${score.toFixed(1)}/10`;
+    document.getElementById('rScoreInterp').textContent = r.confidence_interpretation || '';
+    setTimeout(() => {
+      document.getElementById('scoreFill').style.width = `${score * 10}%`;
+    }, 100);
+
+    // Summary
+    document.getElementById('rSummary').textContent = r.executive_summary || '';
+
+    // Indicators
+    const inds = r.main_indicators || [];
+    const indSection = document.getElementById('rIndicatorsSection');
+    if (inds.length) {
+      document.getElementById('rIndicators').innerHTML = inds.map(ind => `
+        <div class="indicator-card">
+          <div class="indicator-name">${esc(ind.name || '')}</div>
+          <div class="indicator-value">${esc(ind.value || '—')}</div>
+          <div class="indicator-interp">${esc(ind.interpretation || '')}</div>
+        </div>
+      `).join('');
+      indSection.style.display = 'block';
+    } else { indSection.style.display = 'none'; }
+
+    // Insights
+    const insights = r.chart_insights || [];
+    renderListSection('rInsightsSection', 'rInsights', insights.map(i => `${i.type ? i.type + ': ' : ''}${i.insight || ''}`), '');
+
+    // Attention
+    renderListSection('rAttentionSection', 'rAttention', r.attention_points || [], 'attention');
+    renderListSection('rInconsistenciesSection', 'rInconsistencies', r.inconsistencies || [], 'inconsistency');
+    renderListSection('rRecommendationsSection', 'rRecommendations', r.recommendations || [], 'recommendation');
+
+    // Conclusion
+    document.getElementById('rConclusion').textContent = r.conclusion || '';
+
+    // Show
+    document.getElementById('reportView').style.display = 'block';
+    document.getElementById('downloadBar').style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderListSection(sectionId, listId, items, cls) {
+    const section = document.getElementById(sectionId);
+    if (!items.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    document.getElementById(listId).innerHTML = items.map((item, i) => `
+      <div class="list-item ${cls}">
+        <span class="item-num">${i+1}.</span>
+        <span>${esc(item)}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── Downloads ──
+  function downloadPDF() {
+    if (!currentReport) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+    const brand = [168, 95, 58];
+    const pageW = 210;
+    const margin = 18;
+    const contentW = pageW - margin * 2;
+    let y = 20;
+
+    const addText = (text, size, bold, color, maxW) => {
+      doc.setFontSize(size);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setTextColor(...(color || [26,26,26]));
+      const lines = doc.splitTextToSize(String(text || ''), maxW || contentW);
+      doc.text(lines, margin, y);
+      y += lines.length * (size * 0.4) + 3;
+    };
+
+    const checkPage = (needed = 20) => {
+      if (y + needed > 280) { doc.addPage(); y = 20; }
+    };
+
+    // Capa
+    doc.setFillColor(...brand);
+    doc.rect(0, 0, pageW, 50, 'F');
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('REPORT AI', margin, 18);
+    doc.setFontSize(18); doc.text(currentReport.title || 'Relatório', margin, 30);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text([
+      `Especialista: ${currentReport.specialist_name || ''}`,
+      `Período: ${currentReport.period || '—'}  |  Score: ${currentReport.confidence_score || '—'}/10`,
+    ], margin, 40);
+    y = 62;
+
+    // Resumo
+    addText('RESUMO EXECUTIVO', 11, true, brand);
+    addText(currentReport.executive_summary || '', 10, false, null, contentW);
+    y += 4;
+
+    // Indicadores
+    if ((currentReport.main_indicators || []).length) {
+      checkPage();
+      addText('PRINCIPAIS INDICADORES', 11, true, brand);
+      (currentReport.main_indicators || []).forEach(ind => {
+        checkPage(14);
+        addText(`${ind.name}: ${ind.value}`, 10, true, null, contentW);
+        if (ind.interpretation) addText(ind.interpretation, 9, false, [107,114,128], contentW);
+        y += 2;
+      });
+    }
+
+    // Pontos de atenção
+    if ((currentReport.attention_points || []).length) {
+      checkPage(); addText('PONTOS DE ATENÇÃO', 11, true, brand);
+      (currentReport.attention_points || []).forEach((p,i) => { checkPage(10); addText(`${i+1}. ${p}`, 10); });
+    }
+
+    // Recomendações
+    if ((currentReport.recommendations || []).length) {
+      checkPage(); addText('RECOMENDAÇÕES', 11, true, brand);
+      (currentReport.recommendations || []).forEach((r,i) => { checkPage(10); addText(`${i+1}. ${r}`, 10); });
+    }
+
+    // Conclusão
+    if (currentReport.conclusion) {
+      checkPage(); addText('CONCLUSÃO', 11, true, brand);
+      addText(currentReport.conclusion, 10);
+    }
+
+    // Rodapé
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setFontSize(8); doc.setTextColor(150,150,150);
+      doc.text(`Report AI  |  Gerado em ${new Date().toLocaleDateString('pt-BR')}  |  Página ${p}/${pages}`, margin, 292);
+    }
+
+    const fname = `ReportAI_${(currentReport.title||'relatorio').replace(/[^a-z0-9]/gi,'_')}.pdf`;
+    doc.save(fname);
+  }
+
+  function downloadWord() {
+    if (!currentReport) return;
+    const r = currentReport;
+    let txt = `REPORT AI\n${'='.repeat(60)}\n\n`;
+    txt += `${r.title || 'Relatório'}\n${'-'.repeat(60)}\n`;
+    txt += `Especialista: ${r.specialist_name || ''}\n`;
+    txt += `Período: ${r.period || '—'}\n`;
+    txt += `Objetivo: ${r.objective || ''}\n`;
+    txt += `Score de confiabilidade: ${r.confidence_score || '—'}/10\n`;
+    txt += `Gerado em: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+
+    txt += `RESUMO EXECUTIVO\n${'-'.repeat(40)}\n${r.executive_summary || ''}\n\n`;
+
+    if ((r.main_indicators||[]).length) {
+      txt += `PRINCIPAIS INDICADORES\n${'-'.repeat(40)}\n`;
+      r.main_indicators.forEach(i => { txt += `• ${i.name}: ${i.value}\n  ${i.interpretation||''}\n`; });
+      txt += '\n';
+    }
+    if ((r.attention_points||[]).length) {
+      txt += `PONTOS DE ATENÇÃO\n${'-'.repeat(40)}\n`;
+      r.attention_points.forEach((p,i) => { txt += `${i+1}. ${p}\n`; });
+      txt += '\n';
+    }
+    if ((r.recommendations||[]).length) {
+      txt += `RECOMENDAÇÕES\n${'-'.repeat(40)}\n`;
+      r.recommendations.forEach((rec,i) => { txt += `${i+1}. ${rec}\n`; });
+      txt += '\n';
+    }
+    if (r.conclusion) txt += `CONCLUSÃO\n${'-'.repeat(40)}\n${r.conclusion}\n`;
+
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `ReportAI_${(r.title||'relatorio').replace(/[^a-z0-9]/gi,'_')}.txt`;
+    a.click();
+  }
+
+  function newReport() {
+    currentReport = null;
+    uploadedFiles = [];
+    renderFileList();
+    document.getElementById('reportView').style.display = 'none';
+    document.getElementById('downloadBar').style.display = 'none';
+    goToStep(1);
+  }
+
+  // ── Helpers ──
+  function showLoading(text, sub) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingSub').textContent = sub;
+    document.getElementById('loadingOverlay').classList.add('visible');
+  }
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('visible');
+  }
+  function formatDate(d) {
+    const [y,m,day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

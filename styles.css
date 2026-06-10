@@ -5742,6 +5742,83 @@ button.calendar-day:focus-visible {
   }
 }
 
+/* ─── Mobile bottom navigation ─── */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 780px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #ffffff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 4px 8px;
+    color: #7a7e75;
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: color 160ms ease;
+  }
+
+  .mobile-bottom-nav-item svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 160ms ease;
+  }
+
+  .mobile-bottom-nav-item.is-active {
+    color: #3f4632;
+  }
+
+  .mobile-bottom-nav-item.is-active svg {
+    stroke: #3f4632;
+  }
+
+  /* CTA central */
+  .mobile-bottom-nav-cta {
+    color: #a85f3a;
+    position: relative;
+  }
+
+  .mobile-bottom-nav-cta svg {
+    stroke: #a85f3a;
+    width: 26px;
+    height: 26px;
+  }
+
+  .mobile-bottom-nav-cta span {
+    font-weight: 800;
+  }
+
+  /* Espaço para o nav não cobrir o footer */
+  #publicSite main,
+  #publicSite footer {
+    padding-bottom: 70px;
+  }
+}
+
 @media (max-width: 460px) {
   .site-header {
     padding: 12px 14px;

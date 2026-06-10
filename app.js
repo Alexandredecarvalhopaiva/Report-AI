@@ -7012,3 +7012,27 @@ function showToast(message) {
   document.body.appendChild(toast);
   window.setTimeout(() => toast.remove(), 2800);
 }
+
+// ─── Mobile bottom nav: highlight active section on scroll ───
+(function () {
+  const navItems = document.querySelectorAll('.mobile-bottom-nav-item[data-section]');
+  if (!navItems.length) return;
+
+  const sections = Array.from(navItems).map(item => {
+    const id = item.dataset.section;
+    return { item, el: document.getElementById(id) };
+  }).filter(s => s.el);
+
+  function updateActive() {
+    const mid = window.scrollY + window.innerHeight * 0.4;
+    let active = sections[0];
+    for (const s of sections) {
+      if (s.el.offsetTop <= mid) active = s;
+    }
+    navItems.forEach(i => i.classList.remove('is-active'));
+    active.item.classList.add('is-active');
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+})();

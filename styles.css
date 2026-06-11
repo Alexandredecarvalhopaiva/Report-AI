@@ -6049,6 +6049,14 @@ button.calendar-day:focus-visible {
   }
 }
 
+/* ─── Esconde elementos exclusivos do mobile no desktop ─── */
+.site-nav-backdrop,
+.site-nav-header,
+.site-nav-section,
+.site-nav-cta {
+  display: none;
+}
+
 /* ─── Mobile slide-in nav panel ─── */
 @media (max-width: 780px) {
 
@@ -6056,6 +6064,14 @@ button.calendar-day:focus-visible {
   .site-nav-desktop-links,
   .site-nav-desktop-cta {
     display: none !important;
+  }
+
+  /* Reativa os elementos mobile dentro do painel */
+  .site-nav-backdrop,
+  .site-nav-header,
+  .site-nav-section,
+  .site-nav-cta {
+    display: revert;
   }
 
   /* Backdrop */

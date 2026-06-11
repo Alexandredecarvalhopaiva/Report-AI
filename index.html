@@ -277,68 +277,96 @@
 
       <main>
         <section class="hero hero-product" id="inicio">
-          <div class="hero-dashboard-scene" data-hero-dashboard aria-label="Painel demonstrativo interativo de indicadores do relatório">
-            <div class="scene-window scene-main">
-              <div class="scene-topbar">
-                <span></span>
-                <span></span>
-                <span></span>
-                <strong>Operação comercial · auditoria</strong>
+          <!-- Hero: múltiplas propostas de visualização de gastos -->
+          <div class="hero-viz-scene" aria-label="Propostas de visualização de análise de gastos">
+
+            <!-- Card 1 (principal): Tendência de gastos mensais -->
+            <div class="viz-card viz-card-trend">
+              <div class="viz-card-top">
+                <div>
+                  <span class="viz-eyebrow">Relatório financeiro · IA</span>
+                  <strong class="viz-card-title">Tendência de Gastos</strong>
+                  <span class="viz-subtitle">Jan – Jun 2025</span>
+                </div>
+                <span class="viz-score-badge">Score 8,7</span>
               </div>
-              <div class="scene-decision-card">
-                <span class="scene-decision-kicker" data-hero-day-label>Ciclo 4 · variação crítica</span>
-                <strong class="scene-decision-title" data-hero-decision data-hero-dynamic>Revisar variação</strong>
-                <p data-hero-audit-text>O ciclo 4 concentrou 780 registros e acendeu revisão automática de anomalia.</p>
-                <div class="scene-decision-meta">
-                  <span>
-                    Confiança
-                    <strong data-hero-score data-hero-dynamic>6,9</strong>
-                  </span>
-                  <span>
-                    Impacto
-                    <strong data-hero-impact data-hero-dynamic>+249</strong>
-                  </span>
+              <div class="viz-bar-group" aria-label="Gastos mensais">
+                <div class="viz-bar" style="--h:55%">
+                  <span class="viz-bar-val">47k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Jan</span>
                 </div>
-                <span class="scene-impact-criteria" data-hero-impact-criteria>
-                  +249 registros vs. C3 com score 6,9: revisar antes de aprovar.
-                </span>
+                <div class="viz-bar" style="--h:72%">
+                  <span class="viz-bar-val">62k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Fev</span>
+                </div>
+                <div class="viz-bar" style="--h:48%">
+                  <span class="viz-bar-val">41k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Mar</span>
+                </div>
+                <div class="viz-bar viz-bar-peak" style="--h:88%">
+                  <span class="viz-bar-val">75k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Abr</span>
+                </div>
+                <div class="viz-bar" style="--h:61%">
+                  <span class="viz-bar-val">52k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Mai</span>
+                </div>
+                <div class="viz-bar viz-bar-low" style="--h:42%">
+                  <span class="viz-bar-val">36k</span>
+                  <div class="viz-bar-fill"></div>
+                  <span class="viz-bar-label">Jun</span>
+                </div>
               </div>
-              <div class="scene-chart-shell">
-                <div class="scene-chart-head">
-                  <span data-hero-sync-label>Arraste para comparar ciclos</span>
-                  <strong data-hero-audit-note>Gerar comentário executivo antes do envio.</strong>
-                </div>
-                <div class="scene-chart" aria-label="Registros por ciclo">
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 1" data-total="286" data-score="8,6" data-occupancy="38%" data-impact="Base" data-impact-criteria="Linha base do negócio: score alto e sem variação anterior." data-decision="Aprovar" data-height="36" data-audit-title="Dados consistentes" data-audit-text="Volume moderado, sem divergência relevante entre as fontes." data-audit-note="Pronto para compor o resumo executivo." data-report-version="v1.1" data-report-label="Parcial validado" data-spark-x="8" data-spark-y="28" aria-label="Ciclo 1, aprovar, score 8,6">
-                    <span class="scene-chart-fill" style="height: 36%"></span>
-                    <span class="scene-chart-label">D1</span>
-                  </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 2" data-total="412" data-score="8,2" data-occupancy="44%" data-impact="+126" data-impact-criteria="+126 registros vs. C1 com score 8,2: acompanhar sem bloquear." data-decision="Acompanhar" data-height="48" data-audit-title="Volume em crescimento" data-audit-text="Aumento de registros com indicadores ainda dentro do esperado." data-audit-note="Comparar com a fonte principal." data-report-version="v1.2" data-report-label="Comparativo atualizado" data-spark-x="56" data-spark-y="22" aria-label="Ciclo 2, acompanhar, score 8,2">
-                    <span class="scene-chart-fill" style="height: 48%"></span>
-                    <span class="scene-chart-label">D2</span>
-                  </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 3" data-total="531" data-score="7,8" data-occupancy="52%" data-impact="+119" data-impact-criteria="+119 registros vs. C2 com score abaixo de 8: conferir base." data-decision="Conferir base" data-height="64" data-audit-title="Atenção à soma parcial" data-audit-text="Aceleração dos indicadores pede conferência dos registros únicos." data-audit-note="Anexar base analítica ao relatório." data-report-version="v1.3" data-report-label="Evidências anexadas" data-spark-x="104" data-spark-y="34" aria-label="Ciclo 3, conferir base, score 7,8">
-                    <span class="scene-chart-fill" style="height: 64%"></span>
-                    <span class="scene-chart-label">D3</span>
-                  </button>
-                  <button class="scene-chart-bar is-active" type="button" data-hero-bar data-day="Ciclo 4" data-total="780" data-score="6,9" data-occupancy="61%" data-impact="+249" data-impact-criteria="+249 registros vs. C3 com score 6,9: revisar antes de aprovar." data-decision="Revisar variação" data-height="88" data-audit-title="Variação crítica" data-audit-text="Maior concentração de registros; revisão automática antes do envio." data-audit-note="Gerar comentário executivo antes do envio." data-report-version="v1.4" data-report-label="Variação explicada" data-spark-x="152" data-spark-y="18" aria-label="Ciclo 4, revisar variação, score 6,9">
-                    <span class="scene-chart-fill" style="height: 88%"></span>
-                    <span class="scene-chart-label">D4</span>
-                  </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 5" data-total="509" data-score="8,4" data-occupancy="53%" data-impact="-271" data-impact-criteria="-271 registros vs. C4 e score 8,4: variação estabilizada." data-decision="Aprovar" data-height="54" data-audit-title="Retomada estável" data-audit-text="Queda da variação crítica e curva estabilizada com baixa divergência." data-audit-note="Resumo pronto para aprovação." data-report-version="v1.5" data-report-label="Curva estabilizada" data-spark-x="200" data-spark-y="42" aria-label="Ciclo 5, aprovar, score 8,4">
-                    <span class="scene-chart-fill" style="height: 54%"></span>
-                    <span class="scene-chart-label">D5</span>
-                  </button>
-                  <button class="scene-chart-bar" type="button" data-hero-bar data-day="Ciclo 6" data-total="372" data-score="8,8" data-occupancy="41%" data-impact="Baixo risco" data-impact-criteria="-137 registros vs. C5 com score 8,8: liberar relatório final." data-decision="Liberar relatório" data-height="42" data-audit-title="Fechamento consistente" data-audit-text="Queda prevista dos indicadores e alta confiabilidade no encerramento." data-audit-note="Liberar versão final do relatório." data-report-version="v1.6" data-report-label="Relatório final" data-spark-x="248" data-spark-y="31" aria-label="Ciclo 6, liberar relatório, score 8,8">
-                    <span class="scene-chart-fill" style="height: 42%"></span>
-                    <span class="scene-chart-label">D6</span>
-                  </button>
-                </div>
-                <div class="scene-presentation-progress" aria-hidden="true">
-                  <span data-hero-progress></span>
-                </div>
+              <div class="viz-card-footer">
+                <span class="viz-footer-label">Total semestre</span>
+                <strong class="viz-footer-total">R$ 313.000</strong>
+                <span class="viz-trend-tag viz-trend-down">↓ 12% vs. 2024</span>
               </div>
             </div>
+
+            <!-- Card 2 (secundário): Distribuição de custos por categoria -->
+            <div class="viz-card viz-card-categories">
+              <strong class="viz-card-title">Distribuição de custos</strong>
+              <div class="viz-cat-list">
+                <div class="viz-cat-row">
+                  <span class="viz-cat-name">Pessoal</span>
+                  <div class="viz-cat-track"><div class="viz-cat-fill" style="--w:42%"></div></div>
+                  <span class="viz-cat-pct">42%</span>
+                </div>
+                <div class="viz-cat-row">
+                  <span class="viz-cat-name">Operacional</span>
+                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-2" style="--w:28%"></div></div>
+                  <span class="viz-cat-pct">28%</span>
+                </div>
+                <div class="viz-cat-row">
+                  <span class="viz-cat-name">Marketing</span>
+                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-3" style="--w:18%"></div></div>
+                  <span class="viz-cat-pct">18%</span>
+                </div>
+                <div class="viz-cat-row">
+                  <span class="viz-cat-name">Outros</span>
+                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-4" style="--w:12%"></div></div>
+                  <span class="viz-cat-pct">12%</span>
+                </div>
+              </div>
+              <div class="viz-alert-row">
+                <span class="viz-alert-dot"></span>
+                <span>Pessoal acima do target em 7 p.p.</span>
+              </div>
+            </div>
+
+            <!-- Card 3 (flutuante): Insight da IA -->
+            <div class="viz-card viz-card-insight">
+              <span class="viz-insight-icon" aria-hidden="true">✦</span>
+              <p class="viz-insight-text">Abril concentrou variação crítica. Auditoria automática acionada antes da aprovação.</p>
+              <span class="viz-insight-tag">Especialista financeiro</span>
+            </div>
+
           </div>
           <div class="hero-content">
             <p class="eyebrow">Plataforma inteligente de relatórios especializados</p>

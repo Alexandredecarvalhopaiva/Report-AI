@@ -6659,3 +6659,316 @@ button.calendar-day:focus-visible {
     padding-bottom: clamp(36px, 4.5vw, 56px) !important;
   }
 }
+
+/* ====================================================================
+   HERO VIZ SCENE — múltiplas propostas de visualização de gastos
+   ==================================================================== */
+
+.hero-viz-scene {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  width: 100%;
+  padding: 4px 0 8px;
+}
+
+/* ── Base card ── */
+.viz-card {
+  background: var(--c-surface, #1c1c22);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+
+/* ── Card 1: Tendência de gastos ── */
+.viz-card-trend {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.viz-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.viz-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--c-brand, #a78bfa);
+  opacity: .85;
+  margin-bottom: 3px;
+}
+
+.viz-card-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text, #f1f1f3);
+  line-height: 1.2;
+}
+
+.viz-subtitle {
+  display: block;
+  font-size: 10px;
+  color: var(--c-muted, #8b8b99);
+  margin-top: 2px;
+}
+
+.viz-score-badge {
+  flex-shrink: 0;
+  background: rgba(134, 239, 172, 0.12);
+  color: #86efac;
+  border: 1px solid rgba(134, 239, 172, 0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+/* ── Bar chart ── */
+.viz-bar-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  padding-bottom: 22px;
+  position: relative;
+}
+
+.viz-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  position: relative;
+  height: 100%;
+}
+
+.viz-bar-fill {
+  width: 100%;
+  height: var(--h, 50%);
+  background: var(--c-brand, #a78bfa);
+  opacity: .45;
+  border-radius: 4px 4px 2px 2px;
+  transition: opacity .2s, transform .2s;
+}
+
+.viz-bar-peak .viz-bar-fill {
+  background: #f87171;
+  opacity: .7;
+}
+
+.viz-bar-low .viz-bar-fill {
+  background: #86efac;
+  opacity: .6;
+}
+
+.viz-bar-val {
+  position: absolute;
+  top: -2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--c-muted, #8b8b99);
+  white-space: nowrap;
+}
+
+.viz-bar-peak .viz-bar-val {
+  color: #f87171;
+}
+
+.viz-bar-low .viz-bar-val {
+  color: #86efac;
+}
+
+.viz-bar-label {
+  position: absolute;
+  bottom: -18px;
+  font-size: 9px;
+  color: var(--c-muted, #8b8b99);
+  white-space: nowrap;
+}
+
+/* ── Card footer ── */
+.viz-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap;
+}
+
+.viz-footer-label {
+  font-size: 10px;
+  color: var(--c-muted, #8b8b99);
+}
+
+.viz-footer-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-text, #f1f1f3);
+}
+
+.viz-trend-tag {
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 2px 8px;
+  margin-left: auto;
+}
+
+.viz-trend-down {
+  background: rgba(134, 239, 172, 0.1);
+  color: #86efac;
+}
+
+/* ── Card 2: Distribuição por categoria ── */
+.viz-card-categories {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.viz-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.viz-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-cat-name {
+  font-size: 10px;
+  color: var(--c-muted, #8b8b99);
+  width: 68px;
+  flex-shrink: 0;
+}
+
+.viz-cat-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.viz-cat-fill {
+  height: 100%;
+  width: var(--w, 50%);
+  background: var(--c-brand, #a78bfa);
+  border-radius: 99px;
+  opacity: .7;
+}
+.viz-cat-fill-2 { background: #60a5fa; }
+.viz-cat-fill-3 { background: #fb923c; }
+.viz-cat-fill-4 { background: #a3a3a3; }
+
+.viz-cat-pct {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--c-text, #f1f1f3);
+  width: 26px;
+  text-align: right;
+}
+
+.viz-alert-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 10px;
+  color: #fbbf24;
+}
+
+.viz-alert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fbbf24;
+  flex-shrink: 0;
+}
+
+/* ── Card 3: Insight da IA ── */
+.viz-card-insight {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 160px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.viz-insight-icon {
+  font-size: 16px;
+  color: var(--c-brand, #a78bfa);
+  line-height: 1;
+}
+
+.viz-insight-text {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--c-muted, #8b8b99);
+  margin: 0;
+  flex: 1;
+}
+
+.viz-insight-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--c-brand, #a78bfa);
+  opacity: .8;
+}
+
+/* ── Mobile: stack cards ── */
+@media (max-width: 780px) {
+  .hero-viz-scene {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 10px;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .viz-card-trend   { grid-column: 1; grid-row: 1; }
+  .viz-card-categories { grid-column: 1; grid-row: 2; }
+  .viz-card-insight { grid-column: 1; grid-row: 3; max-width: 100%; min-width: 0; flex-direction: row; align-items: center; gap: 10px; }
+  .viz-insight-text { font-size: 11px; }
+
+  .viz-bar-group { height: 70px; }
+}
+
+/* ── Desktop: scene area sizing within hero grid ── */
+@media (min-width: 781px) {
+  .hero-viz-scene {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .viz-card-trend .viz-bar-group {
+    height: 90px;
+  }
+}

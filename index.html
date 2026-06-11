@@ -277,104 +277,78 @@
 
       <main>
         <section class="hero hero-product" id="inicio">
-          <!-- Hero: múltiplas propostas de visualização de gastos -->
-          <div class="hero-viz-scene" aria-label="Propostas de visualização de análise de gastos">
+          <!-- Hero: Central de Insights — dado → interpretação → decisão -->
+          <div class="hero-viz-scene" aria-label="Central de Insights do Report AI">
 
-            <!-- Card 1 (principal): Tendência de gastos mensais -->
-            <div class="viz-card viz-card-trend">
-              <div class="viz-card-top">
-                <div>
-                  <span class="viz-eyebrow">Relatório financeiro · IA</span>
-                  <strong class="viz-card-title">Tendência de Gastos</strong>
-                  <span class="viz-subtitle">Jan – Jun 2025</span>
-                </div>
+            <!-- Card 1 (principal): Transformação dado → insight -->
+            <div class="viz-card viz-card-transform">
+              <div class="viz-transform-header">
+                <span class="viz-eyebrow">Central de Insights · Análise financeira</span>
                 <span class="viz-score-badge">Score 8,7</span>
               </div>
-              <div class="viz-bar-group" aria-label="Gastos mensais">
-                <div class="viz-bar" style="--h:55%">
-                  <span class="viz-bar-val">47k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Jan</span>
+              <div class="viz-transform-body">
+
+                <!-- Esquerda: dados brutos -->
+                <div class="viz-input-side">
+                  <span class="viz-side-label">Dados enviados</span>
+                  <div class="viz-mini-chart" aria-label="Gráfico de gastos mensais">
+                    <div class="viz-mini-bar" style="--h:55%"></div>
+                    <div class="viz-mini-bar" style="--h:72%"></div>
+                    <div class="viz-mini-bar" style="--h:48%"></div>
+                    <div class="viz-mini-bar viz-mini-peak" style="--h:88%"></div>
+                    <div class="viz-mini-bar" style="--h:61%"></div>
+                    <div class="viz-mini-bar" style="--h:42%"></div>
+                  </div>
+                  <span class="viz-side-meta">Planilha · Jan–Jun 2025</span>
                 </div>
-                <div class="viz-bar" style="--h:72%">
-                  <span class="viz-bar-val">62k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Fev</span>
+
+                <!-- Centro: seta IA -->
+                <div class="viz-arrow-col">
+                  <span class="viz-arrow-glyph" aria-hidden="true">→</span>
+                  <span class="viz-arrow-label">IA interpreta</span>
                 </div>
-                <div class="viz-bar" style="--h:48%">
-                  <span class="viz-bar-val">41k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Mar</span>
+
+                <!-- Direita: insight gerado -->
+                <div class="viz-output-side">
+                  <span class="viz-side-label">Insight gerado</span>
+                  <strong class="viz-insight-headline">Variação crítica em Abril</strong>
+                  <p class="viz-insight-body">Concentração de 24% dos gastos em um único mês indica risco operacional. Revisão necessária antes do próximo ciclo.</p>
+                  <div class="viz-tag-row">
+                    <span class="viz-tag viz-tag-alert">⚠ Alta prioridade</span>
+                    <span class="viz-tag viz-tag-type">Alerta financeiro</span>
+                  </div>
                 </div>
-                <div class="viz-bar viz-bar-peak" style="--h:88%">
-                  <span class="viz-bar-val">75k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Abr</span>
-                </div>
-                <div class="viz-bar" style="--h:61%">
-                  <span class="viz-bar-val">52k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Mai</span>
-                </div>
-                <div class="viz-bar viz-bar-low" style="--h:42%">
-                  <span class="viz-bar-val">36k</span>
-                  <div class="viz-bar-fill"></div>
-                  <span class="viz-bar-label">Jun</span>
-                </div>
-              </div>
-              <div class="viz-card-footer">
-                <span class="viz-footer-label">Total semestre</span>
-                <strong class="viz-footer-total">R$ 313.000</strong>
-                <span class="viz-trend-tag viz-trend-down">↓ 12% vs. 2024</span>
+
               </div>
             </div>
 
-            <!-- Card 2 (secundário): Distribuição de custos por categoria -->
-            <div class="viz-card viz-card-categories">
-              <strong class="viz-card-title">Distribuição de custos</strong>
-              <div class="viz-cat-list">
-                <div class="viz-cat-row">
-                  <span class="viz-cat-name">Pessoal</span>
-                  <div class="viz-cat-track"><div class="viz-cat-fill" style="--w:42%"></div></div>
-                  <span class="viz-cat-pct">42%</span>
-                </div>
-                <div class="viz-cat-row">
-                  <span class="viz-cat-name">Operacional</span>
-                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-2" style="--w:28%"></div></div>
-                  <span class="viz-cat-pct">28%</span>
-                </div>
-                <div class="viz-cat-row">
-                  <span class="viz-cat-name">Marketing</span>
-                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-3" style="--w:18%"></div></div>
-                  <span class="viz-cat-pct">18%</span>
-                </div>
-                <div class="viz-cat-row">
-                  <span class="viz-cat-name">Outros</span>
-                  <div class="viz-cat-track"><div class="viz-cat-fill viz-cat-fill-4" style="--w:12%"></div></div>
-                  <span class="viz-cat-pct">12%</span>
-                </div>
-              </div>
-              <div class="viz-alert-row">
-                <span class="viz-alert-dot"></span>
-                <span>Pessoal acima do target em 7 p.p.</span>
-              </div>
+            <!-- Card 2: Tipos de insight detectados -->
+            <div class="viz-card viz-card-types">
+              <strong class="viz-card-title">Insights detectados</strong>
+              <ul class="viz-types-list">
+                <li><span class="viz-type-dot" style="--dot:#a78bfa"></span>Descritivo</li>
+                <li><span class="viz-type-dot" style="--dot:#60a5fa"></span>Tendência</li>
+                <li><span class="viz-type-dot" style="--dot:#f87171"></span>Alerta</li>
+                <li><span class="viz-type-dot" style="--dot:#86efac"></span>Oportunidade</li>
+                <li><span class="viz-type-dot" style="--dot:#fbbf24"></span>Inconsistência</li>
+              </ul>
             </div>
 
-            <!-- Card 3 (flutuante): Insight da IA -->
-            <div class="viz-card viz-card-insight">
-              <span class="viz-insight-icon" aria-hidden="true">✦</span>
-              <p class="viz-insight-text">Abril concentrou variação crítica. Auditoria automática acionada antes da aprovação.</p>
-              <span class="viz-insight-tag">Especialista financeiro</span>
+            <!-- Card 3: Recomendação prática -->
+            <div class="viz-card viz-card-rec">
+              <span class="viz-rec-icon" aria-hidden="true">✦</span>
+              <p class="viz-rec-text">Reforçar controle em Abril e revisar planejamento antes do próximo ciclo.</p>
+              <span class="viz-rec-tag">Recomendação prática</span>
             </div>
 
           </div>
           <div class="hero-content">
-            <p class="eyebrow">Plataforma inteligente de relatórios especializados</p>
+            <p class="eyebrow">Central de Insights · Report AI</p>
             <h1>Report AI</h1>
             <p class="hero-lead">
-              Escolha o tipo de relatório, envie seus dados e receba uma análise profissional
-              interpretada por um especialista digital. Financeiro, RH, comercial, operacional,
-              eventos, marketing, engenharia e muito mais.
+              Não basta mostrar gráficos. O Report AI interpreta os dados que você envia —
+              planilhas, PDFs, dashboards ou imagens — e revela o que eles realmente significam:
+              padrões, tendências, riscos, oportunidades e recomendações práticas para tomada de decisão.
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="report-generator.html">✨ Gerar relatório agora</a>
@@ -383,16 +357,16 @@
           </div>
           <div class="hero-metrics" aria-label="Indicadores do produto">
             <article>
-              <strong>12 especialistas</strong>
-              <span>financeiro, RH, comercial, eventos, marketing, engenharia e mais</span>
+              <strong>Dado → Insight</strong>
+              <span>o Report AI explica o significado dos seus dados, não só os exibe</span>
             </article>
             <article>
-              <strong>0 a 10</strong>
-              <span>score de confiabilidade com auditoria automática antes da aprovação</span>
+              <strong>8 tipos de insight</strong>
+              <span>descritivo, comparativo, tendência, alerta, oportunidade, inconsistência e mais</span>
             </article>
             <article>
-              <strong>PDF/Word</strong>
-              <span>exportação profissional em linguagem executiva, técnica ou gerencial</span>
+              <strong>Score 0–10</strong>
+              <span>confiabilidade e qualidade dos insights com auditoria automática</span>
             </article>
           </div>
         </section>

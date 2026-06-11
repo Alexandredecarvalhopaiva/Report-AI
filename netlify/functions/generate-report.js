@@ -75,9 +75,9 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'GEMINI_API_KEY não configurada.' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'GROQ_API_KEY não configurada.' }) };
   }
 
   let body;
@@ -126,31 +126,31 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
 `.trim();
 
   try {
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const fullPrompt = `${specialist.prompt}\n\n${userMessage}`;
-
-    const response = await fetch(geminiUrl, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: fullPrompt }] }],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 4096,
-          responseMimeType: 'application/json',
-        },
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: specialist.prompt },
+          { role: 'user', content: userMessage },
+        ],
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      return { statusCode: 502, body: JSON.stringify({ error: `Gemini error: ${err}` }) };
+      return { statusCode: 502, body: JSON.stringify({ error: `Groq error: ${err}` }) };
     }
 
     const data = await response.json();
-    const rawText = data.candidates[0].content.parts[0].text;
-    const content = JSON.parse(rawText);
+    const content = JSON.parse(data.choices[0].message.content);
 
     return {
       statusCode: 200,

@@ -6310,3 +6310,33 @@ button.calendar-day:focus-visible {
     order: -1;
   }
 }
+
+/* ─── Força ocultar elementos mobile no desktop ─── */
+@media (min-width: 781px) {
+  .site-nav-backdrop,
+  .site-nav-header,
+  .site-nav-section,
+  .site-nav-cta {
+    display: none !important;
+  }
+
+  .site-nav-desktop-links {
+    display: contents !important;
+  }
+
+  .site-nav-desktop-cta {
+    display: inline-flex !important;
+  }
+
+  /* Garante que o painel volta ao layout desktop correto */
+  .site-nav-panel {
+    display: contents !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

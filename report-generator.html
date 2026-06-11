@@ -539,7 +539,7 @@
     showLoading('Especialista analisando seus dados…', 'Isso pode levar até 30 segundos');
 
     try {
-      const res = await fetch('/.netlify/functions/generate-report', {
+      const res = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reportType: selectedType, objective, audience, period, sources }),

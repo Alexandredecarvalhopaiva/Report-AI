@@ -607,28 +607,12 @@ function setupPublicSite() {
 }
 
 function setupHeroDashboardInteraction() {
-  const widget = document.querySelector("[data-lp-viz]");
-  if (!widget) return;
+  const cards = Array.from(document.querySelectorAll("[data-viz-card]"));
+  if (!cards.length) return;
 
   const NS = "http://www.w3.org/2000/svg";
   const reduceMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const tabsEl = widget.querySelector('[role="tablist"]');
-  const tabs = Array.from(widget.querySelectorAll("[data-viz-tab]"));
-  const panels = Array.from(widget.querySelectorAll("[data-viz-panel]"));
-  const stage = widget.querySelector("[data-viz-stage]");
-  const tip = widget.querySelector("[data-viz-tip]");
-  const progress = widget.querySelector("[data-viz-progress]");
-  const sourceEl = widget.querySelector("[data-viz-source]");
-  const insightBox = widget.querySelector("[data-viz-insight]");
-  const tagEl = widget.querySelector("[data-viz-tag]");
-  const prioEl = widget.querySelector("[data-viz-prio]");
-  const headlineEl = widget.querySelector("[data-viz-headline]");
-  const noteEl = widget.querySelector("[data-viz-note]");
-  const recEl = widget.querySelector("[data-viz-rec]");
-
-  if (!tabs.length || tabs.length !== panels.length) return;
 
   const COLORS = {
     green: "#5f7446",
@@ -636,7 +620,6 @@ function setupHeroDashboardInteraction() {
     amber: "#d88b2a",
     neutral: "#cdbd9e",
   };
-  const INTERVAL = 6200;
 
   function svgEl(tag, attrs, text) {
     const node = document.createElementNS(NS, tag);
@@ -647,9 +630,13 @@ function setupHeroDashboardInteraction() {
     return node;
   }
 
+  // Tooltip posicionado dentro do card do próprio elemento (cada card tem o seu).
   function tipAt(target, html) {
+    const container = target.closest(".lp-fc-chart");
+    if (!container) return;
+    const tip = container.querySelector("[data-viz-tip]");
     if (!tip) return;
-    const s = stage.getBoundingClientRect();
+    const s = container.getBoundingClientRect();
     const r = target.getBoundingClientRect();
     tip.innerHTML = html;
     tip.style.left = `${r.left - s.left + r.width / 2}px`;
@@ -658,11 +645,13 @@ function setupHeroDashboardInteraction() {
   }
 
   function hideTip() {
-    if (tip) tip.classList.remove("is-on");
+    document
+      .querySelectorAll(".lp-float-stack [data-viz-tip].is-on")
+      .forEach((t) => t.classList.remove("is-on"));
   }
 
   // ── Gráfico de tendência (área + linha) ──────────────────────
-  function buildArea(panel) {
+  function buildArea(container) {
     const data = [
       { m: "Jan", v: 42 },
       { m: "Fev", v: 45 },
@@ -672,12 +661,12 @@ function setupHeroDashboardInteraction() {
       { m: "Jun", v: 55 },
       { m: "Jul", v: 58 },
     ];
-    const W = 300;
-    const H = 160;
-    const padL = 16;
-    const padR = 16;
-    const top = 22;
-    const bottom = 126;
+    const W = 320;
+    const H = 112;
+    const padL = 14;
+    const padR = 14;
+    const top = 16;
+    const bottom = 80;
     const vMin = 39;
     const vMax = 61;
     const xs = data.map((_, i) => padL + (i * (W - padL - padR)) / (data.length - 1));
@@ -722,7 +711,7 @@ function setupHeroDashboardInteraction() {
 
     const points = [];
     data.forEach((d, i) => {
-      svg.appendChild(svgEl("text", { class: "lp-viz-axis-label", x: xs[i], y: 150 }, d.m));
+      svg.appendChild(svgEl("text", { class: "lp-viz-axis-label", x: xs[i], y: 102 }, d.m));
       const isLast = i === data.length - 1;
       const circle = svgEl("circle", {
         class: `lp-viz-point${isLast ? " is-last" : ""}`,
@@ -763,7 +752,7 @@ function setupHeroDashboardInteraction() {
     const tracer = svgEl("circle", { class: "lp-viz-tracer", cx: xs[0], cy: ys[0], r: 4 });
     svg.appendChild(tracer);
 
-    panel.appendChild(svg);
+    container.appendChild(svg);
 
     let rafId = null;
     return {
@@ -783,11 +772,13 @@ function setupHeroDashboardInteraction() {
         line.style.transition = "stroke-dashoffset 1000ms ease";
         line.style.strokeDashoffset = "0";
 
-        tracer.style.opacity = "1";
         const dur = 1000;
         let start = null;
         const step = (ts) => {
-          if (start === null) start = ts;
+          if (start === null) {
+            start = ts;
+            tracer.style.opacity = "1";
+          }
           const k = Math.min(1, (ts - start) / dur);
           const p = line.getPointAtLength(len * k);
           tracer.setAttribute("cx", p.x);
@@ -805,7 +796,7 @@ function setupHeroDashboardInteraction() {
   }
 
   // ── Gráfico de gastos (barras) ───────────────────────────────
-  function buildBars(panel) {
+  function buildBars(container) {
     const data = [
       { m: "Jan", v: 52 },
       { m: "Fev", v: 64 },
@@ -852,7 +843,7 @@ function setupHeroDashboardInteraction() {
       wrap.appendChild(bar);
     });
 
-    panel.appendChild(wrap);
+    container.appendChild(wrap);
 
     return {
       replay() {
@@ -864,7 +855,7 @@ function setupHeroDashboardInteraction() {
   }
 
   // ── Gráfico de distribuição (rosca) ──────────────────────────
-  function buildDonut(panel) {
+  function buildDonut(container) {
     const cats = [
       { l: "Marketing", v: 38, c: COLORS.accent },
       { l: "Operação", v: 27, c: COLORS.green },
@@ -936,7 +927,7 @@ function setupHeroDashboardInteraction() {
     });
 
     wrap.append(svg, ul);
-    panel.appendChild(wrap);
+    container.appendChild(wrap);
 
     function focusCat(i) {
       segs.forEach((s, j) => {
@@ -987,176 +978,48 @@ function setupHeroDashboardInteraction() {
     };
   }
 
-  const defs = [
-    {
-      source: "receita-2025.xlsx",
-      build: buildArea,
-      insight: {
-        type: "tendencia",
-        tag: "Tendência",
-        prio: "Sinal positivo",
-        headline: "Receita cresce 38% no semestre",
-        note: "Aceleração consistente desde abril, acima da meta do trimestre.",
-        rec: "Manter o ritmo de aquisição e revisar a capacidade de entrega.",
+  const BUILDERS = { area: buildArea, bars: buildBars, donut: buildDonut };
+
+  const built = cards
+    .map((card) => {
+      const type = card.getAttribute("data-chart");
+      const container = card.querySelector("[data-viz-chart]");
+      const builder = BUILDERS[type];
+      if (!builder || !container) return null;
+      return { card, api: builder(container) };
+    })
+    .filter(Boolean);
+
+  // Sem motion reduzido, mostra o estado final de uma vez.
+  if (reduceMotion) {
+    built.forEach((b) => b.api.replay());
+    return;
+  }
+
+  // Entrada em cascata no carregamento. Usa setTimeout (não rAF) para
+  // funcionar mesmo quando a aba é renderizada oculta/offscreen.
+  built.forEach((b, i) => window.setTimeout(() => b.api.replay(), 80 + i * 160));
+
+  // Re-anima ao reentrar na viewport (best-effort). Ignora a primeira
+  // interseção de cada card para não duplicar a animação de entrada.
+  if ("IntersectionObserver" in window) {
+    const seen = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          if (!seen.has(entry.target)) {
+            seen.add(entry.target);
+            return;
+          }
+          const found = built.find((b) => b.card === entry.target);
+          if (found) found.api.replay();
+        });
       },
-    },
-    {
-      source: "custos-2025.xlsx",
-      build: buildBars,
-      insight: {
-        type: "alerta",
-        tag: "Alerta",
-        prio: "Alta prioridade",
-        headline: "Abril concentra 26% dos gastos",
-        note: "Pico de 1,7× sobre a média dos demais meses, sem sazonalidade que o explique.",
-        rec: "Definir teto mensal com alerta automático de variação.",
-      },
-    },
-    {
-      source: "orcamento-2025.xlsx",
-      build: buildDonut,
-      insight: {
-        type: "oportunidade",
-        tag: "Oportunidade",
-        prio: "Prioridade média",
-        headline: "Marketing concentra 38% do orçamento",
-        note: "Maior categoria isolada — principal alavanca de realocação de verba.",
-        rec: "Testar realocar 10% para os canais de maior retorno.",
-      },
-    },
-  ];
-
-  const charts = defs.map((d, i) => ({ ...d, api: d.build(panels[i]) }));
-
-  function applyInsight(ins) {
-    insightBox.dataset.tagType = ins.type;
-    tagEl.textContent = ins.tag;
-    prioEl.textContent = ins.prio;
-    headlineEl.textContent = ins.headline;
-    noteEl.textContent = ins.note;
-    recEl.textContent = ins.rec;
+      { threshold: 0.4 },
+    );
+    built.forEach((b) => observer.observe(b.card));
   }
-
-  let current = 0;
-
-  function show(i) {
-    charts.forEach((chart, idx) => {
-      const active = idx === i;
-      tabs[idx].setAttribute("aria-selected", String(active));
-      tabs[idx].tabIndex = active ? 0 : -1;
-      if (active) {
-        panels[idx].hidden = false;
-        void panels[idx].offsetWidth;
-        panels[idx].classList.add("is-active");
-      } else {
-        panels[idx].classList.remove("is-active");
-        panels[idx].hidden = true;
-      }
-    });
-    hideTip();
-    sourceEl.textContent = charts[i].source;
-    applyInsight(charts[i].insight);
-    current = i;
-    charts[i].api.replay();
-  }
-
-  // ── Rotação automática + barra de progresso ──────────────────
-  let timer = null;
-  let userControl = false;
-
-  // Na primeira seleção explícita do usuário, a rotação para de vez:
-  // evita trocar o gráfico que ele escolheu (sobretudo no toque), atende
-  // ao WCAG 2.2.2 e só então liga o aria-live (silencioso na fase automática).
-  function takeControl() {
-    if (userControl) return;
-    userControl = true;
-    stop();
-    if (progress) {
-      progress.style.transition = "none";
-      progress.style.transform = "scaleX(0)";
-    }
-    if (insightBox) insightBox.setAttribute("aria-live", "polite");
-  }
-
-  function restartProgress() {
-    if (!progress || reduceMotion) return;
-    progress.style.transition = "none";
-    progress.style.transform = "scaleX(0)";
-    void progress.offsetWidth;
-    progress.style.transition = `transform ${INTERVAL}ms linear`;
-    progress.style.transform = "scaleX(1)";
-  }
-
-  function freezeProgress() {
-    if (!progress) return;
-    const t = getComputedStyle(progress).transform;
-    progress.style.transition = "none";
-    progress.style.transform = t && t !== "none" ? t : "scaleX(0)";
-  }
-
-  function stop() {
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-  }
-
-  function play() {
-    if (reduceMotion) return;
-    stop();
-    restartProgress();
-    timer = window.setTimeout(() => {
-      show((current + 1) % charts.length);
-      play();
-    }, INTERVAL);
-  }
-
-  function pause() {
-    stop();
-    freezeProgress();
-  }
-
-  tabs.forEach((tab, i) => {
-    tab.addEventListener("click", () => {
-      takeControl();
-      show(i);
-    });
-  });
-
-  if (tabsEl) {
-    tabsEl.addEventListener("keydown", (event) => {
-      const i = tabs.indexOf(document.activeElement);
-      if (i < 0) return;
-      let next = null;
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (i + 1) % tabs.length;
-      else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (i - 1 + tabs.length) % tabs.length;
-      else if (event.key === "Home") next = 0;
-      else if (event.key === "End") next = tabs.length - 1;
-      if (next === null) return;
-      event.preventDefault();
-      takeControl();
-      tabs[next].focus();
-      show(next);
-    });
-  }
-
-  // Pausa enquanto o ponteiro/foco está no widget (fase automática);
-  // retoma só se o usuário ainda não assumiu o controle.
-  widget.addEventListener("pointerenter", () => {
-    if (!userControl) pause();
-  });
-  widget.addEventListener("pointerleave", () => {
-    if (!userControl) play();
-  });
-  widget.addEventListener("focusin", () => {
-    if (!userControl) pause();
-  });
-  widget.addEventListener("focusout", (event) => {
-    if (!userControl && !widget.contains(event.relatedTarget)) play();
-  });
-
-  show(0);
-  play();
 }
 
 function setupContactForm() {

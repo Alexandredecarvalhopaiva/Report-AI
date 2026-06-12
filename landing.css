@@ -366,139 +366,140 @@
   background: var(--lp-accent);
 }
 
-/* Card de insight (visual do hero) */
 /* ════════════════════════════════════════════════════════════════
-   Hero — widget de visualização interativo (.lp-viz)
-   3 gráficos (tendência, barras, rosca) + insight por gráfico.
+   Hero — três cards flutuantes (Tendências · Gasto · Categorias)
+   Cada card traz um gráfico interativo + insight da IA.
    ════════════════════════════════════════════════════════════════ */
 
-#publicSite .lp-viz {
+#publicSite .lp-float-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#publicSite .lp-float-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px 22px 20px;
+  gap: 12px;
+  padding: 18px 18px 16px;
   border: 1px solid var(--lp-line);
   border-radius: var(--lp-radius);
   background: var(--lp-surface);
-  box-shadow: 0 24px 60px rgba(63, 70, 50, 0.1);
-  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(63, 70, 50, 0.12);
+  animation: lpFloatBob 7s ease-in-out infinite;
+  will-change: transform;
 }
 
-/* Barra de progresso da rotação automática */
-#publicSite .lp-viz-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--lp-accent), var(--lp-amber));
-  transform: scaleX(0);
-  transform-origin: left center;
+/* Deslocamento horizontal escalonado + tempos distintos = sensação flutuante */
+#publicSite .lp-float-card:nth-child(1) {
+  margin-right: 30px;
+  animation-duration: 6.6s;
+  animation-delay: 0s;
 }
 
-/* Cabeçalho */
-#publicSite .lp-viz-head {
+#publicSite .lp-float-card:nth-child(2) {
+  margin-left: 30px;
+  animation-duration: 7.4s;
+  animation-delay: 0.7s;
+}
+
+#publicSite .lp-float-card:nth-child(3) {
+  margin-right: 14px;
+  animation-duration: 6.9s;
+  animation-delay: 1.4s;
+}
+
+#publicSite .lp-float-card:hover {
+  box-shadow: 0 28px 60px rgba(63, 70, 50, 0.18);
+  animation-play-state: paused;
+}
+
+#publicSite .lp-fc-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
-#publicSite .lp-viz-source {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+#publicSite .lp-fc-id {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   min-width: 0;
-  font-size: 0.76rem;
-  font-weight: 650;
-  color: var(--lp-muted);
 }
 
-#publicSite .lp-viz-source b {
-  overflow: hidden;
+#publicSite .lp-fc-title {
+  font-size: 0.98rem;
+  font-weight: 740;
+  letter-spacing: -0.01em;
   color: var(--lp-ink);
-  font-weight: 700;
+}
+
+#publicSite .lp-fc-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--lp-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-#publicSite .lp-viz-source::before {
+#publicSite .lp-fc-source::before {
   content: "";
   flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--lp-green);
   box-shadow: 0 0 0 0 rgba(95, 116, 70, 0.45);
   animation: lpLivePulse 2.4s ease-out infinite;
 }
 
-#publicSite .lp-viz-score {
+#publicSite .lp-fc-tag {
   flex: 0 0 auto;
-  padding: 4px 12px;
+  padding: 4px 11px;
   border-radius: 999px;
-  background: rgba(95, 116, 70, 0.12);
-  color: var(--lp-green);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* Abas dos gráficos */
-#publicSite .lp-viz-tabs {
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border: 1px solid var(--lp-line);
-  border-radius: 999px;
-  background: var(--lp-bg);
+#publicSite .lp-fc-tag[data-tag-type="tendencia"] {
+  background: rgba(95, 116, 70, 0.14);
+  color: var(--lp-green);
 }
 
-#publicSite .lp-viz-tab {
-  flex: 1;
-  min-height: 32px;
-  padding: 5px 10px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--lp-muted);
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 650;
-  cursor: pointer;
-  transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+#publicSite .lp-fc-tag[data-tag-type="alerta"] {
+  background: var(--lp-accent-soft);
+  color: var(--lp-accent);
 }
 
-#publicSite .lp-viz-tab[aria-selected="true"] {
-  background: var(--lp-surface);
-  color: var(--lp-ink);
-  box-shadow: 0 2px 6px rgba(63, 70, 50, 0.12);
+#publicSite .lp-fc-tag[data-tag-type="oportunidade"] {
+  background: rgba(216, 139, 42, 0.16);
+  color: #b06f18;
 }
 
-#publicSite .lp-viz-tab:hover {
-  color: var(--lp-ink);
-}
-
-/* Palco dos gráficos (crossfade) */
-#publicSite .lp-viz-stage {
+/* Área do gráfico — contexto de posicionamento do tooltip */
+#publicSite .lp-fc-chart {
   position: relative;
-  height: 188px;
 }
 
-#publicSite .lp-viz-panel {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
-  transition: opacity 340ms ease, transform 340ms ease;
+#publicSite .lp-fc-insight {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--lp-muted);
 }
 
-#publicSite .lp-viz-panel.is-active {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
+#publicSite .lp-fc-insight strong {
+  color: var(--lp-ink);
+  font-weight: 720;
 }
 
 /* — Gráfico de barras — */
@@ -506,14 +507,14 @@
   display: flex;
   align-items: stretch;
   gap: clamp(6px, 2.2vw, 14px);
-  height: 100%;
-  padding: 6px 4px 0;
+  height: 116px;
+  padding: 4px 2px 0;
 }
 
 #publicSite .lp-viz-bar {
-  display: flex;
+  display: grid;
   flex: 1;
-  flex-direction: column;
+  grid-template-rows: 1fr 14px;
   gap: 7px;
   padding: 0;
   border: 0;
@@ -523,15 +524,19 @@
   cursor: pointer;
 }
 
+/* Grid 1fr dá ao track altura definida; o fill é posicionado de forma
+   absoluta para que a altura percentual resolva de modo confiável
+   (evita o quirk de cross-size em flex aninhado). */
 #publicSite .lp-viz-bar-track {
-  display: flex;
-  flex: 1;
-  align-items: flex-end;
+  position: relative;
   min-height: 0;
 }
 
 #publicSite .lp-viz-bar-fill {
-  width: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 0;
   border-radius: 6px 6px 3px 3px;
   background: #ddcdab;
@@ -568,7 +573,7 @@
 #publicSite .lp-viz-svg {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   overflow: visible;
 }
 
@@ -577,7 +582,7 @@
   transition: opacity 600ms ease 200ms;
 }
 
-#publicSite .lp-viz-panel.is-active .lp-viz-area {
+#publicSite .lp-float-card .lp-viz-area {
   opacity: 1;
 }
 
@@ -597,10 +602,7 @@
   transition: r 180ms ease;
 }
 
-#publicSite .lp-viz-point.is-hot {
-  fill: var(--lp-green);
-}
-
+#publicSite .lp-viz-point.is-hot,
 #publicSite .lp-viz-point.is-last {
   fill: var(--lp-green);
 }
@@ -628,14 +630,13 @@
 #publicSite .lp-viz-donut-wrap {
   display: flex;
   align-items: center;
-  gap: 18px;
-  height: 100%;
+  gap: 16px;
 }
 
 #publicSite .lp-viz-donut {
   flex: 0 0 auto;
-  width: 150px;
-  height: 150px;
+  width: 132px;
+  height: 132px;
 }
 
 #publicSite .lp-viz-seg {
@@ -671,7 +672,7 @@
 #publicSite .lp-viz-legend {
   display: grid;
   flex: 1;
-  gap: 7px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -681,9 +682,9 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 8px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--lp-ink);
   cursor: pointer;
@@ -737,78 +738,14 @@
   color: var(--lp-amber);
 }
 
-/* Rodapé de insight */
-#publicSite .lp-viz-insight {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding-top: 15px;
-  border-top: 1px solid var(--lp-line);
-}
-
-#publicSite .lp-viz-insight-tags {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#publicSite .lp-viz-tag {
-  padding: 3px 11px;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-#publicSite .lp-viz-insight[data-tag-type="tendencia"] .lp-viz-tag {
-  background: rgba(95, 116, 70, 0.14);
-  color: var(--lp-green);
-}
-
-#publicSite .lp-viz-insight[data-tag-type="alerta"] .lp-viz-tag {
-  background: var(--lp-accent-soft);
-  color: var(--lp-accent);
-}
-
-#publicSite .lp-viz-insight[data-tag-type="oportunidade"] .lp-viz-tag {
-  background: rgba(216, 139, 42, 0.16);
-  color: #b06f18;
-}
-
-#publicSite .lp-viz-prio {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--lp-muted);
-}
-
-#publicSite .lp-viz-insight-headline {
-  font-size: 1.02rem;
-  font-weight: 740;
-  line-height: 1.25;
-  color: var(--lp-ink);
-}
-
-#publicSite .lp-viz-insight-note {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  color: var(--lp-muted);
-}
-
-#publicSite .lp-viz-insight-rec {
-  display: flex;
-  gap: 7px;
-  margin: 2px 0 0;
-  font-size: 0.82rem;
-  line-height: 1.4;
-  color: var(--lp-ink);
-}
-
-#publicSite .lp-viz-insight-rec span {
-  flex: 0 0 auto;
-  font-weight: 750;
-  color: var(--lp-accent);
+@keyframes lpFloatBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes lpLivePulse {
@@ -1402,14 +1339,16 @@
     margin-top: auto;
   }
 
-  /* Widget de visualização */
-  #publicSite .lp-viz-stage {
-    height: 176px;
+  /* Cards flutuantes: sem deslocamento lateral no mobile */
+  #publicSite .lp-float-card:nth-child(1),
+  #publicSite .lp-float-card:nth-child(2),
+  #publicSite .lp-float-card:nth-child(3) {
+    margin-inline: 0;
   }
 
   #publicSite .lp-viz-donut {
-    width: 128px;
-    height: 128px;
+    width: 122px;
+    height: 122px;
   }
 }
 
@@ -1442,7 +1381,6 @@
   #publicSite .lp-nav-backdrop,
   #publicSite .lp-find-card,
   #publicSite .lp-btn,
-  #publicSite .lp-viz-panel,
   #publicSite .lp-viz-bar-fill,
   #publicSite .lp-viz-area,
   #publicSite .lp-viz-seg,
@@ -1450,11 +1388,11 @@
     transition: none;
   }
 
-  #publicSite .lp-viz-source::before {
+  #publicSite .lp-float-card {
     animation: none;
   }
 
-  #publicSite .lp-viz-progress {
-    display: none;
+  #publicSite .lp-fc-source::before {
+    animation: none;
   }
 }

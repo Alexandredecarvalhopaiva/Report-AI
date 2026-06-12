@@ -52,6 +52,7 @@
     />
     <link rel="icon" href="assets/report-ai-logo.png" type="image/png" />
     <link rel="stylesheet" href="styles.css?v=20260607-latest-reports-1" />
+    <link rel="stylesheet" href="landing.css?v=20260612-redesign-1" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -177,468 +178,474 @@
       </symbol>
     </svg>
     <div id="publicSite">
-      <header class="site-header">
-        <a class="brand product-brand" href="#inicio" aria-label="Acesse Report AI início">
-          <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
-          <span>
-            <strong>Report AI</strong>
-            <small>Especialistas digitais em análise</small>
-          </span>
-        </a>
+      <header class="lp-header">
+        <div class="lp-header-inner">
+          <a class="lp-brand" href="#inicio" aria-label="Report AI — início">
+            <img src="assets/report-ai-logo.png" alt="" />
+            <span>
+              <strong>Report AI</strong>
+              <small>Dados que viram decisão</small>
+            </span>
+          </a>
 
-        <button
-          class="menu-button"
-          id="menuButton"
-          type="button"
-          aria-label="Abrir menu"
-          aria-expanded="false"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+          <nav class="lp-nav" id="siteNav" aria-label="Navegação principal">
+            <div class="lp-nav-backdrop" id="siteNavBackdrop" aria-hidden="true"></div>
 
-        <nav class="site-nav" id="siteNav" aria-label="Navegação principal">
-          <div class="site-nav-backdrop" id="siteNavBackdrop" aria-hidden="true"></div>
-          <div class="site-nav-panel">
-            <!-- Cabeçalho do painel -->
-            <div class="site-nav-header">
-              <a class="site-nav-brand-link" href="#inicio">
-                <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
-                <span>
-                  <strong>Report AI</strong>
-                  <small>Especialistas digitais em análise</small>
-                </span>
+            <!-- Drawer mobile -->
+            <div class="lp-nav-drawer" role="dialog" aria-label="Menu">
+              <div class="lp-drawer-head">
+                <a class="lp-brand" href="#inicio" data-close-nav>
+                  <img src="assets/report-ai-logo.png" alt="" />
+                  <span>
+                    <strong>Report AI</strong>
+                    <small>Dados que viram decisão</small>
+                  </span>
+                </a>
+                <button class="lp-drawer-close" type="button" id="siteNavClose" aria-label="Fechar menu">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="lp-nav-group">
+                <span class="lp-nav-group-title">Produto</span>
+                <div class="lp-nav-links">
+                  <a href="#inicio" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-home"></use></svg>
+                    <span>Início</span>
+                  </a>
+                  <a href="#sobre" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-users"></use></svg>
+                    <span>O que a IA encontra</span>
+                  </a>
+                  <a href="#servicos" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-activity"></use></svg>
+                    <span>Como funciona</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="lp-nav-group">
+                <span class="lp-nav-group-title">Recursos</span>
+                <div class="lp-nav-links">
+                  <a href="#clientes" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-report"></use></svg>
+                    <span>Anatomia do insight</span>
+                  </a>
+                  <a href="#depoimentos" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-award"></use></svg>
+                    <span>Auditoria e score</span>
+                  </a>
+                  <a href="#contato" data-close-nav>
+                    <svg aria-hidden="true"><use href="#icon-message"></use></svg>
+                    <span>Demonstração</span>
+                  </a>
+                </div>
+              </div>
+
+              <a class="lp-btn lp-btn-accent lp-drawer-cta" href="report-generator.html" data-close-nav>
+                Gerar relatório agora
               </a>
-              <button class="site-nav-close-btn" type="button" id="siteNavClose" aria-label="Fechar menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                  <path d="M15 6l-6 6 6 6"/>
-                </svg>
-              </button>
             </div>
 
-            <!-- Seção Produto -->
-            <div class="site-nav-section">
-              <span class="site-nav-section-title">Produto</span>
-              <div class="site-nav-links">
-                <a href="#inicio" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-home"></use></svg>
-                  <span>Início</span>
-                </a>
-                <a href="#servicos" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-activity"></use></svg>
-                  <span>Como funciona</span>
-                </a>
-                <a href="#sobre" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-users"></use></svg>
-                  <span>Visão do produto</span>
-                </a>
-              </div>
+            <!-- Links desktop -->
+            <div class="lp-nav-links lp-nav-desktop">
+              <a href="#sobre">Produto</a>
+              <a href="#servicos">Como funciona</a>
+              <a href="#clientes">Insights</a>
+              <a href="#depoimentos">Auditoria</a>
+              <a href="#contato">Contato</a>
             </div>
+          </nav>
 
-            <!-- Seção Recursos -->
-            <div class="site-nav-section">
-              <span class="site-nav-section-title">Recursos</span>
-              <div class="site-nav-links">
-                <a href="#clientes" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-award"></use></svg>
-                  <span>Auditoria automática</span>
-                </a>
-                <a href="#depoimentos" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-report"></use></svg>
-                  <span>Fluxo do produto</span>
-                </a>
-                <a href="#contato" data-close-nav>
-                  <svg aria-hidden="true"><use href="#icon-message"></use></svg>
-                  <span>Demonstração</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Desktop links (hidden on mobile, needed for desktop nav) -->
-            <div class="site-nav-links site-nav-desktop-links">
-              <a class="desktop-menu-link" href="#clientes"><span>Auditoria</span></a>
-              <a class="desktop-menu-link" href="#depoimentos"><span>MVP</span></a>
-              <a class="desktop-menu-link" href="#contato"><span>Contato</span></a>
-            </div>
-
-            <!-- CTA -->
-            <a class="button button-primary site-nav-cta" href="report-generator.html">
-              ✨ Gerar relatório agora
-            </a>
-
-            <!-- Desktop CTA original -->
-            <a class="button button-dark site-nav-desktop-cta" href="report-generator.html">
-              <span>Gerar relatório</span>
-            </a>
+          <div class="lp-header-actions">
+            <a class="lp-btn lp-btn-primary lp-header-cta" href="report-generator.html">Gerar relatório</a>
+            <button
+              class="lp-burger"
+              id="menuButton"
+              type="button"
+              aria-label="Abrir menu"
+              aria-expanded="false"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
-        </nav>
+        </div>
       </header>
 
       <main>
-        <section class="hero hero-product" id="inicio">
-          <!-- Hero: Central de Insights — dado → interpretação → decisão -->
-          <div class="hero-viz-scene" aria-label="Central de Insights do Report AI">
-
-            <!-- Card 1 (principal): Transformação dado → insight -->
-            <div class="viz-card viz-card-transform">
-              <div class="viz-transform-header">
-                <span class="viz-eyebrow">Central de Insights · Análise financeira</span>
-                <span class="viz-score-badge">Score 8,7</span>
+        <!-- Hero -->
+        <section class="lp-hero" id="inicio">
+          <div class="lp-container lp-hero-grid">
+            <div class="lp-hero-copy">
+              <p class="lp-eyebrow">Plataforma de análise com IA</p>
+              <h1>Seus dados mostram o que aconteceu. <em>O Report AI explica o que significa.</em></h1>
+              <p class="lp-hero-lead">
+                Envie gráficos, planilhas, PDFs, imagens ou dashboards. A IA interpreta cada arquivo
+                e devolve insights claros e acionáveis — com evidência, interpretação técnica,
+                impacto para o negócio e recomendação prática.
+              </p>
+              <div class="lp-hero-actions">
+                <a class="lp-btn lp-btn-primary" href="report-generator.html">Gerar relatório agora</a>
+                <a class="lp-btn lp-btn-ghost" href="#servicos">Ver como funciona</a>
               </div>
-              <div class="viz-transform-body">
-
-                <!-- Esquerda: dados brutos -->
-                <div class="viz-input-side">
-                  <span class="viz-side-label">Dados enviados</span>
-                  <div class="viz-mini-chart" aria-label="Gráfico de gastos mensais">
-                    <div class="viz-mini-bar" style="--h:55%"></div>
-                    <div class="viz-mini-bar" style="--h:72%"></div>
-                    <div class="viz-mini-bar" style="--h:48%"></div>
-                    <div class="viz-mini-bar viz-mini-peak" style="--h:88%"></div>
-                    <div class="viz-mini-bar" style="--h:61%"></div>
-                    <div class="viz-mini-bar" style="--h:42%"></div>
-                  </div>
-                  <span class="viz-side-meta">Planilha · Jan–Jun 2025</span>
-                </div>
-
-                <!-- Centro: seta IA -->
-                <div class="viz-arrow-col">
-                  <span class="viz-arrow-glyph" aria-hidden="true">→</span>
-                  <span class="viz-arrow-label">IA interpreta</span>
-                </div>
-
-                <!-- Direita: insight gerado -->
-                <div class="viz-output-side">
-                  <span class="viz-side-label">Insight gerado</span>
-                  <strong class="viz-insight-headline">Variação crítica em Abril</strong>
-                  <p class="viz-insight-body">Concentração de 24% dos gastos em um único mês indica risco operacional. Revisão necessária antes do próximo ciclo.</p>
-                  <div class="viz-tag-row">
-                    <span class="viz-tag viz-tag-alert">⚠ Alta prioridade</span>
-                    <span class="viz-tag viz-tag-type">Alerta financeiro</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Card 2: Tipos de insight detectados -->
-            <div class="viz-card viz-card-types">
-              <strong class="viz-card-title">Insights detectados</strong>
-              <ul class="viz-types-list">
-                <li><span class="viz-type-dot" style="--dot:#a78bfa"></span>Descritivo</li>
-                <li><span class="viz-type-dot" style="--dot:#60a5fa"></span>Tendência</li>
-                <li><span class="viz-type-dot" style="--dot:#f87171"></span>Alerta</li>
-                <li><span class="viz-type-dot" style="--dot:#86efac"></span>Oportunidade</li>
-                <li><span class="viz-type-dot" style="--dot:#fbbf24"></span>Inconsistência</li>
+              <ul class="lp-hero-points">
+                <li>Padrões e tendências</li>
+                <li>Riscos e oportunidades</li>
+                <li>Inconsistências e melhorias</li>
               </ul>
             </div>
 
-            <!-- Card 3: Recomendação prática -->
-            <div class="viz-card viz-card-rec">
-              <span class="viz-rec-icon" aria-hidden="true">✦</span>
-              <p class="viz-rec-text">Reforçar controle em Abril e revisar planejamento antes do próximo ciclo.</p>
-              <span class="viz-rec-tag">Recomendação prática</span>
+            <div class="lp-hero-visual">
+              <article class="lp-insight-card" aria-label="Exemplo de insight gerado pelo Report AI">
+                <header class="lp-insight-head">
+                  <span class="lp-insight-source">custos-2025.xlsx analisado</span>
+                  <span class="lp-score-chip">Score 8,7 / 10</span>
+                </header>
+                <div class="lp-insight-chart" role="img" aria-label="Gráfico de gastos de janeiro a junho com pico em abril">
+                  <span class="lp-bar" style="--h:52%"><i></i>Jan</span>
+                  <span class="lp-bar" style="--h:64%"><i></i>Fev</span>
+                  <span class="lp-bar" style="--h:47%"><i></i>Mar</span>
+                  <span class="lp-bar is-peak" style="--h:92%"><i></i>Abr</span>
+                  <span class="lp-bar" style="--h:58%"><i></i>Mai</span>
+                  <span class="lp-bar" style="--h:43%"><i></i>Jun</span>
+                </div>
+                <dl class="lp-anatomy">
+                  <div>
+                    <dt>Evidência</dt>
+                    <dd>Abril concentra 24% dos gastos do semestre.</dd>
+                  </div>
+                  <div>
+                    <dt>Interpretação</dt>
+                    <dd>Desvio atípico, sem sazonalidade que o justifique.</dd>
+                  </div>
+                  <div>
+                    <dt>Impacto</dt>
+                    <dd>Pressão de caixa e risco de estouro do orçamento anual.</dd>
+                  </div>
+                  <div>
+                    <dt>Recomendação</dt>
+                    <dd>Definir teto mensal com alerta automático de variação.</dd>
+                  </div>
+                </dl>
+              </article>
             </div>
-
-          </div>
-          <div class="hero-content">
-            <p class="eyebrow">Central de Insights · Report AI</p>
-            <h1>Report AI</h1>
-            <p class="hero-lead">
-              Não basta mostrar gráficos. O Report AI interpreta os dados que você envia —
-              planilhas, PDFs, dashboards ou imagens — e revela o que eles realmente significam:
-              padrões, tendências, riscos, oportunidades e recomendações práticas para tomada de decisão.
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="report-generator.html">✨ Gerar relatório agora</a>
-              <a class="button button-light" href="#servicos">Ver como funciona</a>
-            </div>
-          </div>
-          <div class="hero-metrics" aria-label="Indicadores do produto">
-            <article>
-              <strong>Dado → Insight</strong>
-              <span>o Report AI explica o significado dos seus dados, não só os exibe</span>
-            </article>
-            <article>
-              <strong>8 tipos de insight</strong>
-              <span>descritivo, comparativo, tendência, alerta, oportunidade, inconsistência e mais</span>
-            </article>
-            <article>
-              <strong>Score 0–10</strong>
-              <span>confiabilidade e qualidade dos insights com auditoria automática</span>
-            </article>
           </div>
         </section>
 
-        <section class="section intro-section" id="sobre">
-          <div class="section-copy">
-            <p class="eyebrow">Visão do produto</p>
-            <h2>O Report AI funciona como uma camada de interpretação sobre os dados.</h2>
-          </div>
-          <p>
-            O usuário envia suas fontes — dashboards, planilhas, PDFs, imagens ou integrações via API —
-            e escolhe o tipo de relatório. O sistema ativa um perfil de especialista que interpreta
-            os dados com critérios técnicos da área. Em vez de gráficos e textos genéricos, você
-            recebe uma análise contextualizada com indicadores relevantes, leitura crítica,
-            identificação de padrões, alertas e recomendações práticas.
-          </p>
-        </section>
-
-        <section class="section services-section" id="servicos">
-          <div class="section-heading">
-            <p class="eyebrow">Como funciona</p>
-            <h2>Escolha o tipo de relatório. O especialista analisa. Você decide.</h2>
-          </div>
-          <div class="service-grid">
-            <article class="service-card">
-              <span class="card-icon clean-icon"></span>
-              <h3>Escolha o tipo de relatório</h3>
-              <p>Financeiro, RH, comercial, operacional, eventos, marketing, engenharia, segurança, atendimento, produtividade, educacional ou executivo personalizado.</p>
-            </article>
-            <article class="service-card">
-              <span class="card-icon building-icon"></span>
-              <h3>Envie seus dados</h3>
-              <p>Upload de PDF, imagem, CSV, XLSX, dashboard ou integração via API. O sistema identifica os principais indicadores automaticamente.</p>
-            </article>
-            <article class="service-card">
-              <span class="card-icon event-icon"></span>
-              <h3>Especialista interpreta</h3>
-              <p>O perfil especialista analisa os dados com critérios técnicos da área, verifica inconsistências, padrões, gargalos e formula recomendações práticas.</p>
-            </article>
-            <article class="service-card">
-              <span class="card-icon support-icon"></span>
-              <h3>Relatório profissional</h3>
-              <p>Estrutura executiva com resumo, indicadores, análise, pontos de atenção, score de confiabilidade e exportação em PDF, Word ou Google Docs.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="portfolio-section" id="clientes">
-          <div class="section portfolio-heading">
-            <div>
-              <p class="eyebrow">Auditoria automática</p>
-              <h2>Antes de gerar o relatório, o sistema valida se os dados são confiáveis.</h2>
-            </div>
-            <p>
-              O Report AI verifica coerência matemática, campos vazios, duplicidades,
-              percentuais inconsistentes, bases comparativas e divergências entre fontes.
-              Cada relatório recebe um score de confiabilidade de 0 a 10 antes da aprovação.
-            </p>
-          </div>
-          <div class="portfolio-grid">
-            <article class="portfolio-card audit-card-public">
-              <div class="audit-card-visual">
-                <strong>2.019</strong>
-                <span>Total informado</span>
-              </div>
-              <div>
-                <span>Inconsistência</span>
-                <h3>Soma das fontes indica 2.310 registros no período.</h3>
-              </div>
-            </article>
-            <article class="portfolio-card audit-card-public">
-              <div class="audit-card-visual">
-                <strong>47%</strong>
-                <span>Meta atingida</span>
-              </div>
-              <div>
-                <span>Validação</span>
-                <h3>Resultado recalculado com base validada e meta declarada.</h3>
-              </div>
-            </article>
-            <article class="portfolio-card audit-card-public">
-              <div class="audit-card-visual">
-                <strong>7,9</strong>
-                <span>Score do relatório</span>
-              </div>
-              <div>
-                <span>Entrega segura</span>
-                <h3>Versão fica marcada como “Com inconsistência” até revisão.</h3>
-              </div>
-            </article>
-          </div>
-          <div class="section client-strip" aria-label="Regras de validação do relatório">
-            <article>
-              <strong>Total</strong>
-              <span>Total global versus soma das fontes</span>
-            </article>
-            <article>
-              <strong>Variação</strong>
-              <span>Período atual versus base comparativa</span>
-            </article>
-            <article>
-              <strong>Metas</strong>
-              <span>Resultado realizado versus objetivo declarado</span>
-            </article>
-            <article>
-              <strong>Fontes</strong>
-              <span>Anexos e evidências ligados a cada indicador</span>
-            </article>
-          </div>
-        </section>
-
-        <section class="brand-showcase" id="marcas" aria-labelledby="brandShowcaseTitle">
-          <div class="section brand-showcase-heading">
-            <p class="eyebrow">Fontes de dados</p>
-            <h2 id="brandShowcaseTitle">Enquanto um dashboard mostra o que aconteceu, o Report AI explica o que aquilo significa.</h2>
-            <p>
-              Conecte dashboards, planilhas, PDFs, imagens, CSVs ou integrações via API.
-              O especialista digital interpreta cada tipo de gráfico — barras, linhas, pizza,
-              funil, mapa de calor, tabelas e indicadores — com critérios técnicos da área.
-            </p>
-          </div>
-          <div class="brand-marquee" aria-label="Fontes de dados aceitas pelo Acesse Report AI">
-            <div class="brand-marquee-track" id="publicBrandCarousel"></div>
-          </div>
-        </section>
-
-        <section class="testimonials-section" id="depoimentos">
-          <div class="section testimonials-layout">
-            <div class="section-copy">
-              <p class="eyebrow">Fluxo do produto</p>
-              <h2>Nove etapas do dado bruto ao relatório aprovado e exportado.</h2>
-              <p>
-                O Report AI guia o usuário por um fluxo estruturado: da escolha do tipo de relatório
-                até a exportação final em PDF, Word ou Google Docs.
+        <!-- O que a IA encontra -->
+        <section class="lp-section" id="sobre">
+          <div class="lp-container">
+            <div class="lp-section-head">
+              <p class="lp-eyebrow">O que a IA encontra</p>
+              <h2>Uma camada de interpretação sobre os seus dados.</h2>
+              <p class="lp-section-lead">
+                O Report AI vai além de exibir gráficos: lê o conteúdo de cada arquivo enviado e
+                transforma informações visuais e dados brutos em análises claras, objetivas e acionáveis.
               </p>
             </div>
-            <div class="testimonial-grid">
-              <article class="testimonial-card">
-                <p>
-                  O usuário escolhe o tipo de relatório, define o objetivo e o público-alvo,
-                  informa o período e envia os dados ou seleciona uma integração existente.
-                </p>
-                <strong>1 a 3</strong>
-                <span>Escolha, objetivo e dados</span>
+            <div class="lp-find-grid">
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">◈</span>Padrões</h3>
+                <p>Comportamentos recorrentes que passam despercebidos no dia a dia da operação.</p>
               </article>
-              <article class="testimonial-card">
-                <p>
-                  O especialista digital identifica indicadores-chave, analisa os gráficos,
-                  verifica inconsistências e estrutura a análise em linguagem executiva.
-                </p>
-                <strong>4 a 6</strong>
-                <span>Identificação, análise e estruturação</span>
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">↗</span>Tendências</h3>
+                <p>A direção dos seus indicadores ao longo do tempo, com contexto e comparativos.</p>
               </article>
-              <article class="testimonial-card">
-                <p>
-                  O usuário revisa, edita e aprova. O sistema exporta o relatório com
-                  score de confiabilidade, histórico de versões e estrutura profissional.
-                </p>
-                <strong>7 a 9</strong>
-                <span>Revisão, aprovação e exportação</span>
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">⚠</span>Riscos</h3>
+                <p>Sinais de alerta identificados nos dados antes que se tornem prejuízo.</p>
+              </article>
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">✦</span>Oportunidades</h3>
+                <p>Pontos de crescimento e ganho que estavam escondidos nos números.</p>
+              </article>
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">≠</span>Inconsistências</h3>
+                <p>Divergências entre fontes, somas que não fecham e percentuais incoerentes.</p>
+              </article>
+              <article class="lp-find-card">
+                <h3><span aria-hidden="true">✓</span>Pontos de melhoria</h3>
+                <p>Onde o processo pode ser ajustado — sempre com uma recomendação prática.</p>
               </article>
             </div>
           </div>
         </section>
 
-        <section class="section contact-section" id="contato">
-          <div>
-            <p class="eyebrow">Demonstração</p>
-            <h2>Escolha o tipo de relatório e veja o especialista digital em ação.</h2>
-            <p>
-              Acesse o painel demonstrativo ou envie uma mensagem para testar o Report AI
-              com dados reais do seu negócio — financeiro, RH, comercial, eventos ou qualquer outra área.
-            </p>
+        <!-- Como funciona -->
+        <section class="lp-section" id="servicos">
+          <div class="lp-container">
+            <div class="lp-section-head">
+              <p class="lp-eyebrow">Como funciona</p>
+              <h2>Do arquivo bruto à decisão em quatro passos.</h2>
+            </div>
+            <div class="lp-steps">
+              <article class="lp-step">
+                <h3>Envie seus arquivos</h3>
+                <p>Gráficos, planilhas (XLSX/CSV), PDFs, imagens, dashboards ou integração via API.</p>
+              </article>
+              <article class="lp-step">
+                <h3>A IA interpreta</h3>
+                <p>Identifica indicadores, lê os gráficos e cruza as fontes com critérios técnicos da sua área.</p>
+              </article>
+              <article class="lp-step">
+                <h3>Receba insights</h3>
+                <p>Cada insight traz evidência encontrada, interpretação técnica, impacto e recomendação.</p>
+              </article>
+              <article class="lp-step">
+                <h3>Decida com clareza</h3>
+                <p>Relatório executivo com score de confiabilidade, exportável em PDF, Word ou Google Docs.</p>
+              </article>
+            </div>
           </div>
-          <form class="contact-form">
-            <label>
-              Nome
-              <input type="text" name="nome" placeholder="Seu nome" autocomplete="name" maxlength="90" required />
-            </label>
-            <label>
-              Empresa
-              <input type="text" name="empresa" placeholder="Nome da empresa" autocomplete="organization" maxlength="120" />
-            </label>
-            <label>
-              Telefone
-              <input
-                type="tel"
-                id="contactPhone"
-                name="telefone"
-                placeholder="(83) 99999-9999"
-                autocomplete="tel"
-                inputmode="numeric"
-                maxlength="15"
-                pattern="\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}"
-                required
-              />
-            </label>
-            <label>
-              Interesse
-              <select name="servico" required>
-                <option>Demonstração do produto</option>
-                <option>Relatório financeiro</option>
-                <option>Relatório de RH</option>
-                <option>Relatório comercial</option>
-                <option>Relatório de eventos</option>
-                <option>Relatório operacional</option>
-                <option>Relatório de marketing</option>
-                <option>Relatório de engenharia</option>
-                <option>Relatório de atendimento</option>
-                <option>Relatório de produtividade</option>
-                <option>Relatório educacional</option>
-                <option>Relatório executivo personalizado</option>
-                <option>Integração com dashboard/API</option>
-              </select>
-            </label>
-            <label class="full-field">
-              Mensagem
-              <textarea
-                id="contactMessage"
-                rows="4"
-                name="mensagem"
-                placeholder="Conte qual negócio, setor ou fluxo você quer validar"
-                maxlength="250"
-                aria-describedby="contactMessageCounter"
-              ></textarea>
-              <small class="field-counter" id="contactMessageCounter">0/250 caracteres</small>
-            </label>
-            <a
-              class="button button-primary full-field"
-              id="contactWhatsappButton"
-              href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20validar%20o%20Acesse%20Report%20AI."
-              aria-label="Falar pelo WhatsApp no número (83) 99802-4125"
-              title="WhatsApp: (83) 99802-4125"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Falar pelo WhatsApp
-            </a>
-          </form>
         </section>
 
+        <!-- Anatomia do insight -->
+        <section class="lp-section lp-anatomy-section" id="clientes">
+          <div class="lp-container">
+            <div class="lp-section-head">
+              <p class="lp-eyebrow">Anatomia do insight</p>
+              <h2>Todo insight responde a quatro perguntas.</h2>
+              <p class="lp-section-lead">
+                Nada de texto genérico: cada análise gerada segue a mesma estrutura,
+                para você entender o dado e saber exatamente o que fazer com ele.
+              </p>
+            </div>
+            <div class="lp-anatomy-grid">
+              <article class="lp-anatomy-card">
+                <span class="lp-pill">1 · Evidência</span>
+                <strong>O que os dados mostram?</strong>
+                <p>O fato objetivo encontrado no arquivo, com número, período e fonte.</p>
+                <blockquote>“Abril concentra 24% dos gastos do semestre (R$ 48,2 mil).”</blockquote>
+              </article>
+              <article class="lp-anatomy-card">
+                <span class="lp-pill">2 · Interpretação</span>
+                <strong>Por que isso acontece?</strong>
+                <p>A leitura técnica do dado, com contexto da área e comparativos.</p>
+                <blockquote>“Desvio de 2,1× sobre a média mensal, sem sazonalidade que o justifique.”</blockquote>
+              </article>
+              <article class="lp-anatomy-card">
+                <span class="lp-pill">3 · Impacto</span>
+                <strong>O que muda para o negócio?</strong>
+                <p>A consequência prática se nada for feito — em caixa, meta ou operação.</p>
+                <blockquote>“Pressão de caixa no 2º trimestre e risco de estouro do orçamento anual.”</blockquote>
+              </article>
+              <article class="lp-anatomy-card">
+                <span class="lp-pill">4 · Recomendação</span>
+                <strong>O que fazer agora?</strong>
+                <p>Uma ação objetiva e priorizada, pronta para entrar no seu plano.</p>
+                <blockquote>“Redistribuir compras recorrentes e definir teto mensal com alerta automático.”</blockquote>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- Auditoria e score -->
+        <section class="lp-section" id="depoimentos">
+          <div class="lp-container lp-audit-grid">
+            <div>
+              <p class="lp-eyebrow">Auditoria automática</p>
+              <h2>Antes de gerar o relatório, o sistema valida se os dados são confiáveis.</h2>
+              <p class="lp-section-lead">
+                O Report AI confere a coerência matemática do que você enviou e atribui um
+                score de confiabilidade de 0 a 10. Relatórios com inconsistências ficam
+                marcados para revisão antes da entrega.
+              </p>
+            </div>
+            <div class="lp-audit-card">
+              <div class="lp-audit-score">
+                <strong>8,7</strong>
+                <span>Score de confiabilidade<br />calculado antes da aprovação</span>
+              </div>
+              <ul class="lp-audit-list">
+                <li>Total global × soma das fontes</li>
+                <li>Variação do período × base comparativa</li>
+                <li>Resultado realizado × meta declarada</li>
+                <li>Campos vazios, duplicidades e percentuais incoerentes</li>
+                <li>Evidências e anexos vinculados a cada indicador</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Fontes de dados -->
+        <section class="lp-section lp-sources" id="marcas" aria-labelledby="sourcesTitle">
+          <div class="lp-container">
+            <div class="lp-section-head">
+              <p class="lp-eyebrow">Fontes de dados</p>
+              <h2 id="sourcesTitle">O dashboard mostra o que aconteceu. O Report AI explica o que aquilo significa.</h2>
+              <div class="lp-source-tags" aria-label="Formatos aceitos">
+                <span>Gráficos</span>
+                <span>Planilhas XLSX/CSV</span>
+                <span>PDFs</span>
+                <span>Imagens</span>
+                <span>Dashboards</span>
+                <span>Integração via API</span>
+              </div>
+            </div>
+            <div class="brand-marquee" aria-label="Fontes de dados aceitas pelo Report AI">
+              <div class="brand-marquee-track" id="publicBrandCarousel"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contato / demonstração -->
+        <section class="lp-section" id="contato">
+          <div class="lp-container lp-contact-grid">
+            <div class="lp-contact-aside">
+              <p class="lp-eyebrow">Demonstração</p>
+              <h2>Veja o Report AI analisando os dados do seu negócio.</h2>
+              <p class="lp-section-lead">
+                Envie uma mensagem e teste a plataforma com dados reais — financeiro, RH,
+                comercial, eventos, marketing ou qualquer outra área.
+              </p>
+              <ul class="lp-hero-points">
+                <li>Resposta pelo WhatsApp</li>
+                <li>Demonstração com seus arquivos</li>
+                <li>Sem compromisso</li>
+              </ul>
+            </div>
+
+            <form class="lp-form" id="contactForm">
+              <label>
+                Nome
+                <input type="text" name="nome" placeholder="Seu nome" autocomplete="name" maxlength="90" required />
+              </label>
+              <label>
+                Empresa
+                <input type="text" name="empresa" placeholder="Nome da empresa" autocomplete="organization" maxlength="120" />
+              </label>
+              <label>
+                Telefone
+                <input
+                  type="tel"
+                  id="contactPhone"
+                  name="telefone"
+                  placeholder="(83) 99999-9999"
+                  autocomplete="tel"
+                  inputmode="numeric"
+                  maxlength="15"
+                  pattern="\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}"
+                  required
+                />
+              </label>
+              <label>
+                Interesse
+                <select name="servico" required>
+                  <option>Demonstração do produto</option>
+                  <option>Relatório financeiro</option>
+                  <option>Relatório de RH</option>
+                  <option>Relatório comercial</option>
+                  <option>Relatório de eventos</option>
+                  <option>Relatório operacional</option>
+                  <option>Relatório de marketing</option>
+                  <option>Relatório de engenharia</option>
+                  <option>Relatório de atendimento</option>
+                  <option>Relatório de produtividade</option>
+                  <option>Relatório educacional</option>
+                  <option>Relatório executivo personalizado</option>
+                  <option>Integração com dashboard/API</option>
+                </select>
+              </label>
+              <label class="lp-full">
+                Mensagem
+                <textarea
+                  id="contactMessage"
+                  rows="4"
+                  name="mensagem"
+                  placeholder="Conte qual negócio, setor ou fluxo você quer analisar"
+                  maxlength="250"
+                  aria-describedby="contactMessageCounter"
+                ></textarea>
+                <small class="lp-counter" id="contactMessageCounter">0/250 caracteres</small>
+              </label>
+              <a
+                class="lp-btn lp-btn-accent lp-full"
+                id="contactWhatsappButton"
+                href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20validar%20o%20Report%20AI."
+                aria-label="Falar pelo WhatsApp no número (83) 99802-4125"
+                title="WhatsApp: (83) 99802-4125"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Falar pelo WhatsApp
+              </a>
+            </form>
+          </div>
+        </section>
       </main>
 
-      <footer class="site-footer">
-        <div class="footer-brand-block">
-          <a class="brand footer-product-brand" href="#inicio" aria-label="Report AI início">
-            <img class="product-logo product-logo-mark" src="assets/report-ai-logo.png" alt="" />
-            <span>
-              <strong>Report AI</strong>
-              <small>Especialistas digitais em análise</small>
-            </span>
-          </a>
-          <address class="footer-address">
-            Plataforma de geração inteligente de relatórios com especialistas digitais para financeiro, RH, comercial, eventos, marketing, engenharia e mais.
-            <a
-              href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20validar%20o%20Acesse%20Report%20AI."
-              target="_blank"
-              rel="noreferrer"
-            >
-              WhatsApp: (83) 99802-4125
+      <!-- Footer com menu -->
+      <footer class="lp-footer">
+        <div class="lp-footer-grid">
+          <div class="lp-footer-brand">
+            <a class="lp-brand" href="#inicio" aria-label="Report AI — início">
+              <img src="assets/report-ai-logo.png" alt="" />
+              <span>
+                <strong>Report AI</strong>
+                <small>Dados que viram decisão</small>
+              </span>
             </a>
-          </address>
+            <p>
+              Plataforma que interpreta gráficos, planilhas, PDFs, imagens e dashboards
+              e transforma dados brutos em insights acionáveis.
+            </p>
+          </div>
+
+          <nav class="lp-footer-nav" aria-label="Menu do rodapé — produto">
+            <strong>Produto</strong>
+            <ul>
+              <li><a href="#inicio">Início</a></li>
+              <li><a href="#sobre">O que a IA encontra</a></li>
+              <li><a href="#servicos">Como funciona</a></li>
+              <li><a href="report-generator.html">Gerar relatório</a></li>
+            </ul>
+          </nav>
+
+          <nav class="lp-footer-nav" aria-label="Menu do rodapé — recursos">
+            <strong>Recursos</strong>
+            <ul>
+              <li><a href="#clientes">Anatomia do insight</a></li>
+              <li><a href="#depoimentos">Auditoria e score</a></li>
+              <li><a href="#marcas">Fontes de dados</a></li>
+            </ul>
+          </nav>
+
+          <nav class="lp-footer-nav" aria-label="Menu do rodapé — contato">
+            <strong>Contato</strong>
+            <ul>
+              <li><a href="#contato">Demonstração</a></li>
+              <li>
+                <a
+                  href="https://wa.me/5583998024125?text=Ol%C3%A1%2C%20gostaria%20de%20validar%20o%20Report%20AI."
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WhatsApp: (83) 99802-4125
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div class="lp-footer-bottom">
+          <div class="lp-footer-bottom-inner">
+            <span>© 2026 Report AI. Todos os direitos reservados.</span>
+            <a href="#inicio">Voltar ao topo ↑</a>
+          </div>
         </div>
       </footer>
 
-      <!-- Mobile bottom nav -->
+      <!-- Menu inferior mobile -->
       <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navegação rápida">
         <a class="mobile-bottom-nav-item is-active" href="#inicio" data-section="inicio">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-home"></use></svg>
           <span>Início</span>
         </a>
-        <a class="mobile-bottom-nav-item" href="#servicos" data-section="servicos">
+        <a class="mobile-bottom-nav-item" href="#sobre" data-section="sobre">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-activity"></use></svg>
           <span>Produto</span>
         </a>
@@ -647,8 +654,8 @@
           <span>Gerar</span>
         </a>
         <a class="mobile-bottom-nav-item" href="#clientes" data-section="clientes">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-award"></use></svg>
-          <span>Auditoria</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-report"></use></svg>
+          <span>Insights</span>
         </a>
         <a class="mobile-bottom-nav-item" href="#contato" data-section="contato">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-message"></use></svg>

@@ -503,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function setupPublicSite() {
   const updateHeaderState = () => {
-    document.querySelector(".site-header").classList.toggle("scrolled", window.scrollY > 30);
+    document.querySelector(".lp-header")?.classList.toggle("scrolled", window.scrollY > 30);
   };
 
   window.addEventListener("scroll", updateHeaderState);
@@ -519,6 +519,7 @@ function setupPublicSite() {
     menuButton.classList.toggle("is-open", isOpen);
     menuButton.setAttribute("aria-expanded", String(isOpen));
     menuButton.setAttribute("aria-label", isOpen ? "Fechar menu" : "Abrir menu");
+    document.body.style.overflow = isOpen ? "hidden" : "";
   };
 
   menuButton.addEventListener("click", (event) => {
@@ -912,7 +913,7 @@ function setupHeroDashboardInteraction() {
 }
 
 function setupContactForm() {
-  const form = document.querySelector(".contact-form");
+  const form = document.querySelector("#contactForm");
   if (!form) return;
 
   const phoneInput = form.querySelector("#contactPhone");
@@ -1006,7 +1007,7 @@ function buildContactWhatsappUrl(form) {
 }
 
 function getSiteNavLinks() {
-  return [...siteNav.querySelectorAll('.site-nav-links a[href^="#"]')];
+  return [...siteNav.querySelectorAll('.lp-nav-links a[href^="#"]')];
 }
 
 function setActiveSiteNavLink(hash) {
@@ -7061,16 +7062,6 @@ function showToast(message) {
       menuBtn.setAttribute('aria-expanded', 'true');
     }
     document.body.style.overflow = 'hidden';
-  }
-
-  if (menuBtn) {
-    // Override do event listener existente para mobile
-    const origHandler = menuBtn.onclick;
-    menuBtn.addEventListener('click', function (e) {
-      if (window.innerWidth > 780) return;
-      e.stopPropagation();
-      nav.classList.contains('open') ? closeNav() : openNav();
-    }, true);
   }
 
   if (closeBtn) closeBtn.addEventListener('click', closeNav);

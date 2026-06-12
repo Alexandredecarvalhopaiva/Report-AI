@@ -367,42 +367,75 @@
 }
 
 /* Card de insight (visual do hero) */
-#publicSite .lp-insight-card {
+/* ════════════════════════════════════════════════════════════════
+   Hero — widget de visualização interativo (.lp-viz)
+   3 gráficos (tendência, barras, rosca) + insight por gráfico.
+   ════════════════════════════════════════════════════════════════ */
+
+#publicSite .lp-viz {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 22px;
+  gap: 16px;
+  padding: 22px 22px 20px;
   border: 1px solid var(--lp-line);
   border-radius: var(--lp-radius);
   background: var(--lp-surface);
   box-shadow: 0 24px 60px rgba(63, 70, 50, 0.1);
+  overflow: hidden;
 }
 
-#publicSite .lp-insight-head {
+/* Barra de progresso da rotação automática */
+#publicSite .lp-viz-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--lp-accent), var(--lp-amber));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* Cabeçalho */
+#publicSite .lp-viz-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-#publicSite .lp-insight-source {
+#publicSite .lp-viz-source {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.78rem;
+  min-width: 0;
+  font-size: 0.76rem;
   font-weight: 650;
   color: var(--lp-muted);
 }
 
-#publicSite .lp-insight-source::before {
+#publicSite .lp-viz-source b {
+  overflow: hidden;
+  color: var(--lp-ink);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#publicSite .lp-viz-source::before {
   content: "";
+  flex: 0 0 auto;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--lp-green);
+  box-shadow: 0 0 0 0 rgba(95, 116, 70, 0.45);
+  animation: lpLivePulse 2.4s ease-out infinite;
 }
 
-#publicSite .lp-score-chip {
+#publicSite .lp-viz-score {
+  flex: 0 0 auto;
   padding: 4px 12px;
   border-radius: 999px;
   background: rgba(95, 116, 70, 0.12);
@@ -412,70 +445,382 @@
   white-space: nowrap;
 }
 
-#publicSite .lp-insight-chart {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-  align-items: end;
-  height: 110px;
-  padding: 14px 14px 8px;
-  border-radius: var(--lp-radius-sm);
+/* Abas dos gráficos */
+#publicSite .lp-viz-tabs {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--lp-line);
+  border-radius: 999px;
   background: var(--lp-bg);
 }
 
-#publicSite .lp-bar {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 6px;
-  height: 100%;
-  font-size: 0.62rem;
-  font-weight: 650;
-  text-align: center;
+#publicSite .lp-viz-tab {
+  flex: 1;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
   color: var(--lp-muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
-#publicSite .lp-bar i {
-  display: block;
-  height: var(--h, 50%);
-  border-radius: 5px 5px 2px 2px;
-  background: #d8c9ab;
+#publicSite .lp-viz-tab[aria-selected="true"] {
+  background: var(--lp-surface);
+  color: var(--lp-ink);
+  box-shadow: 0 2px 6px rgba(63, 70, 50, 0.12);
 }
 
-#publicSite .lp-bar.is-peak i {
+#publicSite .lp-viz-tab:hover {
+  color: var(--lp-ink);
+}
+
+/* Palco dos gráficos (crossfade) */
+#publicSite .lp-viz-stage {
+  position: relative;
+  height: 188px;
+}
+
+#publicSite .lp-viz-panel {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 340ms ease, transform 340ms ease;
+}
+
+#publicSite .lp-viz-panel.is-active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* — Gráfico de barras — */
+#publicSite .lp-viz-bars {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(6px, 2.2vw, 14px);
+  height: 100%;
+  padding: 6px 4px 0;
+}
+
+#publicSite .lp-viz-bar {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lp-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+#publicSite .lp-viz-bar-track {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  min-height: 0;
+}
+
+#publicSite .lp-viz-bar-fill {
+  width: 100%;
+  height: 0;
+  border-radius: 6px 6px 3px 3px;
+  background: #ddcdab;
+  transition: height 620ms cubic-bezier(0.22, 0.7, 0.3, 1), background 200ms ease, filter 200ms ease;
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+#publicSite .lp-viz-bars.is-live .lp-viz-bar-fill {
+  height: var(--h, 40%);
+}
+
+#publicSite .lp-viz-bar.is-peak .lp-viz-bar-fill {
   background: var(--lp-accent);
 }
 
-#publicSite .lp-bar.is-peak {
+#publicSite .lp-viz-bar.is-peak {
   color: var(--lp-accent);
 }
 
-#publicSite .lp-anatomy {
+#publicSite .lp-viz-bar-label {
+  height: 14px;
+  font-size: 0.64rem;
+  font-weight: 650;
+  text-align: center;
+}
+
+#publicSite .lp-viz-bar:hover .lp-viz-bar-fill,
+#publicSite .lp-viz-bar:focus-visible .lp-viz-bar-fill,
+#publicSite .lp-viz-bar.is-hot .lp-viz-bar-fill {
+  filter: brightness(0.94) saturate(1.1);
+}
+
+/* — Gráfico de área/tendência (SVG) — */
+#publicSite .lp-viz-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#publicSite .lp-viz-area {
+  opacity: 0;
+  transition: opacity 600ms ease 200ms;
+}
+
+#publicSite .lp-viz-panel.is-active .lp-viz-area {
+  opacity: 1;
+}
+
+#publicSite .lp-viz-line {
+  fill: none;
+  stroke: var(--lp-green);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#publicSite .lp-viz-point {
+  fill: var(--lp-surface);
+  stroke: var(--lp-green);
+  stroke-width: 2.2;
+  cursor: pointer;
+  transition: r 180ms ease;
+}
+
+#publicSite .lp-viz-point.is-hot {
+  fill: var(--lp-green);
+}
+
+#publicSite .lp-viz-point.is-last {
+  fill: var(--lp-green);
+}
+
+#publicSite .lp-viz-tracer {
+  fill: var(--lp-green);
+  opacity: 0;
+}
+
+#publicSite .lp-viz-axis-label {
+  fill: var(--lp-muted);
+  font-size: 9px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+#publicSite .lp-viz-guide {
+  stroke: var(--lp-line);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0;
+}
+
+/* — Gráfico de rosca (SVG) + legenda — */
+#publicSite .lp-viz-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 100%;
+}
+
+#publicSite .lp-viz-donut {
+  flex: 0 0 auto;
+  width: 150px;
+  height: 150px;
+}
+
+#publicSite .lp-viz-seg {
+  fill: none;
+  stroke-width: 18;
+  stroke-linecap: butt;
+  cursor: pointer;
+  transition: stroke-width 180ms ease, opacity 180ms ease;
+}
+
+#publicSite .lp-viz-seg.is-dim {
+  opacity: 0.4;
+}
+
+#publicSite .lp-viz-seg.is-hot {
+  stroke-width: 23;
+}
+
+#publicSite .lp-viz-donut-center-value {
+  fill: var(--lp-ink);
+  font-size: 26px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+#publicSite .lp-viz-donut-center-label {
+  fill: var(--lp-muted);
+  font-size: 10px;
+  font-weight: 650;
+  text-anchor: middle;
+}
+
+#publicSite .lp-viz-legend {
   display: grid;
-  gap: 12px;
+  flex: 1;
+  gap: 7px;
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-#publicSite .lp-anatomy > div {
-  display: grid;
-  grid-template-columns: 116px 1fr;
-  gap: 12px;
-  align-items: baseline;
+#publicSite .lp-viz-legend li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--lp-ink);
+  cursor: pointer;
+  transition: background 160ms ease;
 }
 
-#publicSite .lp-anatomy dt {
+#publicSite .lp-viz-legend li:hover,
+#publicSite .lp-viz-legend li.is-hot {
+  background: var(--lp-bg);
+}
+
+#publicSite .lp-viz-legend .lp-viz-dot {
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  background: var(--c, var(--lp-muted));
+}
+
+#publicSite .lp-viz-legend .lp-viz-legend-val {
+  margin-left: auto;
+  color: var(--lp-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tooltip dos pontos/barras */
+#publicSite .lp-viz-tip {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 0;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: var(--lp-dark);
+  color: #fdf9f0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -120%);
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+
+#publicSite .lp-viz-tip.is-on {
+  opacity: 1;
+}
+
+#publicSite .lp-viz-tip b {
+  color: var(--lp-amber);
+}
+
+/* Rodapé de insight */
+#publicSite .lp-viz-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 15px;
+  border-top: 1px solid var(--lp-line);
+}
+
+#publicSite .lp-viz-insight-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#publicSite .lp-viz-tag {
+  padding: 3px 11px;
+  border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 750;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+#publicSite .lp-viz-insight[data-tag-type="tendencia"] .lp-viz-tag {
+  background: rgba(95, 116, 70, 0.14);
+  color: var(--lp-green);
+}
+
+#publicSite .lp-viz-insight[data-tag-type="alerta"] .lp-viz-tag {
+  background: var(--lp-accent-soft);
   color: var(--lp-accent);
 }
 
-#publicSite .lp-anatomy dd {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.45;
+#publicSite .lp-viz-insight[data-tag-type="oportunidade"] .lp-viz-tag {
+  background: rgba(216, 139, 42, 0.16);
+  color: #b06f18;
+}
+
+#publicSite .lp-viz-prio {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--lp-muted);
+}
+
+#publicSite .lp-viz-insight-headline {
+  font-size: 1.02rem;
+  font-weight: 740;
+  line-height: 1.25;
   color: var(--lp-ink);
+}
+
+#publicSite .lp-viz-insight-note {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--lp-muted);
+}
+
+#publicSite .lp-viz-insight-rec {
+  display: flex;
+  gap: 7px;
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--lp-ink);
+}
+
+#publicSite .lp-viz-insight-rec span {
+  flex: 0 0 auto;
+  font-weight: 750;
+  color: var(--lp-accent);
+}
+
+@keyframes lpLivePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(95, 116, 70, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(95, 116, 70, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(95, 116, 70, 0);
+  }
 }
 
 /* ── Grade "o que a IA encontra" ─────────────────────────────── */
@@ -1057,14 +1402,14 @@
     margin-top: auto;
   }
 
-  /* Conteúdo */
-  #publicSite .lp-insight-chart {
-    height: 96px;
+  /* Widget de visualização */
+  #publicSite .lp-viz-stage {
+    height: 176px;
   }
 
-  #publicSite .lp-anatomy > div {
-    grid-template-columns: 1fr;
-    gap: 2px;
+  #publicSite .lp-viz-donut {
+    width: 128px;
+    height: 128px;
   }
 }
 
@@ -1096,7 +1441,20 @@
   #publicSite .lp-nav-drawer,
   #publicSite .lp-nav-backdrop,
   #publicSite .lp-find-card,
-  #publicSite .lp-btn {
+  #publicSite .lp-btn,
+  #publicSite .lp-viz-panel,
+  #publicSite .lp-viz-bar-fill,
+  #publicSite .lp-viz-area,
+  #publicSite .lp-viz-seg,
+  #publicSite .lp-viz-point {
     transition: none;
+  }
+
+  #publicSite .lp-viz-source::before {
+    animation: none;
+  }
+
+  #publicSite .lp-viz-progress {
+    display: none;
   }
 }

@@ -607,309 +607,556 @@ function setupPublicSite() {
 }
 
 function setupHeroDashboardInteraction() {
-  const scene = document.querySelector("[data-hero-dashboard]");
-  if (!scene) return;
+  const widget = document.querySelector("[data-lp-viz]");
+  if (!widget) return;
 
-  const bars = Array.from(scene.querySelectorAll("[data-hero-bar]"));
-  if (!bars.length) return;
+  const NS = "http://www.w3.org/2000/svg";
+  const reduceMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const fields = {
-    total: scene.querySelector("[data-hero-total]"),
-    totalLabel: scene.querySelector("[data-hero-total-label]"),
-    score: scene.querySelector("[data-hero-score]"),
-    scoreLabel: scene.querySelector("[data-hero-score-label]"),
-    occupancy: scene.querySelector("[data-hero-occupancy]"),
-    occupancyLabel: scene.querySelector("[data-hero-occupancy-label]"),
-    decision: scene.querySelector("[data-hero-decision]"),
-    impact: scene.querySelector("[data-hero-impact]"),
-    impactCriteria: scene.querySelector("[data-hero-impact-criteria]"),
-    dayLabel: scene.querySelector("[data-hero-day-label]"),
-    syncLabel: scene.querySelector("[data-hero-sync-label]"),
-    auditTitle: scene.querySelector("[data-hero-audit-title]"),
-    auditText: scene.querySelector("[data-hero-audit-text]"),
-    auditNote: scene.querySelector("[data-hero-audit-note]"),
-    reportVersion: scene.querySelector("[data-hero-report-version]"),
-    reportLabel: scene.querySelector("[data-hero-report-label]"),
+  const tabsEl = widget.querySelector('[role="tablist"]');
+  const tabs = Array.from(widget.querySelectorAll("[data-viz-tab]"));
+  const panels = Array.from(widget.querySelectorAll("[data-viz-panel]"));
+  const stage = widget.querySelector("[data-viz-stage]");
+  const tip = widget.querySelector("[data-viz-tip]");
+  const progress = widget.querySelector("[data-viz-progress]");
+  const sourceEl = widget.querySelector("[data-viz-source]");
+  const insightBox = widget.querySelector("[data-viz-insight]");
+  const tagEl = widget.querySelector("[data-viz-tag]");
+  const prioEl = widget.querySelector("[data-viz-prio]");
+  const headlineEl = widget.querySelector("[data-viz-headline]");
+  const noteEl = widget.querySelector("[data-viz-note]");
+  const recEl = widget.querySelector("[data-viz-rec]");
+
+  if (!tabs.length || tabs.length !== panels.length) return;
+
+  const COLORS = {
+    green: "#5f7446",
+    accent: "#a85f3a",
+    amber: "#d88b2a",
+    neutral: "#cdbd9e",
   };
-  const metricCards = Array.from(scene.querySelectorAll(".scene-metrics article"));
-  const chart = scene.querySelector(".scene-chart");
-  const chartShell = scene.querySelector(".scene-chart-shell");
-  const progressBar = scene.querySelector("[data-hero-progress]");
-  const sparkPoint = scene.querySelector("[data-hero-spark-point]");
-  const reducedMotionQuery = window.matchMedia
-    ? window.matchMedia("(prefers-reduced-motion: reduce)")
-    : { matches: false };
-  let activeIndex = Math.max(0, bars.findIndex((bar) => bar.classList.contains("is-active")));
-  let intervalId = null;
-  let changeTimer = null;
-  let interactionTimer = null;
-  let changeToken = 0;
-  const activeAnimations = new Map();
+  const INTERVAL = 6200;
 
-  const setText = (element, value) => {
-    if (element && value) {
-      element.textContent = value;
+  function svgEl(tag, attrs, text) {
+    const node = document.createElementNS(NS, tag);
+    if (attrs) {
+      for (const key in attrs) node.setAttribute(key, String(attrs[key]));
     }
-  };
+    if (text != null) node.textContent = text;
+    return node;
+  }
 
-  const parseHeroNumber = (value) => {
-    const normalized = String(value ?? "")
-      .replace(/^v/i, "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-      .replace(/[^\d.-]/g, "");
-    const number = Number.parseFloat(normalized);
-    return Number.isFinite(number) ? number : null;
-  };
+  function tipAt(target, html) {
+    if (!tip) return;
+    const s = stage.getBoundingClientRect();
+    const r = target.getBoundingClientRect();
+    tip.innerHTML = html;
+    tip.style.left = `${r.left - s.left + r.width / 2}px`;
+    tip.style.top = `${r.top - s.top}px`;
+    tip.classList.add("is-on");
+  }
 
-  const formatHeroNumber = (number, template) => {
-    if (String(template).includes("%")) {
-      return `${Math.round(number)}%`;
-    }
-    if (String(template).includes(",")) {
-      const decimals = String(template).split(",")[1]?.replace(/\D/g, "").length || 1;
-      return number.toFixed(decimals).replace(".", ",");
-    }
-    return Math.round(number).toLocaleString("pt-BR");
-  };
+  function hideTip() {
+    if (tip) tip.classList.remove("is-on");
+  }
 
-  const replayDataMotion = (element) => {
-    if (!element || reducedMotionQuery.matches) return;
-    element.classList.remove("is-presenting");
-    void element.offsetWidth;
-    element.classList.add("is-presenting");
-    window.setTimeout(() => element.classList.remove("is-presenting"), 720);
-  };
+  // ── Gráfico de tendência (área + linha) ──────────────────────
+  function buildArea(panel) {
+    const data = [
+      { m: "Jan", v: 42 },
+      { m: "Fev", v: 45 },
+      { m: "Mar", v: 43 },
+      { m: "Abr", v: 49 },
+      { m: "Mai", v: 52 },
+      { m: "Jun", v: 55 },
+      { m: "Jul", v: 58 },
+    ];
+    const W = 300;
+    const H = 160;
+    const padL = 16;
+    const padR = 16;
+    const top = 22;
+    const bottom = 126;
+    const vMin = 39;
+    const vMax = 61;
+    const xs = data.map((_, i) => padL + (i * (W - padL - padR)) / (data.length - 1));
+    const ys = data.map((d) => top + (1 - (d.v - vMin) / (vMax - vMin)) * (bottom - top));
 
-  const animateDataText = (element, value, { instant = false } = {}) => {
-    if (!element || !value) return;
+    const linePath = xs
+      .map((x, i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${ys[i].toFixed(1)}`)
+      .join(" ");
+    const areaPath = `${linePath} L ${xs[xs.length - 1].toFixed(1)} ${bottom} L ${xs[0].toFixed(
+      1,
+    )} ${bottom} Z`;
 
-    const targetText = String(value);
-    const targetNumber = parseHeroNumber(targetText);
-    const currentNumber = parseHeroNumber(element.textContent);
-    const shouldCount =
-      !instant &&
-      !reducedMotionQuery.matches &&
-      !targetText.trim().toLowerCase().startsWith("v") &&
-      targetNumber !== null &&
-      currentNumber !== null;
-
-    if (activeAnimations.has(element)) {
-      window.cancelAnimationFrame(activeAnimations.get(element));
-      activeAnimations.delete(element);
-    }
-
-    if (!shouldCount) {
-      element.textContent = targetText;
-      replayDataMotion(element);
-      return;
-    }
-
-    const duration = 820;
-    const start = currentNumber;
-    const delta = targetNumber - start;
-    const startTime = window.performance.now();
-
-    const tick = (time) => {
-      const progress = Math.min((time - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      element.textContent = formatHeroNumber(start + delta * eased, targetText);
-      if (progress < 1) {
-        activeAnimations.set(element, window.requestAnimationFrame(tick));
-      } else {
-        element.textContent = targetText;
-        activeAnimations.delete(element);
-      }
-    };
-
-    replayDataMotion(element);
-    activeAnimations.set(element, window.requestAnimationFrame(tick));
-  };
-
-  const setProgress = (index) => {
-    if (!progressBar) return;
-    progressBar.style.setProperty("--hero-progress", `${((index + 1) / bars.length) * 100}%`);
-  };
-
-  const setFocusLine = (index) => {
-    if (!chartShell) return;
-    chartShell.style.setProperty("--hero-chart-focus-x", `${((index + 0.5) / bars.length) * 100}%`);
-  };
-
-  const showInteraction = () => {
-    window.clearTimeout(interactionTimer);
-    scene.classList.add("is-interacting");
-  };
-
-  const settleInteraction = () => {
-    window.clearTimeout(interactionTimer);
-    interactionTimer = window.setTimeout(() => {
-      scene.classList.remove("is-interacting");
-    }, 720);
-  };
-
-  const presentBarData = (bar, { instant = false } = {}) => {
-    animateDataText(fields.decision, bar.dataset.decision, { instant });
-    animateDataText(fields.impact, bar.dataset.impact, { instant });
-    setText(fields.impactCriteria, bar.dataset.impactCriteria);
-    animateDataText(fields.total, bar.dataset.total, { instant });
-    setText(fields.totalLabel, `${bar.dataset.day} · variação analisada`);
-    animateDataText(fields.score, bar.dataset.score, { instant });
-    setText(fields.scoreLabel, Number.parseFloat((bar.dataset.score || "").replace(",", ".")) < 8
-      ? "Revisão recomendada"
-      : "Alta confiabilidade");
-    animateDataText(fields.occupancy, bar.dataset.occupancy, { instant });
-    setText(fields.occupancyLabel, "Meta ou base esperada");
-    setText(fields.dayLabel, `${bar.dataset.day} · ${bar.dataset.total} registros analisados`);
-    setText(fields.syncLabel, "Arraste para comparar ciclos");
-    setText(fields.auditTitle, bar.dataset.auditTitle);
-    setText(fields.auditText, bar.dataset.auditText);
-    setText(fields.auditNote, bar.dataset.auditNote);
-    animateDataText(fields.reportVersion, bar.dataset.reportVersion, { instant });
-    setText(fields.reportLabel, bar.dataset.reportLabel);
-
-    metricCards.forEach((card) => {
-      card.classList.remove("is-presenting");
-      if (!reducedMotionQuery.matches && !instant) {
-        void card.offsetWidth;
-        card.classList.add("is-presenting");
-        window.setTimeout(() => card.classList.remove("is-presenting"), 420);
-      }
+    const svg = svgEl("svg", {
+      class: "lp-viz-svg",
+      viewBox: `0 0 ${W} ${H}`,
+      preserveAspectRatio: "xMidYMid meet",
+      role: "img",
+      "aria-label": "Tendência de receita de janeiro a julho, em crescimento.",
     });
 
-    if (sparkPoint) {
-      sparkPoint.setAttribute("cx", bar.dataset.sparkX || "152");
-      sparkPoint.setAttribute("cy", bar.dataset.sparkY || "18");
-    }
-  };
+    const defs = svgEl("defs");
+    const grad = svgEl("linearGradient", { id: "lpVizGrad", x1: 0, y1: 0, x2: 0, y2: 1 });
+    grad.appendChild(svgEl("stop", { offset: "0%", "stop-color": COLORS.green, "stop-opacity": 0.26 }));
+    grad.appendChild(svgEl("stop", { offset: "100%", "stop-color": COLORS.green, "stop-opacity": 0 }));
+    defs.appendChild(grad);
+    svg.appendChild(defs);
 
-  const setActiveBar = (index, { instant = false } = {}) => {
-    const bar = bars[index];
-    if (!bar) return;
+    const area = svgEl("path", { class: "lp-viz-area", d: areaPath, fill: "url(#lpVizGrad)" });
+    svg.appendChild(area);
 
-    activeIndex = index;
-    setProgress(activeIndex);
-    setFocusLine(activeIndex);
-    bars.forEach((item, itemIndex) => {
-      item.classList.toggle("is-active", itemIndex === activeIndex);
-      item.setAttribute("aria-pressed", String(itemIndex === activeIndex));
+    const guide = svgEl("line", {
+      class: "lp-viz-guide",
+      x1: xs[0],
+      y1: top,
+      x2: xs[0],
+      y2: bottom,
     });
+    svg.appendChild(guide);
 
-    if (instant || reducedMotionQuery.matches) {
-      scene.classList.remove("is-changing");
-      presentBarData(bar, { instant: true });
-      return;
-    }
+    const line = svgEl("path", { class: "lp-viz-line", d: linePath });
+    svg.appendChild(line);
 
-    const token = ++changeToken;
-    window.clearTimeout(changeTimer);
-    scene.classList.add("is-changing");
-    changeTimer = window.setTimeout(() => {
-      if (token !== changeToken) return;
-      presentBarData(bar);
-      window.requestAnimationFrame(() => {
-        window.setTimeout(() => scene.classList.remove("is-changing"), 80);
+    const points = [];
+    data.forEach((d, i) => {
+      svg.appendChild(svgEl("text", { class: "lp-viz-axis-label", x: xs[i], y: 150 }, d.m));
+      const isLast = i === data.length - 1;
+      const circle = svgEl("circle", {
+        class: `lp-viz-point${isLast ? " is-last" : ""}`,
+        cx: xs[i],
+        cy: ys[i],
+        r: isLast ? 4.2 : 3.2,
       });
-    }, 180);
-  };
+      const hit = svgEl("circle", {
+        cx: xs[i],
+        cy: ys[i],
+        r: 15,
+        fill: "transparent",
+        tabindex: "0",
+        role: "img",
+        "aria-label": `${d.m}: R$ ${d.v} mil`,
+      });
+      const enter = () => {
+        circle.classList.add("is-hot");
+        guide.setAttribute("x1", xs[i]);
+        guide.setAttribute("x2", xs[i]);
+        guide.style.opacity = "1";
+        tipAt(circle, `${d.m} · <b>R$ ${d.v} mil</b>`);
+      };
+      const leave = () => {
+        circle.classList.remove("is-hot");
+        guide.style.opacity = "0";
+        hideTip();
+      };
+      hit.addEventListener("mouseenter", enter);
+      hit.addEventListener("mouseleave", leave);
+      hit.addEventListener("focus", enter);
+      hit.addEventListener("blur", leave);
+      svg.appendChild(circle);
+      svg.appendChild(hit);
+      points.push(circle);
+    });
 
-  const stopAutoplay = () => {
-    if (intervalId) {
-      window.clearInterval(intervalId);
-      intervalId = null;
+    const tracer = svgEl("circle", { class: "lp-viz-tracer", cx: xs[0], cy: ys[0], r: 4 });
+    svg.appendChild(tracer);
+
+    panel.appendChild(svg);
+
+    let rafId = null;
+    return {
+      replay() {
+        if (rafId) cancelAnimationFrame(rafId);
+        const len = line.getTotalLength();
+        if (reduceMotion || !len) {
+          line.style.strokeDasharray = "none";
+          line.style.strokeDashoffset = "0";
+          tracer.style.opacity = "0";
+          return;
+        }
+        line.style.transition = "none";
+        line.style.strokeDasharray = String(len);
+        line.style.strokeDashoffset = String(len);
+        void line.getBoundingClientRect();
+        line.style.transition = "stroke-dashoffset 1000ms ease";
+        line.style.strokeDashoffset = "0";
+
+        tracer.style.opacity = "1";
+        const dur = 1000;
+        let start = null;
+        const step = (ts) => {
+          if (start === null) start = ts;
+          const k = Math.min(1, (ts - start) / dur);
+          const p = line.getPointAtLength(len * k);
+          tracer.setAttribute("cx", p.x);
+          tracer.setAttribute("cy", p.y);
+          if (k < 1) {
+            rafId = requestAnimationFrame(step);
+          } else {
+            tracer.style.opacity = "0";
+            rafId = null;
+          }
+        };
+        rafId = requestAnimationFrame(step);
+      },
+    };
+  }
+
+  // ── Gráfico de gastos (barras) ───────────────────────────────
+  function buildBars(panel) {
+    const data = [
+      { m: "Jan", v: 52 },
+      { m: "Fev", v: 64 },
+      { m: "Mar", v: 47 },
+      { m: "Abr", v: 92, peak: true },
+      { m: "Mai", v: 58 },
+      { m: "Jun", v: 43 },
+    ];
+    const wrap = document.createElement("div");
+    wrap.className = "lp-viz-bars";
+
+    data.forEach((d, i) => {
+      const bar = document.createElement("button");
+      bar.type = "button";
+      bar.className = `lp-viz-bar${d.peak ? " is-peak" : ""}`;
+      bar.style.setProperty("--i", i);
+      bar.style.setProperty("--h", `${d.v}%`);
+      bar.setAttribute("aria-label", `${d.m}: R$ ${d.v} mil`);
+
+      const track = document.createElement("span");
+      track.className = "lp-viz-bar-track";
+      const fill = document.createElement("span");
+      fill.className = "lp-viz-bar-fill";
+      track.appendChild(fill);
+
+      const label = document.createElement("span");
+      label.className = "lp-viz-bar-label";
+      label.textContent = d.m;
+
+      bar.append(track, label);
+
+      const txt = `${d.m} · <b>R$ ${d.v} mil</b>`;
+      bar.addEventListener("mouseenter", () => {
+        bar.classList.add("is-hot");
+        tipAt(fill, txt);
+      });
+      bar.addEventListener("mouseleave", () => {
+        bar.classList.remove("is-hot");
+        hideTip();
+      });
+      bar.addEventListener("focus", () => tipAt(fill, txt));
+      bar.addEventListener("blur", hideTip);
+
+      wrap.appendChild(bar);
+    });
+
+    panel.appendChild(wrap);
+
+    return {
+      replay() {
+        wrap.classList.remove("is-live");
+        void wrap.offsetWidth;
+        wrap.classList.add("is-live");
+      },
+    };
+  }
+
+  // ── Gráfico de distribuição (rosca) ──────────────────────────
+  function buildDonut(panel) {
+    const cats = [
+      { l: "Marketing", v: 38, c: COLORS.accent },
+      { l: "Operação", v: 27, c: COLORS.green },
+      { l: "Pessoal", v: 21, c: COLORS.amber },
+      { l: "Outros", v: 14, c: COLORS.neutral },
+    ];
+    const dominant = 0;
+    const cx = 80;
+    const cy = 80;
+    const r = 58;
+    const C = 2 * Math.PI * r;
+
+    const wrap = document.createElement("div");
+    wrap.className = "lp-viz-donut-wrap";
+
+    const svg = svgEl("svg", {
+      class: "lp-viz-donut",
+      viewBox: "0 0 160 160",
+      role: "img",
+      "aria-label": "Distribuição do orçamento por categoria. Marketing 38%, Operação 27%, Pessoal 21%, Outros 14%.",
+    });
+    svg.appendChild(
+      svgEl("circle", { cx, cy, r, fill: "none", stroke: "#efe6d4", "stroke-width": 18 }),
+    );
+
+    const segs = [];
+    let acc = 0;
+    cats.forEach((cat) => {
+      const frac = cat.v / 100;
+      const dash = frac * C;
+      const rot = acc * 360 - 90;
+      acc += frac;
+      const seg = svgEl("circle", {
+        class: "lp-viz-seg",
+        cx,
+        cy,
+        r,
+        stroke: cat.c,
+        "stroke-dasharray": `${dash.toFixed(2)} ${(C - dash).toFixed(2)}`,
+        "stroke-dashoffset": dash.toFixed(2),
+        transform: `rotate(${rot.toFixed(2)} ${cx} ${cy})`,
+      });
+      seg.dataset.dash = dash.toFixed(2);
+      svg.appendChild(seg);
+      segs.push(seg);
+    });
+
+    const centerVal = svgEl(
+      "text",
+      { class: "lp-viz-donut-center-value", x: cx, y: cy + 4 },
+      `${cats[dominant].v}%`,
+    );
+    const centerLab = svgEl(
+      "text",
+      { class: "lp-viz-donut-center-label", x: cx, y: cy + 20 },
+      cats[dominant].l,
+    );
+    svg.append(centerVal, centerLab);
+
+    const ul = document.createElement("ul");
+    ul.className = "lp-viz-legend";
+    const items = [];
+    cats.forEach((cat) => {
+      const li = document.createElement("li");
+      li.style.setProperty("--c", cat.c);
+      li.innerHTML = `<span class="lp-viz-dot"></span><span>${cat.l}</span><span class="lp-viz-legend-val">${cat.v}%</span>`;
+      ul.appendChild(li);
+      items.push(li);
+    });
+
+    wrap.append(svg, ul);
+    panel.appendChild(wrap);
+
+    function focusCat(i) {
+      segs.forEach((s, j) => {
+        s.classList.toggle("is-hot", j === i);
+        s.classList.toggle("is-dim", j !== i);
+      });
+      items.forEach((li, j) => li.classList.toggle("is-hot", j === i));
+      centerVal.textContent = `${cats[i].v}%`;
+      centerLab.textContent = cats[i].l;
     }
-    scene.classList.remove("is-autoplaying");
-  };
-
-  const startAutoplay = () => {
-    if (reducedMotionQuery.matches || intervalId || bars.length < 2) return;
-    scene.classList.add("is-autoplaying");
-    intervalId = window.setInterval(() => {
-      setActiveBar((activeIndex + 1) % bars.length);
-    }, 3200);
-  };
-
-  bars.forEach((bar, index) => {
-    bar.addEventListener("pointerenter", () => {
-      showInteraction();
-      setActiveBar(index);
-    });
-    bar.addEventListener("focus", () => {
-      showInteraction();
-      setActiveBar(index);
-    });
-    bar.addEventListener("click", () => {
-      showInteraction();
-      setActiveBar(index);
-      settleInteraction();
-    });
-    bar.addEventListener("touchstart", () => {
-      showInteraction();
-      setActiveBar(index);
-      settleInteraction();
-    }, { passive: true });
-    bar.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      showInteraction();
-      const nextIndex = event.key === "Home"
-        ? 0
-        : event.key === "End"
-          ? bars.length - 1
-          : event.key === "ArrowLeft"
-            ? Math.max(0, index - 1)
-            : Math.min(bars.length - 1, index + 1);
-      bars[nextIndex]?.focus();
-      setActiveBar(nextIndex);
-    });
-  });
-
-  chart?.addEventListener("pointermove", (event) => {
-    if (event.pointerType === "mouse" && event.buttons > 1) return;
-    const rect = chart.getBoundingClientRect();
-    const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 0.999);
-    const index = Math.min(bars.length - 1, Math.floor(ratio * bars.length));
-    showInteraction();
-    if (index !== activeIndex) {
-      setActiveBar(index);
-    } else {
-      setFocusLine(index);
+    function reset() {
+      segs.forEach((s) => s.classList.remove("is-hot", "is-dim"));
+      items.forEach((li) => li.classList.remove("is-hot"));
+      centerVal.textContent = `${cats[dominant].v}%`;
+      centerLab.textContent = cats[dominant].l;
     }
-  });
 
-  scene.addEventListener("pointerenter", () => {
-    showInteraction();
-    stopAutoplay();
-  });
-  scene.addEventListener("pointerleave", () => {
-    settleInteraction();
-    startAutoplay();
-  });
-  scene.addEventListener("focusin", () => {
-    showInteraction();
-    stopAutoplay();
-  });
-  scene.addEventListener("focusout", () => {
-    window.setTimeout(() => {
-      if (!scene.contains(document.activeElement)) {
-        settleInteraction();
-        startAutoplay();
-      }
-    }, 0);
-  });
+    segs.forEach((seg, i) => {
+      seg.setAttribute("tabindex", "0");
+      seg.setAttribute("role", "img");
+      seg.setAttribute("aria-label", `${cats[i].l}: ${cats[i].v}%`);
+      seg.addEventListener("mouseenter", () => focusCat(i));
+      seg.addEventListener("mouseleave", reset);
+      seg.addEventListener("focus", () => focusCat(i));
+      seg.addEventListener("blur", reset);
+    });
+    items.forEach((li, i) => {
+      li.addEventListener("mouseenter", () => focusCat(i));
+      li.addEventListener("mouseleave", reset);
+    });
 
-  if (typeof reducedMotionQuery.addEventListener === "function") {
-    reducedMotionQuery.addEventListener("change", (event) => {
-      if (event.matches) {
-        stopAutoplay();
+    return {
+      replay() {
+        if (reduceMotion) {
+          segs.forEach((s) => {
+            s.style.strokeDashoffset = "0";
+          });
+          return;
+        }
+        segs.forEach((s, i) => {
+          s.style.transition = "none";
+          s.style.strokeDashoffset = s.dataset.dash;
+          void s.getBoundingClientRect();
+          s.style.transition = `stroke-dashoffset 720ms ease ${i * 130}ms`;
+          s.style.strokeDashoffset = "0";
+        });
+      },
+    };
+  }
+
+  const defs = [
+    {
+      source: "receita-2025.xlsx",
+      build: buildArea,
+      insight: {
+        type: "tendencia",
+        tag: "Tendência",
+        prio: "Sinal positivo",
+        headline: "Receita cresce 38% no semestre",
+        note: "Aceleração consistente desde abril, acima da meta do trimestre.",
+        rec: "Manter o ritmo de aquisição e revisar a capacidade de entrega.",
+      },
+    },
+    {
+      source: "custos-2025.xlsx",
+      build: buildBars,
+      insight: {
+        type: "alerta",
+        tag: "Alerta",
+        prio: "Alta prioridade",
+        headline: "Abril concentra 26% dos gastos",
+        note: "Pico de 1,7× sobre a média dos demais meses, sem sazonalidade que o explique.",
+        rec: "Definir teto mensal com alerta automático de variação.",
+      },
+    },
+    {
+      source: "orcamento-2025.xlsx",
+      build: buildDonut,
+      insight: {
+        type: "oportunidade",
+        tag: "Oportunidade",
+        prio: "Prioridade média",
+        headline: "Marketing concentra 38% do orçamento",
+        note: "Maior categoria isolada — principal alavanca de realocação de verba.",
+        rec: "Testar realocar 10% para os canais de maior retorno.",
+      },
+    },
+  ];
+
+  const charts = defs.map((d, i) => ({ ...d, api: d.build(panels[i]) }));
+
+  function applyInsight(ins) {
+    insightBox.dataset.tagType = ins.type;
+    tagEl.textContent = ins.tag;
+    prioEl.textContent = ins.prio;
+    headlineEl.textContent = ins.headline;
+    noteEl.textContent = ins.note;
+    recEl.textContent = ins.rec;
+  }
+
+  let current = 0;
+
+  function show(i) {
+    charts.forEach((chart, idx) => {
+      const active = idx === i;
+      tabs[idx].setAttribute("aria-selected", String(active));
+      tabs[idx].tabIndex = active ? 0 : -1;
+      if (active) {
+        panels[idx].hidden = false;
+        void panels[idx].offsetWidth;
+        panels[idx].classList.add("is-active");
       } else {
-        startAutoplay();
+        panels[idx].classList.remove("is-active");
+        panels[idx].hidden = true;
       }
+    });
+    hideTip();
+    sourceEl.textContent = charts[i].source;
+    applyInsight(charts[i].insight);
+    current = i;
+    charts[i].api.replay();
+  }
+
+  // ── Rotação automática + barra de progresso ──────────────────
+  let timer = null;
+  let userControl = false;
+
+  // Na primeira seleção explícita do usuário, a rotação para de vez:
+  // evita trocar o gráfico que ele escolheu (sobretudo no toque), atende
+  // ao WCAG 2.2.2 e só então liga o aria-live (silencioso na fase automática).
+  function takeControl() {
+    if (userControl) return;
+    userControl = true;
+    stop();
+    if (progress) {
+      progress.style.transition = "none";
+      progress.style.transform = "scaleX(0)";
+    }
+    if (insightBox) insightBox.setAttribute("aria-live", "polite");
+  }
+
+  function restartProgress() {
+    if (!progress || reduceMotion) return;
+    progress.style.transition = "none";
+    progress.style.transform = "scaleX(0)";
+    void progress.offsetWidth;
+    progress.style.transition = `transform ${INTERVAL}ms linear`;
+    progress.style.transform = "scaleX(1)";
+  }
+
+  function freezeProgress() {
+    if (!progress) return;
+    const t = getComputedStyle(progress).transform;
+    progress.style.transition = "none";
+    progress.style.transform = t && t !== "none" ? t : "scaleX(0)";
+  }
+
+  function stop() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+
+  function play() {
+    if (reduceMotion) return;
+    stop();
+    restartProgress();
+    timer = window.setTimeout(() => {
+      show((current + 1) % charts.length);
+      play();
+    }, INTERVAL);
+  }
+
+  function pause() {
+    stop();
+    freezeProgress();
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => {
+      takeControl();
+      show(i);
+    });
+  });
+
+  if (tabsEl) {
+    tabsEl.addEventListener("keydown", (event) => {
+      const i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      let next = null;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (i + 1) % tabs.length;
+      else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (i - 1 + tabs.length) % tabs.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = tabs.length - 1;
+      if (next === null) return;
+      event.preventDefault();
+      takeControl();
+      tabs[next].focus();
+      show(next);
     });
   }
 
-  setActiveBar(activeIndex, { instant: true });
-  startAutoplay();
+  // Pausa enquanto o ponteiro/foco está no widget (fase automática);
+  // retoma só se o usuário ainda não assumiu o controle.
+  widget.addEventListener("pointerenter", () => {
+    if (!userControl) pause();
+  });
+  widget.addEventListener("pointerleave", () => {
+    if (!userControl) play();
+  });
+  widget.addEventListener("focusin", () => {
+    if (!userControl) pause();
+  });
+  widget.addEventListener("focusout", (event) => {
+    if (!userControl && !widget.contains(event.relatedTarget)) play();
+  });
+
+  show(0);
+  play();
 }
 
 function setupContactForm() {

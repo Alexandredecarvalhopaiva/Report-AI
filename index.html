@@ -300,37 +300,36 @@
             </div>
 
             <div class="lp-hero-visual">
-              <article class="lp-insight-card" aria-label="Exemplo de insight gerado pelo Report AI">
-                <header class="lp-insight-head">
-                  <span class="lp-insight-source">custos-2025.xlsx analisado</span>
-                  <span class="lp-score-chip">Score 8,7 / 10</span>
+              <article class="lp-viz" data-lp-viz aria-label="Central de Insights do Report AI — gráficos interpretados ao vivo">
+                <span class="lp-viz-progress" data-viz-progress aria-hidden="true"></span>
+
+                <header class="lp-viz-head">
+                  <span class="lp-viz-source">analisando <b data-viz-source>receita-2025.xlsx</b></span>
+                  <span class="lp-viz-score">Score 8,7 / 10</span>
                 </header>
-                <div class="lp-insight-chart" role="img" aria-label="Gráfico de gastos de janeiro a junho com pico em abril">
-                  <span class="lp-bar" style="--h:52%"><i></i>Jan</span>
-                  <span class="lp-bar" style="--h:64%"><i></i>Fev</span>
-                  <span class="lp-bar" style="--h:47%"><i></i>Mar</span>
-                  <span class="lp-bar is-peak" style="--h:92%"><i></i>Abr</span>
-                  <span class="lp-bar" style="--h:58%"><i></i>Mai</span>
-                  <span class="lp-bar" style="--h:43%"><i></i>Jun</span>
+
+                <div class="lp-viz-tabs" role="tablist" aria-label="Escolher gráfico">
+                  <button class="lp-viz-tab" type="button" role="tab" id="vizTab-0" aria-selected="true" aria-controls="vizPanel-0" data-viz-tab="0">Tendência</button>
+                  <button class="lp-viz-tab" type="button" role="tab" id="vizTab-1" aria-selected="false" aria-controls="vizPanel-1" tabindex="-1" data-viz-tab="1">Gastos</button>
+                  <button class="lp-viz-tab" type="button" role="tab" id="vizTab-2" aria-selected="false" aria-controls="vizPanel-2" tabindex="-1" data-viz-tab="2">Categorias</button>
                 </div>
-                <dl class="lp-anatomy">
-                  <div>
-                    <dt>Evidência</dt>
-                    <dd>Abril concentra 24% dos gastos do semestre.</dd>
+
+                <div class="lp-viz-stage" data-viz-stage>
+                  <div class="lp-viz-panel is-active" id="vizPanel-0" role="tabpanel" aria-labelledby="vizTab-0" data-viz-panel="0"></div>
+                  <div class="lp-viz-panel" id="vizPanel-1" role="tabpanel" aria-labelledby="vizTab-1" data-viz-panel="1" hidden></div>
+                  <div class="lp-viz-panel" id="vizPanel-2" role="tabpanel" aria-labelledby="vizTab-2" data-viz-panel="2" hidden></div>
+                  <span class="lp-viz-tip" data-viz-tip aria-hidden="true"></span>
+                </div>
+
+                <footer class="lp-viz-insight" data-viz-insight data-tag-type="tendencia">
+                  <div class="lp-viz-insight-tags">
+                    <span class="lp-viz-tag" data-viz-tag>Tendência</span>
+                    <span class="lp-viz-prio" data-viz-prio>Sinal positivo</span>
                   </div>
-                  <div>
-                    <dt>Interpretação</dt>
-                    <dd>Desvio atípico, sem sazonalidade que o justifique.</dd>
-                  </div>
-                  <div>
-                    <dt>Impacto</dt>
-                    <dd>Pressão de caixa e risco de estouro do orçamento anual.</dd>
-                  </div>
-                  <div>
-                    <dt>Recomendação</dt>
-                    <dd>Definir teto mensal com alerta automático de variação.</dd>
-                  </div>
-                </dl>
+                  <strong class="lp-viz-insight-headline" data-viz-headline>Receita cresce 38% no semestre</strong>
+                  <p class="lp-viz-insight-note" data-viz-note>Aceleração consistente desde abril, acima da meta do trimestre.</p>
+                  <p class="lp-viz-insight-rec"><span>Recomendação</span> <em data-viz-rec>Manter o ritmo de aquisição e revisar a capacidade de entrega.</em></p>
+                </footer>
               </article>
             </div>
           </div>

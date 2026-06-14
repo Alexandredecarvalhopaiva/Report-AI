@@ -139,7 +139,12 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
         body: JSON.stringify({
           system_instruction: { parts: [{ text: specialist.prompt }] },
           contents: [{ role: 'user', parts }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 4096, responseMimeType: 'application/json' },
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 8192,
+            responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
@@ -151,17 +156,26 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
 
     const data = await response.json();
     const cand = data.candidates && data.candidates[0];
+    const finishReason = cand && cand.finishReason;
     const text = ((cand && cand.content && cand.content.parts) || [])
       .map(p => p.text).filter(Boolean).join('');
     if (!text) {
       const reason = (data.promptFeedback && data.promptFeedback.blockReason)
-        || (cand && cand.finishReason) || 'resposta vazia';
+        || finishReason || 'resposta vazia';
       return res.status(502).json({ error: `Gemini não retornou conteúdo (${reason}).` });
     }
 
+    // Remove cercas de markdown (```json ... ```), caso a IA as inclua
+    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+
     let content;
-    try { content = JSON.parse(text); }
-    catch { return res.status(502).json({ error: 'Gemini retornou um JSON inválido.' }); }
+    try { content = JSON.parse(cleaned); }
+    catch {
+      if (finishReason === 'MAX_TOKENS') {
+        return res.status(502).json({ error: 'A resposta da IA excedeu o limite de tokens e veio incompleta. Reduza os dados enviados ou gere um relatório mais enxuto.' });
+      }
+      return res.status(502).json({ error: 'Gemini retornou um JSON inválido.' });
+    }
 
     return res.status(200).json({
       ...content,

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Servidor local para Report AI
 // Uso: node server.js
-// Opcional: GROQ_API_KEY=gsk_... node server.js
+// Opcional: GEMINI_API_KEY=... node server.js
 
 const http = require('http');
 const fs = require('fs');
@@ -47,7 +47,22 @@ const server = http.createServer(async (req, res) => {
       } catch {
         req.body = {};
       }
-      await apiHandler(req, res);
+      // Adapta a resposta nativa do Node à API estilo Vercel usada em api/generate-report.js
+      res.status = (code) => { res.statusCode = code; return res; };
+      res.json = (obj) => {
+        if (!res.headersSent) res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify(obj));
+        return res;
+      };
+      try {
+        await apiHandler(req, res);
+      } catch (e) {
+        if (!res.headersSent) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(JSON.stringify({ error: `Erro interno: ${e.message}` }));
+        }
+      }
     });
     return;
   }
@@ -78,11 +93,11 @@ server.listen(PORT, () => {
   console.log(`\n✅ Report AI rodando em http://localhost:${PORT}`);
   console.log(`📄 Site:      http://localhost:${PORT}`);
   console.log(`🤖 Gerador:   http://localhost:${PORT}/report-generator.html`);
-  if (!process.env.GROQ_API_KEY) {
-    console.log(`\n⚠️  GROQ_API_KEY não encontrada.`);
-    console.log(`   Crie um arquivo .env com: GROQ_API_KEY=gsk_...`);
-    console.log(`   Ou rode: GROQ_API_KEY=gsk_... node server.js\n`);
+  if (!process.env.GEMINI_API_KEY) {
+    console.log(`\n⚠️  GEMINI_API_KEY não encontrada.`);
+    console.log(`   Crie um arquivo .env com: GEMINI_API_KEY=...`);
+    console.log(`   Chave grátis em: https://aistudio.google.com/apikey\n`);
   } else {
-    console.log(`\n✅ GROQ_API_KEY configurada — IA pronta!\n`);
+    console.log(`\n✅ GEMINI_API_KEY configurada — IA pronta!\n`);
   }
 });

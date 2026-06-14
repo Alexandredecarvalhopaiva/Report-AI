@@ -7,6 +7,7 @@
   <meta name="robots" content="noindex" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.9.0/mammoth.browser.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -281,13 +282,13 @@
     <div class="card">
       <div class="card-title"><span class="icon">📁</span> Envie seus dados</div>
       <div class="alert alert-info">
-        💡 Aceito: <strong>CSV, Excel (XLSX), TXT, JSON</strong>. Para PDFs e imagens, copie o texto relevante em um arquivo .txt.
+        💡 Aceito: <strong>CSV, Excel, TXT, JSON, PDF, Word (.docx) e imagens</strong> (PNG, JPG). A IA lê o conteúdo — inclusive PDFs, prints e dashboards. Máx. 3 MB por PDF/imagem.
       </div>
       <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.txt,.json" onchange="handleFiles(this.files)" />
+        <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.txt,.json,.pdf,.docx,.png,.jpg,.jpeg,.webp" onchange="handleFiles(this.files)" />
         <div class="upload-icon">☁️</div>
         <p><strong>Clique para selecionar</strong> ou arraste os arquivos aqui</p>
-        <p style="font-size:12px;margin-top:4px">CSV · XLSX · TXT · JSON</p>
+        <p style="font-size:12px;margin-top:4px">CSV · XLSX · TXT · JSON · PDF · Word · Imagens</p>
       </div>
       <div class="file-list" id="fileList"></div>
       <div class="actions">
@@ -448,14 +449,17 @@
   async function handleFiles(files) {
     for (const file of files) {
       if (uploadedFiles.find(f => f.name === file.name)) continue;
-      const item = { name: file.name, type: detectType(file.name), content: '', status: 'reading' };
+      const item = { name: file.name, type: detectType(file.name), content: '', data: null, mimeType: null, status: 'reading', error: '' };
       uploadedFiles.push(item);
       renderFileList();
       try {
-        item.content = await readFile(file);
+        const r = await readFile(file);
+        if (r.kind === 'binary') { item.data = r.data; item.mimeType = r.mimeType; }
+        else { item.content = r.text; }
         item.status = 'ok';
-      } catch {
+      } catch (err) {
         item.status = 'error';
+        item.error = err.message || 'falha na leitura';
       }
       renderFileList();
     }
@@ -463,44 +467,84 @@
 
   function detectType(name) {
     const ext = name.split('.').pop().toLowerCase();
-    const map = { csv: 'CSV', xlsx: 'Excel', xls: 'Excel', txt: 'Texto', json: 'JSON' };
+    const map = {
+      csv: 'CSV', xlsx: 'Excel', xls: 'Excel', txt: 'Texto', json: 'JSON',
+      pdf: 'PDF', docx: 'Word', doc: 'Word',
+      png: 'Imagem', jpg: 'Imagem', jpeg: 'Imagem', webp: 'Imagem',
+    };
     return map[ext] || ext.toUpperCase();
   }
 
   function fileIcon(type) {
-    const icons = { CSV: '📊', Excel: '📗', Texto: '📄', JSON: '📦' };
+    const icons = { CSV: '📊', Excel: '📗', Texto: '📄', JSON: '📦', PDF: '📕', Word: '📘', Imagem: '🖼️' };
     return icons[type] || '📎';
+  }
+
+  // 3 MB cru → ~4 MB em base64, dentro do limite de corpo das funções serverless
+  const MAX_BINARY_BYTES = 3 * 1024 * 1024;
+
+  function readAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsText(file, 'UTF-8');
+    });
+  }
+
+  function readArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
   }
 
   async function readFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
+
+    // Texto puro
     if (ext === 'csv' || ext === 'txt' || ext === 'json') {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result.slice(0, 12000));
-        reader.onerror = reject;
-        reader.readAsText(file, 'UTF-8');
-      });
+      const t = await readAsText(file);
+      return { kind: 'text', text: t.slice(0, 12000) };
     }
+
+    // Planilhas → CSV (SheetJS)
     if (ext === 'xlsx' || ext === 'xls') {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          try {
-            const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-            let text = '';
-            wb.SheetNames.forEach(name => {
-              const ws = wb.Sheets[name];
-              text += `=== Planilha: ${name} ===\n`;
-              text += XLSX.utils.sheet_to_csv(ws) + '\n\n';
-            });
-            resolve(text.slice(0, 14000));
-          } catch(err) { reject(err); }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
+      const buf = await readArrayBuffer(file);
+      const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+      let text = '';
+      wb.SheetNames.forEach(name => {
+        text += `=== Planilha: ${name} ===\n`;
+        text += XLSX.utils.sheet_to_csv(wb.Sheets[name]) + '\n\n';
       });
+      return { kind: 'text', text: text.slice(0, 14000) };
     }
+
+    // Word (.docx) → texto (mammoth)
+    if (ext === 'docx') {
+      const buf = await readArrayBuffer(file);
+      try {
+        const result = await mammoth.extractRawText({ arrayBuffer: buf });
+        return { kind: 'text', text: (result.value || '').slice(0, 14000) };
+      } catch { throw new Error('Falha ao ler o Word (.docx)'); }
+    }
+
+    // PDF e imagens → base64 (lidos diretamente pela IA multimodal)
+    if (ext === 'pdf' || ['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+      if (file.size > MAX_BINARY_BYTES) throw new Error('grande demais (máx 3 MB)');
+      const mimeType = ext === 'pdf' ? 'application/pdf' : ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result || '');
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const comma = dataUrl.indexOf(','); // remove o prefixo "data:...;base64,"
+      return { kind: 'binary', mimeType, data: comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl };
+    }
+
     throw new Error('Tipo não suportado');
   }
 
@@ -518,7 +562,7 @@
           <div class="file-name">${f.name}</div>
           <div class="file-size">${f.type}</div>
         </div>
-        <span class="file-status ${f.status}">${f.status === 'ok' ? '✓ Lido' : f.status === 'reading' ? '⏳ Lendo…' : '✕ Erro'}</span>
+        <span class="file-status ${f.status}">${f.status === 'ok' ? '✓ Lido' : f.status === 'reading' ? '⏳ Lendo…' : '✕ ' + (f.error || 'Erro')}</span>
         <button class="file-remove" onclick="removeFile('${f.name}')" title="Remover">✕</button>
       </div>
     `).join('');
@@ -532,9 +576,11 @@
     const pe = document.getElementById('periodEnd').value;
     const period = ps && pe ? `${formatDate(ps)} a ${formatDate(pe)}` : ps || '';
 
-    const sources = uploadedFiles.filter(f => f.status === 'ok').map(f => ({
-      name: f.name, type: f.type, content: f.content
-    }));
+    const sources = uploadedFiles.filter(f => f.status === 'ok').map(f =>
+      f.data
+        ? { name: f.name, type: f.type, mimeType: f.mimeType, data: f.data }
+        : { name: f.name, type: f.type, content: f.content }
+    );
 
     showLoading('Especialista analisando seus dados…', 'Isso pode levar até 30 segundos');
 
@@ -555,7 +601,7 @@
       renderReport(currentReport);
     } catch (err) {
       hideLoading();
-      alert(`Erro ao gerar relatório: ${err.message}\n\nVerifique se a chave OpenAI está configurada no Netlify.`);
+      alert(`Erro ao gerar relatório: ${err.message}\n\nVerifique se a chave GROQ_API_KEY está configurada (.env local ou variáveis de ambiente do deploy).`);
     }
   }
 

@@ -79,15 +79,19 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY não configurada.' });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
   const { reportType = 'executive', objective = 'executive', period = '', audience = '', sources = [] } = req.body || {};
 
   const specialist = SPECIALIST_PROMPTS[reportType] || SPECIALIST_PROMPTS.executive;
   const objectiveLabel = OBJECTIVE_LABELS[objective] || 'Relatório Executivo';
 
-  const sourcesText = sources.map((s, i) =>
+  const textSources = sources.filter(s => s.content);
+  const binarySources = sources.filter(s => s.data && s.mimeType);
+
+  const sourcesText = textSources.map((s, i) =>
     `--- Fonte ${i + 1}: ${s.name} (${s.type}) ---\n${s.content}`
   ).join('\n\n');
 
@@ -98,7 +102,7 @@ PÚBLICO-ALVO: ${audience || 'Não informado'}
 PERÍODO: ${period || 'Não informado'}
 
 === DADOS FORNECIDOS ===
-${sourcesText || 'Nenhuma fonte enviada — faça uma análise geral com base no contexto.'}
+${sourcesText || (binarySources.length ? '(Documentos e imagens anexados abaixo para análise.)' : 'Nenhuma fonte enviada — faça uma análise geral com base no contexto.')}
 
 === INSTRUÇÃO ===
 Produza uma análise especializada completa. Responda SOMENTE com JSON válido no formato abaixo:
@@ -120,32 +124,44 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
 }
 `.trim();
 
+  // Monta as partes multimodais: texto + PDFs/imagens (base64) lidos diretamente pela IA
+  const parts = [{ text: userMessage }];
+  for (const b of binarySources) {
+    parts.push({ inline_data: { mime_type: b.mimeType, data: b.data } });
+  }
+
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: specialist.prompt },
-          { role: 'user', content: userMessage },
-        ],
-        temperature: 0.3,
-        response_format: { type: 'json_object' },
-        max_tokens: 4096,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: specialist.prompt }] },
+          contents: [{ role: 'user', parts }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 4096, responseMimeType: 'application/json' },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const err = await response.text();
-      return res.status(502).json({ error: `Groq error: ${err}` });
+      return res.status(502).json({ error: `Gemini error: ${err}` });
     }
 
     const data = await response.json();
-    const content = JSON.parse(data.choices[0].message.content);
+    const cand = data.candidates && data.candidates[0];
+    const text = ((cand && cand.content && cand.content.parts) || [])
+      .map(p => p.text).filter(Boolean).join('');
+    if (!text) {
+      const reason = (data.promptFeedback && data.promptFeedback.blockReason)
+        || (cand && cand.finishReason) || 'resposta vazia';
+      return res.status(502).json({ error: `Gemini não retornou conteúdo (${reason}).` });
+    }
+
+    let content;
+    try { content = JSON.parse(text); }
+    catch { return res.status(502).json({ error: 'Gemini retornou um JSON inválido.' }); }
 
     return res.status(200).json({
       ...content,

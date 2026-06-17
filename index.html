@@ -172,6 +172,10 @@
       <symbol id="icon-message" viewBox="0 0 24 24">
         <path d="M21 12a8 8 0 0 1-8 8H6l-3 2 1.2-4.2A8 8 0 1 1 21 12z"></path>
       </symbol>
+      <symbol id="icon-mail" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+        <path d="M5 7.5 12 12.5 19 7.5"></path>
+      </symbol>
       <symbol id="icon-whatsapp" viewBox="0 0 24 24">
         <path d="M4.6 19.4 6 15.6A8 8 0 1 1 9 18.7z"></path>
         <path d="M9.4 8.7c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2.1.4-.1.6l-.4.5c-.1.2-.2.3 0 .6.4.8 1.4 1.9 2.4 2.3.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.5.7c.3.1.4.3.4.6-.1.8-.7 1.5-1.5 1.6-1.2.2-3.3-.5-5.1-2.3-1.8-1.8-2.6-3.9-2.4-5.1.1-.3.2-.5.4-.7z"></path>
@@ -284,9 +288,9 @@
               <p class="lp-eyebrow">Plataforma de análise com IA</p>
               <h1>Seus dados mostram o que aconteceu. <em>O Report AI explica o que significa.</em></h1>
               <p class="lp-hero-lead">
-                Envie gráficos, planilhas, PDFs, imagens ou dashboards. A IA interpreta cada arquivo
-                e devolve insights claros e acionáveis — com evidência, interpretação técnica,
-                impacto para o negócio e recomendação prática.
+                Envie dashboards, imagens, PDFs ou planilhas e transforme informações operacionais
+                em relatórios profissionais, auditáveis e inteligentes. A IA interpreta os dados,
+                identifica inconsistências, revela insights e gera documentos prontos para apresentação.
               </p>
               <div class="lp-hero-actions">
                 <a class="lp-btn lp-btn-primary" href="report-generator.html">Gerar relatório agora</a>
@@ -296,54 +300,120 @@
                 <li>Padrões e tendências</li>
                 <li>Riscos e oportunidades</li>
                 <li>Inconsistências e melhorias</li>
+                <li>Relatórios em PDF, Word e Google Sheets</li>
               </ul>
             </div>
 
             <div class="lp-hero-visual">
-              <div class="lp-float-stack" aria-label="Insights do Report AI por tipo de gráfico">
+              <div class="rai-dash" aria-label="Painel do Report AI analisando relatórios em tempo real">
+                <span class="rai-glow rai-glow--a" aria-hidden="true"></span>
+                <span class="rai-glow rai-glow--b" aria-hidden="true"></span>
 
-                <article class="lp-float-card" data-viz-card data-chart="area" aria-label="Tendências interpretadas pela IA">
-                  <header class="lp-fc-head">
-                    <div class="lp-fc-id">
-                      <strong class="lp-fc-title">Tendências</strong>
-                      <span class="lp-fc-source">receita-2025.xlsx</span>
+                <div class="rai-ticker" role="status" aria-live="polite">
+                  <span class="rai-ticker-dot" aria-hidden="true"></span>
+                  <span class="rai-ticker-label">IA analisando</span>
+                  <span class="rai-ticker-msgs">
+                    <b>Tendência positiva detectada</b>
+                    <b>Inconsistência encontrada</b>
+                    <b>Relatório com score 8,7/10</b>
+                    <b>Pico de acesso identificado</b>
+                    <b>Dados prontos para exportação</b>
+                    <b>Resumo executivo gerado</b>
+                    <b>Oportunidade operacional identificada</b>
+                  </span>
+                </div>
+
+                <div class="rai-cols" aria-hidden="true">
+                  <div class="rai-col rai-col--front">
+                    <div class="rai-track">
+                      <article class="rai-card rai-card--line">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Tendências</strong><span class="rai-c-src">receita-2025.xlsx</span></span><span class="rai-c-tag rai-tag--up">Sinal positivo</span></header>
+                        <div class="rai-chart rai-chart--line"><svg viewBox="0 0 200 60" preserveAspectRatio="none"><path class="rai-area" d="M2 46 L35 42 L68 44 L101 33 L134 28 L167 18 L198 10 L198 60 L2 60 Z"/><path class="rai-line" d="M2 46 L35 42 L68 44 L101 33 L134 28 L167 18 L198 10"/><circle class="rai-dot" cx="198" cy="10" r="3.6"/></svg></div>
+                        <p class="rai-c-note"><strong>Receita +38% no semestre.</strong> Aceleração consistente desde abril, acima da meta.</p>
+                      </article>
+                      <article class="rai-card rai-card--score">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Score do relatório</strong><span class="rai-c-src">confiabilidade</span></span><span class="rai-c-tag rai-tag--up">Confiável</span></header>
+                        <div class="rai-c-body rai-score-body"><span class="rai-gauge" style="--p:87%"><b>8,7</b><i>/10</i></span><span class="rai-score-meta"><span>Completude</span><span>Coerência</span><span>Rastreabilidade</span></span></div>
+                      </article>
+                      <article class="rai-card rai-card--incon">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Inconsistência</strong><span class="rai-c-src">auditoria automática</span></span><span class="rai-c-tag rai-tag--alert">Atenção</span></header>
+                        <div class="rai-c-body rai-incon"><span class="rai-incon-ico" aria-hidden="true">≠</span><span class="rai-incon-txt"><b>Soma dos dias não fecha</b><small>2.310 lançados × 2.019 no total</small></span></div>
+                      </article>
+                      <article class="rai-card rai-card--export">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Exportação</strong><span class="rai-c-src">relatório final</span></span><span class="rai-c-tag rai-tag--opp">Pronto</span></header>
+                        <div class="rai-c-body rai-export"><span class="rai-chip">PDF</span><span class="rai-chip">Word</span><span class="rai-chip">Sheets</span></div>
+                        <p class="rai-c-note">Dados prontos para exportação.</p>
+                      </article>
+                      <article class="rai-card rai-card--line" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Tendências</strong><span class="rai-c-src">receita-2025.xlsx</span></span><span class="rai-c-tag rai-tag--up">Sinal positivo</span></header>
+                        <div class="rai-chart rai-chart--line"><svg viewBox="0 0 200 60" preserveAspectRatio="none"><path class="rai-area" d="M2 46 L35 42 L68 44 L101 33 L134 28 L167 18 L198 10 L198 60 L2 60 Z"/><path class="rai-line" d="M2 46 L35 42 L68 44 L101 33 L134 28 L167 18 L198 10"/><circle class="rai-dot" cx="198" cy="10" r="3.6"/></svg></div>
+                        <p class="rai-c-note"><strong>Receita +38% no semestre.</strong> Aceleração consistente desde abril, acima da meta.</p>
+                      </article>
+                      <article class="rai-card rai-card--score" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Score do relatório</strong><span class="rai-c-src">confiabilidade</span></span><span class="rai-c-tag rai-tag--up">Confiável</span></header>
+                        <div class="rai-c-body rai-score-body"><span class="rai-gauge" style="--p:87%"><b>8,7</b><i>/10</i></span><span class="rai-score-meta"><span>Completude</span><span>Coerência</span><span>Rastreabilidade</span></span></div>
+                      </article>
+                      <article class="rai-card rai-card--incon" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Inconsistência</strong><span class="rai-c-src">auditoria automática</span></span><span class="rai-c-tag rai-tag--alert">Atenção</span></header>
+                        <div class="rai-c-body rai-incon"><span class="rai-incon-ico" aria-hidden="true">≠</span><span class="rai-incon-txt"><b>Soma dos dias não fecha</b><small>2.310 lançados × 2.019 no total</small></span></div>
+                      </article>
+                      <article class="rai-card rai-card--export" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Exportação</strong><span class="rai-c-src">relatório final</span></span><span class="rai-c-tag rai-tag--opp">Pronto</span></header>
+                        <div class="rai-c-body rai-export"><span class="rai-chip">PDF</span><span class="rai-chip">Word</span><span class="rai-chip">Sheets</span></div>
+                        <p class="rai-c-note">Dados prontos para exportação.</p>
+                      </article>
                     </div>
-                    <span class="lp-fc-tag" data-tag-type="tendencia">Sinal positivo</span>
-                  </header>
-                  <div class="lp-fc-chart" data-viz-chart>
-                    <span class="lp-viz-tip" data-viz-tip aria-hidden="true"></span>
                   </div>
-                  <p class="lp-fc-insight"><strong>Receita +38% no semestre.</strong> Aceleração consistente desde abril, acima da meta.</p>
-                </article>
 
-                <article class="lp-float-card" data-viz-card data-chart="bars" aria-label="Gasto interpretado pela IA">
-                  <header class="lp-fc-head">
-                    <div class="lp-fc-id">
-                      <strong class="lp-fc-title">Gasto</strong>
-                      <span class="lp-fc-source">custos-2025.xlsx</span>
+                  <div class="rai-col rai-col--back">
+                    <div class="rai-track">
+                      <article class="rai-card rai-card--bars">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Gasto</strong><span class="rai-c-src">custos-2025.xlsx</span></span><span class="rai-c-tag rai-tag--alert">Alerta</span></header>
+                        <div class="rai-chart rai-chart--bars"><span style="--h:44%"></span><span style="--h:60%"></span><span style="--h:52%"></span><span class="is-peak" style="--h:98%"></span><span style="--h:48%"></span><span style="--h:56%"></span></div>
+                        <p class="rai-c-note"><strong>Abril concentra 26% dos gastos.</strong> Pico de 1,7× sobre a média.</p>
+                      </article>
+                      <article class="rai-card rai-card--donut">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Categorias</strong><span class="rai-c-src">orcamento-2025.xlsx</span></span><span class="rai-c-tag rai-tag--opp">Oportunidade</span></header>
+                        <div class="rai-c-body rai-donut-body"><span class="rai-donut"><span>38%</span></span><span class="rai-legend"><span data-c="terra">Marketing<b>38%</b></span><span data-c="green">Operação<b>27%</b></span><span data-c="amber">Pessoal<b>21%</b></span></span></div>
+                      </article>
+                      <article class="rai-card rai-card--status">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Status</strong><span class="rai-c-src">fluxo de revisão</span></span><span class="rai-c-tag rai-tag--up">Em revisão</span></header>
+                        <div class="rai-c-body rai-steps"><span class="is-done">Rascunho</span><span class="is-done">Revisão</span><span>Aprovado</span></div>
+                        <p class="rai-c-note">Resumo executivo gerado.</p>
+                      </article>
+                      <article class="rai-card rai-card--version">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Versionamento</strong><span class="rai-c-src">histórico</span></span><span class="rai-c-tag rai-tag--up">v2.0</span></header>
+                        <ul class="rai-c-body rai-versions"><li><b>v2.0</b> aprovada para envio</li><li><b>v1.2</b> ajustes de auditoria</li><li><b>v1.0</b> gerada automaticamente</li></ul>
+                      </article>
+                      <article class="rai-card rai-card--insight">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Insight da IA</strong><span class="rai-c-src">análise</span></span><span class="rai-c-tag rai-tag--opp">Oportunidade</span></header>
+                        <div class="rai-c-body rai-insight"><span class="rai-insight-ico" aria-hidden="true">✦</span><p>Realocar 8% de Marketing para Operação pode elevar a margem no próximo trimestre.</p></div>
+                      </article>
+                      <article class="rai-card rai-card--bars" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Gasto</strong><span class="rai-c-src">custos-2025.xlsx</span></span><span class="rai-c-tag rai-tag--alert">Alerta</span></header>
+                        <div class="rai-chart rai-chart--bars"><span style="--h:44%"></span><span style="--h:60%"></span><span style="--h:52%"></span><span class="is-peak" style="--h:98%"></span><span style="--h:48%"></span><span style="--h:56%"></span></div>
+                        <p class="rai-c-note"><strong>Abril concentra 26% dos gastos.</strong> Pico de 1,7× sobre a média.</p>
+                      </article>
+                      <article class="rai-card rai-card--donut" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Categorias</strong><span class="rai-c-src">orcamento-2025.xlsx</span></span><span class="rai-c-tag rai-tag--opp">Oportunidade</span></header>
+                        <div class="rai-c-body rai-donut-body"><span class="rai-donut"><span>38%</span></span><span class="rai-legend"><span data-c="terra">Marketing<b>38%</b></span><span data-c="green">Operação<b>27%</b></span><span data-c="amber">Pessoal<b>21%</b></span></span></div>
+                      </article>
+                      <article class="rai-card rai-card--status" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Status</strong><span class="rai-c-src">fluxo de revisão</span></span><span class="rai-c-tag rai-tag--up">Em revisão</span></header>
+                        <div class="rai-c-body rai-steps"><span class="is-done">Rascunho</span><span class="is-done">Revisão</span><span>Aprovado</span></div>
+                        <p class="rai-c-note">Resumo executivo gerado.</p>
+                      </article>
+                      <article class="rai-card rai-card--version" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Versionamento</strong><span class="rai-c-src">histórico</span></span><span class="rai-c-tag rai-tag--up">v2.0</span></header>
+                        <ul class="rai-c-body rai-versions"><li><b>v2.0</b> aprovada para envio</li><li><b>v1.2</b> ajustes de auditoria</li><li><b>v1.0</b> gerada automaticamente</li></ul>
+                      </article>
+                      <article class="rai-card rai-card--insight" aria-hidden="true">
+                        <header class="rai-c-head"><span class="rai-c-id"><strong>Insight da IA</strong><span class="rai-c-src">análise</span></span><span class="rai-c-tag rai-tag--opp">Oportunidade</span></header>
+                        <div class="rai-c-body rai-insight"><span class="rai-insight-ico" aria-hidden="true">✦</span><p>Realocar 8% de Marketing para Operação pode elevar a margem no próximo trimestre.</p></div>
+                      </article>
                     </div>
-                    <span class="lp-fc-tag" data-tag-type="alerta">Alerta</span>
-                  </header>
-                  <div class="lp-fc-chart" data-viz-chart>
-                    <span class="lp-viz-tip" data-viz-tip aria-hidden="true"></span>
                   </div>
-                  <p class="lp-fc-insight"><strong>Abril concentra 26% dos gastos.</strong> Pico de 1,7× sobre a média dos demais meses.</p>
-                </article>
-
-                <article class="lp-float-card" data-viz-card data-chart="donut" aria-label="Categorias interpretadas pela IA">
-                  <header class="lp-fc-head">
-                    <div class="lp-fc-id">
-                      <strong class="lp-fc-title">Categorias</strong>
-                      <span class="lp-fc-source">orcamento-2025.xlsx</span>
-                    </div>
-                    <span class="lp-fc-tag" data-tag-type="oportunidade">Oportunidade</span>
-                  </header>
-                  <div class="lp-fc-chart" data-viz-chart>
-                    <span class="lp-viz-tip" data-viz-tip aria-hidden="true"></span>
-                  </div>
-                  <p class="lp-fc-insight"><strong>Marketing é 38% do orçamento.</strong> Maior categoria isolada — principal alavanca de realocação.</p>
-                </article>
-
+                </div>
               </div>
             </div>
           </div>
@@ -671,7 +741,7 @@
           <span>Insights</span>
         </a>
         <a class="mobile-bottom-nav-item" href="#contato" data-section="contato">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-message"></use></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-mail"></use></svg>
           <span>Contato</span>
         </a>
       </nav>

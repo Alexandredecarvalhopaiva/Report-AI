@@ -1402,7 +1402,7 @@
    gráficos, ticker da IA e glassmorphism leve. (.rai-*)
    ════════════════════════════════════════════════════════════════ */
 
-#publicSite .lp-hero-visual { min-width: 0; }
+#publicSite .lp-hero-visual { min-width: 0; overflow: hidden; border-radius: 24px; }
 
 #publicSite .rai-dash {
   position: relative;
@@ -1611,3 +1611,146 @@
   #publicSite .rai-card:hover .rai-chart--bars span,
   #publicSite .rai-card:hover .rai-donut { animation: none; transition: none; }
 }
+
+/* ============== COVERFLOW (scoped #publicSite) ==============
+   Replaces .rai-dash internals. Reuses --lp-* palette + existing
+   .rai-* inner-card styles (do NOT remove those). */
+
+#publicSite .cf-dash {
+  position: relative;
+  /* IMPORTANT: no overflow:hidden, no mask-image here — they clip Z depth
+     and flatten 3D. Give horizontal breathing room instead. */
+}
+
+#publicSite .cf-glow { position: absolute; border-radius: 50%; filter: blur(58px); z-index: 0; pointer-events: none; }
+#publicSite .cf-glow--a { width: 260px; height: 260px; background: rgba(168, 95, 58, 0.30); top: 4%;  right: 2%; }
+#publicSite .cf-glow--b { width: 300px; height: 300px; background: rgba(95, 116, 70, 0.24); bottom: 0;  left: -4%; }
+
+/* Stage = the 3D camera */
+#publicSite .cf-stage {
+  position: relative;
+  z-index: 1;
+  height: clamp(440px, 52vw, 580px);
+  perspective: 1150px;
+  perspective-origin: 50% 48%;
+  touch-action: pan-y;            /* let vertical page scroll through */
+}
+
+/* Track = the preserve-3d world; absolute positioning context */
+#publicSite .cf-track {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* OUTER card: owns the SLOT transform only */
+#publicSite .cf-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(230px, 30vw, 300px);
+  /* one fixed-order transform string, driven by per-slot vars */
+  --x: 0%; --z: -440px; --ry: 0deg; --s: 0.58;
+  transform:
+    translate(-50%, -50%)
+    translateX(var(--x))
+    translateZ(var(--z))
+    rotateY(var(--ry))
+    scale(var(--s));
+  opacity: 0;
+  z-index: 0;
+  filter: blur(3px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity   0.9s ease,
+    filter    0.9s ease;
+}
+
+/* SLOT TABLE — translateX in % (responsive to card width),
+   translateZ in px (absolute depth). Right side = negative rotateY
+   so the inner edge tips toward the viewer (standard coverflow). */
+#publicSite .cf-card[data-slot="0"]  { --x:   0%; --z:    0px; --ry:   0deg; --s: 1.00; opacity: 1;    z-index: 30; filter: none; }
+#publicSite .cf-card[data-slot="1"]  { --x:  62%; --z: -130px; --ry: -38deg; --s: 0.86; opacity: 0.80; z-index: 20; filter: blur(0.6px); }
+#publicSite .cf-card[data-slot="-1"] { --x: -62%; --z: -130px; --ry:  38deg; --s: 0.86; opacity: 0.80; z-index: 20; filter: blur(0.6px); }
+#publicSite .cf-card[data-slot="2"]  { --x: 115%; --z: -280px; --ry: -46deg; --s: 0.72; opacity: 0.42; z-index: 10; filter: blur(2px); }
+#publicSite .cf-card[data-slot="-2"] { --x:-115%; --z: -280px; --ry:  46deg; --s: 0.72; opacity: 0.42; z-index: 10; filter: blur(2px); }
+/* data-slot="hide" keeps the defaults above (opacity:0, pushed far back) */
+
+/* INNER card: owns the HOVER transform + visual surface.
+   Reuses the existing glass look from .rai-card. */
+#publicSite .cf-card-inner {
+  position: relative;
+  padding: 16px 17px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(7px) saturate(120%);
+  backdrop-filter: blur(7px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 16px 36px -14px rgba(38,39,31,0.28);
+  transform: scale(1) translateY(0);
+  transition: transform 0.4s cubic-bezier(0.2,0.7,0.2,1), box-shadow 0.4s ease, background 0.4s ease;
+}
+
+/* center card gets a stronger, sharper shadow (highlight) */
+#publicSite .cf-card[data-slot="0"] .cf-card-inner {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 30px 64px -18px rgba(38,39,31,0.45);
+}
+
+/* HOVER a specific card: emphasis in place (no slot change) */
+#publicSite .cf-card:hover { filter: none; z-index: 40; }   /* clear blur, raise above siblings */
+#publicSite .cf-card:hover .cf-card-inner {
+  transform: scale(1.06) translateY(-5px);
+  background: rgba(255,255,255,0.99);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 34px 70px -16px rgba(38,39,31,0.5);
+}
+
+/* Microtext: hidden by default, revealed on hover (Req 4) */
+#publicSite .cf-micro {
+  display: block;
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--lp-accent);
+  transition: max-height 0.4s ease, opacity 0.35s ease, margin-top 0.4s ease;
+}
+#publicSite .cf-card:hover .cf-micro { max-height: 2.4em; margin-top: 10px; opacity: 1; }
+
+/* ---- MOBILE (<=860px): swipeable, lighter, larger, no blur ---- */
+@media (max-width: 860px) {
+  #publicSite .cf-glow { display: none; }
+  #publicSite .rai-ticker { position: static; transform: none; margin: 0 0 16px; }
+  #publicSite .cf-stage { height: clamp(360px, 78vw, 440px); perspective: 900px; }
+  #publicSite .cf-card { width: clamp(240px, 74vw, 320px); }
+  /* show only center + immediate neighbors, shallower depth, no blur */
+  #publicSite .cf-card { filter: none !important; }
+  #publicSite .cf-card[data-slot="0"]  { --s: 1.00; }
+  #publicSite .cf-card[data-slot="1"]  { --x:  82%; --z: -90px; --ry: -30deg; --s: 0.82; opacity: 0.55; }
+  #publicSite .cf-card[data-slot="-1"] { --x: -82%; --z: -90px; --ry:  30deg; --s: 0.82; opacity: 0.55; }
+  /* fold ±2 into hidden on mobile to reduce 3D layers */
+  #publicSite .cf-card[data-slot="2"], 
+  #publicSite .cf-card[data-slot="-2"] { opacity: 0; --z: -300px; }
+  #publicSite .cf-card-inner { -webkit-backdrop-filter: none; backdrop-filter: none; background: #fff; }
+  /* on touch, reveal microtext on the centered card (no :hover on touch) */
+  #publicSite .cf-card[data-slot="0"] .cf-micro { max-height: 2.4em; margin-top: 10px; opacity: 1; }
+}
+
+/* ---- REDUCED MOTION: static, legible, no orbit, no blur ---- */
+@media (prefers-reduced-motion: reduce) {
+  #publicSite .cf-card { transition: none; }
+}
+/* JS adds data-static; renders a calm shallow fan, everything readable */
+#publicSite .cf-stage[data-static] .cf-card { filter: none; opacity: 1; transition: none; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="0"]  { --x:   0%; --z: 0; --ry: 0deg;   --s: 1;    z-index: 30; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="1"]  { --x:  64%; --z: 0; --ry: -10deg; --s: 0.9;  z-index: 20; opacity: 0.95; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="-1"] { --x: -64%; --z: 0; --ry:  10deg; --s: 0.9;  z-index: 20; opacity: 0.95; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="2"]  { --x: 122%; --z: 0; --ry: -14deg; --s: 0.8;  z-index: 10; opacity: 0.9; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="-2"] { --x:-122%; --z: 0; --ry:  14deg; --s: 0.8;  z-index: 10; opacity: 0.9; }
+#publicSite .cf-stage[data-static] .cf-card[data-slot="hide"] { opacity: 0; }

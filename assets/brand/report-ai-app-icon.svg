@@ -1,0 +1,52 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Report AI — ícone de aplicativo</title>
+  <desc id="d">Ícone de app: símbolo de relatório em estilo cordel centralizado em um tile arredondado creme.</desc>
+  <defs>
+    <filter id="rough" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency=".016 .07" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+      <path d="M0 1.5H6" stroke="#1B1A17" stroke-width="1.2" stroke-linecap="round" opacity=".22"/>
+    </pattern>
+    <symbol id="mark" viewBox="0 0 256 256">
+      <g filter="url(#rough)">
+        <path d="M58 40 L168 40 L198 70 L198 216 L58 216 Z" fill="#F6F0E4" stroke="#1B1A17" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M168 40 L168 70 L198 70 Z" fill="#E7D7BC"/>
+        <path d="M168 40 L168 70 L198 70" fill="none" stroke="#1B1A17" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M72 104 H184" stroke="#1B1A17" stroke-width="5" stroke-linecap="round"/>
+        <path d="M85 104 A19 19 0 0 1 123 104 Z" fill="#BF5A30"/>
+        <g stroke="#BF5A30" stroke-width="4" stroke-linecap="round">
+          <path d="M104 81 L104 72"/><path d="M115.5 84.1 L119.5 77.1"/><path d="M92.5 84.1 L88.5 77.1"/>
+          <path d="M122.8 90.8 L129.4 86.2"/><path d="M85.2 90.8 L78.6 86.2"/>
+        </g>
+        <path d="M76 170 H150" stroke="#1B1A17" stroke-width="5" stroke-linecap="round"/>
+        <g fill="#1B1A17">
+          <rect x="80" y="154" width="12" height="16" rx="1.5"/><rect x="98" y="142" width="12" height="28" rx="1.5"/>
+          <rect x="116" y="130" width="12" height="40" rx="1.5"/><rect x="134" y="118" width="12" height="52" rx="1.5"/>
+        </g>
+        <g stroke="#1B1A17" stroke-width="4" stroke-linecap="round">
+          <path d="M158 120 H184"/><path d="M158 132 H178"/><path d="M158 144 H184"/><path d="M158 156 H173"/>
+        </g>
+        <path d="M78 204 L94 200 L110 202 L126 192 L140 184" fill="none" stroke="#1B1A17" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="#F6F0E4" stroke="#1B1A17" stroke-width="2.4">
+          <circle cx="78" cy="204" r="3.2"/><circle cx="110" cy="202" r="3.2"/><circle cx="126" cy="192" r="3.2"/>
+        </g>
+        <circle cx="140" cy="184" r="3.6" fill="#BF5A30" stroke="#1B1A17" stroke-width="2.4"/>
+        <circle cx="170" cy="194" r="22" fill="#1B1A17"/>
+        <circle cx="170" cy="194" r="22" fill="url(#hatch)"/>
+        <path d="M170 194 L170 172 A22 22 0 0 1 191.7 197.8 Z" fill="#BF5A30"/>
+        <circle cx="170" cy="194" r="22" fill="none" stroke="#1B1A17" stroke-width="3"/>
+        <path d="M67 61 Q67.8 65.2 72 66 Q67.8 66.8 67 71 Q66.2 66.8 62 66 Q66.2 65.2 67 61 Z" fill="#BF5A30"/>
+        <g fill="#1B1A17">
+          <circle cx="67" cy="82" r="1.9"/><circle cx="67" cy="94" r="1.9"/><circle cx="67" cy="166" r="1.9"/><circle cx="67" cy="178" r="1.9"/>
+          <path d="M67 145 Q67.8 149.2 72 150 Q67.8 150.8 67 155 Q66.2 150.8 62 150 Q66.2 149.2 67 145 Z"/>
+        </g>
+      </g>
+    </symbol>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#EFE6D4"/>
+  <rect x="40" y="40" width="944" height="944" rx="188" fill="none" stroke="#1B1A17" stroke-width="4" opacity=".12"/>
+  <use href="#mark" x="248" y="232" width="528" height="528"/>
+</svg>

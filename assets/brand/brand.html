@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report AI — Kit de Identidade Visual</title>
+<style>
+  :root{
+    --ink:#1B1A17; --paper:#F6F0E4; --paper2:#EFE6D4; --fold:#E7D7BC; --terra:#BF5A30;
+    --serif:Georgia,'Times New Roman',serif; --sans:'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6}
+  .wrap{max-width:1000px;margin:0 auto;padding:56px 28px 80px}
+  header{text-align:center;border-bottom:2px solid var(--ink);padding-bottom:40px;margin-bottom:48px}
+  header img{width:340px;max-width:80%}
+  .kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--terra);font-weight:bold;margin-top:18px}
+  h2{font-family:var(--serif);font-size:30px;font-weight:bold;margin:56px 0 6px}
+  h2 .ai{color:var(--terra)}
+  .rule{height:2px;background:var(--ink);width:48px;margin-bottom:24px}
+  p.lead{max-width:680px;color:#4a463e}
+  .grid{display:grid;gap:20px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)} .g5{grid-template-columns:repeat(5,1fr)}
+  .card{background:#fff;border:1.5px solid var(--ink);border-radius:14px;padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px}
+  .card.cream{background:var(--paper2)} .card.dark{background:var(--ink)}
+  .card img{max-width:100%;max-height:120px}
+  .tag{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#6a6459;font-weight:bold}
+  .card.dark .tag{color:#cfc7b6}
+  .sw{border-radius:12px;border:1.5px solid var(--ink);overflow:hidden}
+  .sw .chip{height:96px} .sw .meta{padding:10px 12px;font-size:13px;background:#fff;border-top:1.5px solid var(--ink)}
+  .sw .meta b{display:block;font-size:14px} .sw .meta code{color:var(--terra);font-weight:bold}
+  .type-row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;border-bottom:1px solid #ddd4c2;padding:16px 0}
+  .serif{font-family:var(--serif)} .ico-row{display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+  .ico-row img{image-rendering:auto}
+  footer{margin-top:64px;border-top:2px solid var(--ink);padding-top:20px;font-size:13px;color:#6a6459}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="report-ai-logo.svg" alt="Report AI">
+    <div class="kicker">Kit de Identidade Visual</div>
+  </header>
+
+  <h2>Paleta</h2><div class="rule"></div>
+  <div class="grid g5">
+    <div class="sw"><div class="chip" style="background:#1B1A17"></div><div class="meta"><b>Tinta</b><code>#1B1A17</code></div></div>
+    <div class="sw"><div class="chip" style="background:#F6F0E4"></div><div class="meta"><b>Creme</b><code>#F6F0E4</code></div></div>
+    <div class="sw"><div class="chip" style="background:#EFE6D4"></div><div class="meta"><b>Creme prof.</b><code>#EFE6D4</code></div></div>
+    <div class="sw"><div class="chip" style="background:#E7D7BC"></div><div class="meta"><b>Dobra</b><code>#E7D7BC</code></div></div>
+    <div class="sw"><div class="chip" style="background:#BF5A30"></div><div class="meta"><b>Terracota</b><code>#BF5A30</code></div></div>
+  </div>
+
+  <h2>Variações da marca</h2><div class="rule"></div>
+  <div class="grid g2">
+    <div class="card"><img src="report-ai-logo.svg" alt="logo vertical"><span class="tag">Logo principal</span></div>
+    <div class="card"><img src="report-ai-logo-horizontal.svg" alt="logo horizontal"><span class="tag">Horizontal</span></div>
+    <div class="card cream"><img src="report-ai-isotipo.svg" alt="isotipo" style="max-height:130px"><span class="tag">Isotipo</span></div>
+    <div class="card"><img src="report-ai-logo-mono.svg" alt="monocromática" style="max-height:150px"><span class="tag">Monocromática</span></div>
+  </div>
+
+  <h2>Dashboard &amp; ícones</h2><div class="rule"></div>
+  <div class="grid g2">
+    <div class="card"><img src="report-ai-dashboard.svg" alt="dashboard lockup"><span class="tag">Navbar / dashboard</span></div>
+    <div class="card cream"><img src="report-ai-app-icon.svg" alt="app icon" style="max-height:140px;border-radius:28px"><span class="tag">App icon (1024)</span></div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="ico-row">
+      <img src="report-ai-favicon.svg" width="64" height="64" alt="favicon 64">
+      <img src="report-ai-favicon.svg" width="32" height="32" alt="favicon 32">
+      <img src="report-ai-favicon.svg" width="16" height="16" alt="favicon 16">
+    </div>
+    <span class="tag">Favicon — 64 / 32 / 16 px</span>
+  </div>
+
+  <h2>Tipografia</h2><div class="rule"></div>
+  <div class="type-row"><span class="serif" style="font-size:52px;font-weight:bold">Report <span style="color:var(--terra)">AI</span></span><span class="tag">Serifada bold · Georgia / Playfair Display</span></div>
+  <div class="type-row"><span style="font-size:18px;font-weight:bold;letter-spacing:3px">DADOS &nbsp;•&nbsp; INSIGHTS &nbsp;•&nbsp; INTELIGÊNCIA</span><span class="tag">Sans caps espaçada · Arial / Inter</span></div>
+
+  <footer>Report AI · estética de cordel nordestino aplicada a relatórios com IA · arquivos SVG (vetor) + PNG (transparente) em <code>/assets/brand/</code></footer>
+</div>
+</body>
+</html>

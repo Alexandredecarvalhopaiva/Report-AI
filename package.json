@@ -1,0 +1,22 @@
+{
+  "name": "report-ai",
+  "version": "1.0.0",
+  "description": "Gerador inteligente de relatorios operacionais para eventos, criado para transformar dados de controle de acesso, reconhecimento facial, listas, portoes, dispositivos, dashboards e anexos em documentos profissionais, auditaveis e prontos para entrega ao produtor ou contratante.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alexandredecarvalhopaiva/Report-AI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Alexandredecarvalhopaiva/Report-AI/issues"
+  },
+  "homepage": "https://github.com/Alexandredecarvalhopaiva/Report-AI#readme"
+}

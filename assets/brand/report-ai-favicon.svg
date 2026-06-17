@@ -1,0 +1,17 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Report AI — favicon</title>
+  <desc id="d">Marca simplificada para tamanhos pequenos: documento com sol nascente e gráfico de barras.</desc>
+  <path d="M10 6 L33 6 L40 13 L40 42 L10 42 Z" fill="#F6F0E4" stroke="#1B1A17" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M33 6 L33 13 L40 13 Z" fill="#E7D7BC"/>
+  <path d="M33 6 L33 13 L40 13" fill="none" stroke="#1B1A17" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M14 22 H36" stroke="#1B1A17" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M17 22 A4 4 0 0 1 25 22 Z" fill="#BF5A30"/>
+  <g stroke="#BF5A30" stroke-width="2" stroke-linecap="round">
+    <path d="M21 16.5 V14"/><path d="M17.6 18 L16 16.4"/><path d="M24.4 18 L26 16.4"/>
+  </g>
+  <g fill="#1B1A17">
+    <rect x="15" y="31" width="4.5" height="6" rx="1"/>
+    <rect x="21.75" y="28" width="4.5" height="9" rx="1"/>
+    <rect x="28.5" y="24.5" width="4.5" height="12.5" rx="1"/>
+  </g>
+</svg>

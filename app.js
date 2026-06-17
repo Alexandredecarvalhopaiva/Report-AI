@@ -503,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function setupPublicSite() {
   const updateHeaderState = () => {
-    document.querySelector(".site-header").classList.toggle("scrolled", window.scrollY > 30);
+    document.querySelector(".lp-header")?.classList.toggle("scrolled", window.scrollY > 30);
   };
 
   window.addEventListener("scroll", updateHeaderState);
@@ -519,6 +519,7 @@ function setupPublicSite() {
     menuButton.classList.toggle("is-open", isOpen);
     menuButton.setAttribute("aria-expanded", String(isOpen));
     menuButton.setAttribute("aria-label", isOpen ? "Fechar menu" : "Abrir menu");
+    document.body.style.overflow = isOpen ? "hidden" : "";
   };
 
   menuButton.addEventListener("click", (event) => {
@@ -606,313 +607,423 @@ function setupPublicSite() {
 }
 
 function setupHeroDashboardInteraction() {
-  const scene = document.querySelector("[data-hero-dashboard]");
-  if (!scene) return;
+  const cards = Array.from(document.querySelectorAll("[data-viz-card]"));
+  if (!cards.length) return;
 
-  const bars = Array.from(scene.querySelectorAll("[data-hero-bar]"));
-  if (!bars.length) return;
+  const NS = "http://www.w3.org/2000/svg";
+  const reduceMotion =
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const fields = {
-    total: scene.querySelector("[data-hero-total]"),
-    totalLabel: scene.querySelector("[data-hero-total-label]"),
-    score: scene.querySelector("[data-hero-score]"),
-    scoreLabel: scene.querySelector("[data-hero-score-label]"),
-    occupancy: scene.querySelector("[data-hero-occupancy]"),
-    occupancyLabel: scene.querySelector("[data-hero-occupancy-label]"),
-    decision: scene.querySelector("[data-hero-decision]"),
-    impact: scene.querySelector("[data-hero-impact]"),
-    impactCriteria: scene.querySelector("[data-hero-impact-criteria]"),
-    dayLabel: scene.querySelector("[data-hero-day-label]"),
-    syncLabel: scene.querySelector("[data-hero-sync-label]"),
-    auditTitle: scene.querySelector("[data-hero-audit-title]"),
-    auditText: scene.querySelector("[data-hero-audit-text]"),
-    auditNote: scene.querySelector("[data-hero-audit-note]"),
-    reportVersion: scene.querySelector("[data-hero-report-version]"),
-    reportLabel: scene.querySelector("[data-hero-report-label]"),
+  const COLORS = {
+    green: "#5f7446",
+    accent: "#a85f3a",
+    amber: "#d88b2a",
+    neutral: "#cdbd9e",
   };
-  const metricCards = Array.from(scene.querySelectorAll(".scene-metrics article"));
-  const chart = scene.querySelector(".scene-chart");
-  const chartShell = scene.querySelector(".scene-chart-shell");
-  const progressBar = scene.querySelector("[data-hero-progress]");
-  const sparkPoint = scene.querySelector("[data-hero-spark-point]");
-  const reducedMotionQuery = window.matchMedia
-    ? window.matchMedia("(prefers-reduced-motion: reduce)")
-    : { matches: false };
-  let activeIndex = Math.max(0, bars.findIndex((bar) => bar.classList.contains("is-active")));
-  let intervalId = null;
-  let changeTimer = null;
-  let interactionTimer = null;
-  let changeToken = 0;
-  const activeAnimations = new Map();
 
-  const setText = (element, value) => {
-    if (element && value) {
-      element.textContent = value;
+  function svgEl(tag, attrs, text) {
+    const node = document.createElementNS(NS, tag);
+    if (attrs) {
+      for (const key in attrs) node.setAttribute(key, String(attrs[key]));
     }
-  };
-
-  const parseHeroNumber = (value) => {
-    const normalized = String(value ?? "")
-      .replace(/^v/i, "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-      .replace(/[^\d.-]/g, "");
-    const number = Number.parseFloat(normalized);
-    return Number.isFinite(number) ? number : null;
-  };
-
-  const formatHeroNumber = (number, template) => {
-    if (String(template).includes("%")) {
-      return `${Math.round(number)}%`;
-    }
-    if (String(template).includes(",")) {
-      const decimals = String(template).split(",")[1]?.replace(/\D/g, "").length || 1;
-      return number.toFixed(decimals).replace(".", ",");
-    }
-    return Math.round(number).toLocaleString("pt-BR");
-  };
-
-  const replayDataMotion = (element) => {
-    if (!element || reducedMotionQuery.matches) return;
-    element.classList.remove("is-presenting");
-    void element.offsetWidth;
-    element.classList.add("is-presenting");
-    window.setTimeout(() => element.classList.remove("is-presenting"), 720);
-  };
-
-  const animateDataText = (element, value, { instant = false } = {}) => {
-    if (!element || !value) return;
-
-    const targetText = String(value);
-    const targetNumber = parseHeroNumber(targetText);
-    const currentNumber = parseHeroNumber(element.textContent);
-    const shouldCount =
-      !instant &&
-      !reducedMotionQuery.matches &&
-      !targetText.trim().toLowerCase().startsWith("v") &&
-      targetNumber !== null &&
-      currentNumber !== null;
-
-    if (activeAnimations.has(element)) {
-      window.cancelAnimationFrame(activeAnimations.get(element));
-      activeAnimations.delete(element);
-    }
-
-    if (!shouldCount) {
-      element.textContent = targetText;
-      replayDataMotion(element);
-      return;
-    }
-
-    const duration = 820;
-    const start = currentNumber;
-    const delta = targetNumber - start;
-    const startTime = window.performance.now();
-
-    const tick = (time) => {
-      const progress = Math.min((time - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      element.textContent = formatHeroNumber(start + delta * eased, targetText);
-      if (progress < 1) {
-        activeAnimations.set(element, window.requestAnimationFrame(tick));
-      } else {
-        element.textContent = targetText;
-        activeAnimations.delete(element);
-      }
-    };
-
-    replayDataMotion(element);
-    activeAnimations.set(element, window.requestAnimationFrame(tick));
-  };
-
-  const setProgress = (index) => {
-    if (!progressBar) return;
-    progressBar.style.setProperty("--hero-progress", `${((index + 1) / bars.length) * 100}%`);
-  };
-
-  const setFocusLine = (index) => {
-    if (!chartShell) return;
-    chartShell.style.setProperty("--hero-chart-focus-x", `${((index + 0.5) / bars.length) * 100}%`);
-  };
-
-  const showInteraction = () => {
-    window.clearTimeout(interactionTimer);
-    scene.classList.add("is-interacting");
-  };
-
-  const settleInteraction = () => {
-    window.clearTimeout(interactionTimer);
-    interactionTimer = window.setTimeout(() => {
-      scene.classList.remove("is-interacting");
-    }, 720);
-  };
-
-  const presentBarData = (bar, { instant = false } = {}) => {
-    animateDataText(fields.decision, bar.dataset.decision, { instant });
-    animateDataText(fields.impact, bar.dataset.impact, { instant });
-    setText(fields.impactCriteria, bar.dataset.impactCriteria);
-    animateDataText(fields.total, bar.dataset.total, { instant });
-    setText(fields.totalLabel, `${bar.dataset.day} · variação analisada`);
-    animateDataText(fields.score, bar.dataset.score, { instant });
-    setText(fields.scoreLabel, Number.parseFloat((bar.dataset.score || "").replace(",", ".")) < 8
-      ? "Revisão recomendada"
-      : "Alta confiabilidade");
-    animateDataText(fields.occupancy, bar.dataset.occupancy, { instant });
-    setText(fields.occupancyLabel, "Meta ou base esperada");
-    setText(fields.dayLabel, `${bar.dataset.day} · ${bar.dataset.total} registros analisados`);
-    setText(fields.syncLabel, "Arraste para comparar ciclos");
-    setText(fields.auditTitle, bar.dataset.auditTitle);
-    setText(fields.auditText, bar.dataset.auditText);
-    setText(fields.auditNote, bar.dataset.auditNote);
-    animateDataText(fields.reportVersion, bar.dataset.reportVersion, { instant });
-    setText(fields.reportLabel, bar.dataset.reportLabel);
-
-    metricCards.forEach((card) => {
-      card.classList.remove("is-presenting");
-      if (!reducedMotionQuery.matches && !instant) {
-        void card.offsetWidth;
-        card.classList.add("is-presenting");
-        window.setTimeout(() => card.classList.remove("is-presenting"), 420);
-      }
-    });
-
-    if (sparkPoint) {
-      sparkPoint.setAttribute("cx", bar.dataset.sparkX || "152");
-      sparkPoint.setAttribute("cy", bar.dataset.sparkY || "18");
-    }
-  };
-
-  const setActiveBar = (index, { instant = false } = {}) => {
-    const bar = bars[index];
-    if (!bar) return;
-
-    activeIndex = index;
-    setProgress(activeIndex);
-    setFocusLine(activeIndex);
-    bars.forEach((item, itemIndex) => {
-      item.classList.toggle("is-active", itemIndex === activeIndex);
-      item.setAttribute("aria-pressed", String(itemIndex === activeIndex));
-    });
-
-    if (instant || reducedMotionQuery.matches) {
-      scene.classList.remove("is-changing");
-      presentBarData(bar, { instant: true });
-      return;
-    }
-
-    const token = ++changeToken;
-    window.clearTimeout(changeTimer);
-    scene.classList.add("is-changing");
-    changeTimer = window.setTimeout(() => {
-      if (token !== changeToken) return;
-      presentBarData(bar);
-      window.requestAnimationFrame(() => {
-        window.setTimeout(() => scene.classList.remove("is-changing"), 80);
-      });
-    }, 180);
-  };
-
-  const stopAutoplay = () => {
-    if (intervalId) {
-      window.clearInterval(intervalId);
-      intervalId = null;
-    }
-    scene.classList.remove("is-autoplaying");
-  };
-
-  const startAutoplay = () => {
-    if (reducedMotionQuery.matches || intervalId || bars.length < 2) return;
-    scene.classList.add("is-autoplaying");
-    intervalId = window.setInterval(() => {
-      setActiveBar((activeIndex + 1) % bars.length);
-    }, 3200);
-  };
-
-  bars.forEach((bar, index) => {
-    bar.addEventListener("pointerenter", () => {
-      showInteraction();
-      setActiveBar(index);
-    });
-    bar.addEventListener("focus", () => {
-      showInteraction();
-      setActiveBar(index);
-    });
-    bar.addEventListener("click", () => {
-      showInteraction();
-      setActiveBar(index);
-      settleInteraction();
-    });
-    bar.addEventListener("touchstart", () => {
-      showInteraction();
-      setActiveBar(index);
-      settleInteraction();
-    }, { passive: true });
-    bar.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      showInteraction();
-      const nextIndex = event.key === "Home"
-        ? 0
-        : event.key === "End"
-          ? bars.length - 1
-          : event.key === "ArrowLeft"
-            ? Math.max(0, index - 1)
-            : Math.min(bars.length - 1, index + 1);
-      bars[nextIndex]?.focus();
-      setActiveBar(nextIndex);
-    });
-  });
-
-  chart?.addEventListener("pointermove", (event) => {
-    if (event.pointerType === "mouse" && event.buttons > 1) return;
-    const rect = chart.getBoundingClientRect();
-    const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 0.999);
-    const index = Math.min(bars.length - 1, Math.floor(ratio * bars.length));
-    showInteraction();
-    if (index !== activeIndex) {
-      setActiveBar(index);
-    } else {
-      setFocusLine(index);
-    }
-  });
-
-  scene.addEventListener("pointerenter", () => {
-    showInteraction();
-    stopAutoplay();
-  });
-  scene.addEventListener("pointerleave", () => {
-    settleInteraction();
-    startAutoplay();
-  });
-  scene.addEventListener("focusin", () => {
-    showInteraction();
-    stopAutoplay();
-  });
-  scene.addEventListener("focusout", () => {
-    window.setTimeout(() => {
-      if (!scene.contains(document.activeElement)) {
-        settleInteraction();
-        startAutoplay();
-      }
-    }, 0);
-  });
-
-  if (typeof reducedMotionQuery.addEventListener === "function") {
-    reducedMotionQuery.addEventListener("change", (event) => {
-      if (event.matches) {
-        stopAutoplay();
-      } else {
-        startAutoplay();
-      }
-    });
+    if (text != null) node.textContent = text;
+    return node;
   }
 
-  setActiveBar(activeIndex, { instant: true });
-  startAutoplay();
+  // Tooltip posicionado dentro do card do próprio elemento (cada card tem o seu).
+  function tipAt(target, html) {
+    const container = target.closest(".lp-fc-chart");
+    if (!container) return;
+    const tip = container.querySelector("[data-viz-tip]");
+    if (!tip) return;
+    const s = container.getBoundingClientRect();
+    const r = target.getBoundingClientRect();
+    tip.innerHTML = html;
+    tip.style.left = `${r.left - s.left + r.width / 2}px`;
+    tip.style.top = `${r.top - s.top}px`;
+    tip.classList.add("is-on");
+  }
+
+  function hideTip() {
+    document
+      .querySelectorAll(".lp-float-stack [data-viz-tip].is-on")
+      .forEach((t) => t.classList.remove("is-on"));
+  }
+
+  // ── Gráfico de tendência (área + linha) ──────────────────────
+  function buildArea(container) {
+    const data = [
+      { m: "Jan", v: 42 },
+      { m: "Fev", v: 45 },
+      { m: "Mar", v: 43 },
+      { m: "Abr", v: 49 },
+      { m: "Mai", v: 52 },
+      { m: "Jun", v: 55 },
+      { m: "Jul", v: 58 },
+    ];
+    const W = 320;
+    const H = 112;
+    const padL = 14;
+    const padR = 14;
+    const top = 16;
+    const bottom = 80;
+    const vMin = 39;
+    const vMax = 61;
+    const xs = data.map((_, i) => padL + (i * (W - padL - padR)) / (data.length - 1));
+    const ys = data.map((d) => top + (1 - (d.v - vMin) / (vMax - vMin)) * (bottom - top));
+
+    const linePath = xs
+      .map((x, i) => `${i ? "L" : "M"} ${x.toFixed(1)} ${ys[i].toFixed(1)}`)
+      .join(" ");
+    const areaPath = `${linePath} L ${xs[xs.length - 1].toFixed(1)} ${bottom} L ${xs[0].toFixed(
+      1,
+    )} ${bottom} Z`;
+
+    const svg = svgEl("svg", {
+      class: "lp-viz-svg",
+      viewBox: `0 0 ${W} ${H}`,
+      preserveAspectRatio: "xMidYMid meet",
+      role: "img",
+      "aria-label": "Tendência de receita de janeiro a julho, em crescimento.",
+    });
+
+    const defs = svgEl("defs");
+    const grad = svgEl("linearGradient", { id: "lpVizGrad", x1: 0, y1: 0, x2: 0, y2: 1 });
+    grad.appendChild(svgEl("stop", { offset: "0%", "stop-color": COLORS.green, "stop-opacity": 0.26 }));
+    grad.appendChild(svgEl("stop", { offset: "100%", "stop-color": COLORS.green, "stop-opacity": 0 }));
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    const area = svgEl("path", { class: "lp-viz-area", d: areaPath, fill: "url(#lpVizGrad)" });
+    svg.appendChild(area);
+
+    const guide = svgEl("line", {
+      class: "lp-viz-guide",
+      x1: xs[0],
+      y1: top,
+      x2: xs[0],
+      y2: bottom,
+    });
+    svg.appendChild(guide);
+
+    const line = svgEl("path", { class: "lp-viz-line", d: linePath });
+    svg.appendChild(line);
+
+    const points = [];
+    data.forEach((d, i) => {
+      svg.appendChild(svgEl("text", { class: "lp-viz-axis-label", x: xs[i], y: 102 }, d.m));
+      const isLast = i === data.length - 1;
+      const circle = svgEl("circle", {
+        class: `lp-viz-point${isLast ? " is-last" : ""}`,
+        cx: xs[i],
+        cy: ys[i],
+        r: isLast ? 4.2 : 3.2,
+      });
+      const hit = svgEl("circle", {
+        cx: xs[i],
+        cy: ys[i],
+        r: 15,
+        fill: "transparent",
+        tabindex: "0",
+        role: "img",
+        "aria-label": `${d.m}: R$ ${d.v} mil`,
+      });
+      const enter = () => {
+        circle.classList.add("is-hot");
+        guide.setAttribute("x1", xs[i]);
+        guide.setAttribute("x2", xs[i]);
+        guide.style.opacity = "1";
+        tipAt(circle, `${d.m} · <b>R$ ${d.v} mil</b>`);
+      };
+      const leave = () => {
+        circle.classList.remove("is-hot");
+        guide.style.opacity = "0";
+        hideTip();
+      };
+      hit.addEventListener("mouseenter", enter);
+      hit.addEventListener("mouseleave", leave);
+      hit.addEventListener("focus", enter);
+      hit.addEventListener("blur", leave);
+      svg.appendChild(circle);
+      svg.appendChild(hit);
+      points.push(circle);
+    });
+
+    const tracer = svgEl("circle", { class: "lp-viz-tracer", cx: xs[0], cy: ys[0], r: 4 });
+    svg.appendChild(tracer);
+
+    container.appendChild(svg);
+
+    let rafId = null;
+    return {
+      replay() {
+        if (rafId) cancelAnimationFrame(rafId);
+        const len = line.getTotalLength();
+        if (reduceMotion || !len) {
+          line.style.strokeDasharray = "none";
+          line.style.strokeDashoffset = "0";
+          tracer.style.opacity = "0";
+          return;
+        }
+        line.style.transition = "none";
+        line.style.strokeDasharray = String(len);
+        line.style.strokeDashoffset = String(len);
+        void line.getBoundingClientRect();
+        line.style.transition = "stroke-dashoffset 1000ms ease";
+        line.style.strokeDashoffset = "0";
+
+        const dur = 1000;
+        let start = null;
+        const step = (ts) => {
+          if (start === null) {
+            start = ts;
+            tracer.style.opacity = "1";
+          }
+          const k = Math.min(1, (ts - start) / dur);
+          const p = line.getPointAtLength(len * k);
+          tracer.setAttribute("cx", p.x);
+          tracer.setAttribute("cy", p.y);
+          if (k < 1) {
+            rafId = requestAnimationFrame(step);
+          } else {
+            tracer.style.opacity = "0";
+            rafId = null;
+          }
+        };
+        rafId = requestAnimationFrame(step);
+      },
+    };
+  }
+
+  // ── Gráfico de gastos (barras) ───────────────────────────────
+  function buildBars(container) {
+    const data = [
+      { m: "Jan", v: 52 },
+      { m: "Fev", v: 64 },
+      { m: "Mar", v: 47 },
+      { m: "Abr", v: 92, peak: true },
+      { m: "Mai", v: 58 },
+      { m: "Jun", v: 43 },
+    ];
+    const wrap = document.createElement("div");
+    wrap.className = "lp-viz-bars";
+
+    data.forEach((d, i) => {
+      const bar = document.createElement("button");
+      bar.type = "button";
+      bar.className = `lp-viz-bar${d.peak ? " is-peak" : ""}`;
+      bar.style.setProperty("--i", i);
+      bar.style.setProperty("--h", `${d.v}%`);
+      bar.setAttribute("aria-label", `${d.m}: R$ ${d.v} mil`);
+
+      const track = document.createElement("span");
+      track.className = "lp-viz-bar-track";
+      const fill = document.createElement("span");
+      fill.className = "lp-viz-bar-fill";
+      track.appendChild(fill);
+
+      const label = document.createElement("span");
+      label.className = "lp-viz-bar-label";
+      label.textContent = d.m;
+
+      bar.append(track, label);
+
+      const txt = `${d.m} · <b>R$ ${d.v} mil</b>`;
+      bar.addEventListener("mouseenter", () => {
+        bar.classList.add("is-hot");
+        tipAt(fill, txt);
+      });
+      bar.addEventListener("mouseleave", () => {
+        bar.classList.remove("is-hot");
+        hideTip();
+      });
+      bar.addEventListener("focus", () => tipAt(fill, txt));
+      bar.addEventListener("blur", hideTip);
+
+      wrap.appendChild(bar);
+    });
+
+    container.appendChild(wrap);
+
+    return {
+      replay() {
+        wrap.classList.remove("is-live");
+        void wrap.offsetWidth;
+        wrap.classList.add("is-live");
+      },
+    };
+  }
+
+  // ── Gráfico de distribuição (rosca) ──────────────────────────
+  function buildDonut(container) {
+    const cats = [
+      { l: "Marketing", v: 38, c: COLORS.accent },
+      { l: "Operação", v: 27, c: COLORS.green },
+      { l: "Pessoal", v: 21, c: COLORS.amber },
+      { l: "Outros", v: 14, c: COLORS.neutral },
+    ];
+    const dominant = 0;
+    const cx = 80;
+    const cy = 80;
+    const r = 58;
+    const C = 2 * Math.PI * r;
+
+    const wrap = document.createElement("div");
+    wrap.className = "lp-viz-donut-wrap";
+
+    const svg = svgEl("svg", {
+      class: "lp-viz-donut",
+      viewBox: "0 0 160 160",
+      role: "img",
+      "aria-label": "Distribuição do orçamento por categoria. Marketing 38%, Operação 27%, Pessoal 21%, Outros 14%.",
+    });
+    svg.appendChild(
+      svgEl("circle", { cx, cy, r, fill: "none", stroke: "#efe6d4", "stroke-width": 18 }),
+    );
+
+    const segs = [];
+    let acc = 0;
+    cats.forEach((cat) => {
+      const frac = cat.v / 100;
+      const dash = frac * C;
+      const rot = acc * 360 - 90;
+      acc += frac;
+      const seg = svgEl("circle", {
+        class: "lp-viz-seg",
+        cx,
+        cy,
+        r,
+        stroke: cat.c,
+        "stroke-dasharray": `${dash.toFixed(2)} ${(C - dash).toFixed(2)}`,
+        "stroke-dashoffset": dash.toFixed(2),
+        transform: `rotate(${rot.toFixed(2)} ${cx} ${cy})`,
+      });
+      seg.dataset.dash = dash.toFixed(2);
+      svg.appendChild(seg);
+      segs.push(seg);
+    });
+
+    const centerVal = svgEl(
+      "text",
+      { class: "lp-viz-donut-center-value", x: cx, y: cy + 4 },
+      `${cats[dominant].v}%`,
+    );
+    const centerLab = svgEl(
+      "text",
+      { class: "lp-viz-donut-center-label", x: cx, y: cy + 20 },
+      cats[dominant].l,
+    );
+    svg.append(centerVal, centerLab);
+
+    const ul = document.createElement("ul");
+    ul.className = "lp-viz-legend";
+    const items = [];
+    cats.forEach((cat) => {
+      const li = document.createElement("li");
+      li.style.setProperty("--c", cat.c);
+      li.innerHTML = `<span class="lp-viz-dot"></span><span>${cat.l}</span><span class="lp-viz-legend-val">${cat.v}%</span>`;
+      ul.appendChild(li);
+      items.push(li);
+    });
+
+    wrap.append(svg, ul);
+    container.appendChild(wrap);
+
+    function focusCat(i) {
+      segs.forEach((s, j) => {
+        s.classList.toggle("is-hot", j === i);
+        s.classList.toggle("is-dim", j !== i);
+      });
+      items.forEach((li, j) => li.classList.toggle("is-hot", j === i));
+      centerVal.textContent = `${cats[i].v}%`;
+      centerLab.textContent = cats[i].l;
+    }
+    function reset() {
+      segs.forEach((s) => s.classList.remove("is-hot", "is-dim"));
+      items.forEach((li) => li.classList.remove("is-hot"));
+      centerVal.textContent = `${cats[dominant].v}%`;
+      centerLab.textContent = cats[dominant].l;
+    }
+
+    segs.forEach((seg, i) => {
+      seg.setAttribute("tabindex", "0");
+      seg.setAttribute("role", "img");
+      seg.setAttribute("aria-label", `${cats[i].l}: ${cats[i].v}%`);
+      seg.addEventListener("mouseenter", () => focusCat(i));
+      seg.addEventListener("mouseleave", reset);
+      seg.addEventListener("focus", () => focusCat(i));
+      seg.addEventListener("blur", reset);
+    });
+    items.forEach((li, i) => {
+      li.addEventListener("mouseenter", () => focusCat(i));
+      li.addEventListener("mouseleave", reset);
+    });
+
+    return {
+      replay() {
+        if (reduceMotion) {
+          segs.forEach((s) => {
+            s.style.strokeDashoffset = "0";
+          });
+          return;
+        }
+        segs.forEach((s, i) => {
+          s.style.transition = "none";
+          s.style.strokeDashoffset = s.dataset.dash;
+          void s.getBoundingClientRect();
+          s.style.transition = `stroke-dashoffset 720ms ease ${i * 130}ms`;
+          s.style.strokeDashoffset = "0";
+        });
+      },
+    };
+  }
+
+  const BUILDERS = { area: buildArea, bars: buildBars, donut: buildDonut };
+
+  const built = cards
+    .map((card) => {
+      const type = card.getAttribute("data-chart");
+      const container = card.querySelector("[data-viz-chart]");
+      const builder = BUILDERS[type];
+      if (!builder || !container) return null;
+      return { card, api: builder(container) };
+    })
+    .filter(Boolean);
+
+  // Sem motion reduzido, mostra o estado final de uma vez.
+  if (reduceMotion) {
+    built.forEach((b) => b.api.replay());
+    return;
+  }
+
+  // Entrada em cascata no carregamento. Usa setTimeout (não rAF) para
+  // funcionar mesmo quando a aba é renderizada oculta/offscreen.
+  built.forEach((b, i) => window.setTimeout(() => b.api.replay(), 80 + i * 160));
+
+  // Re-anima ao reentrar na viewport (best-effort). Ignora a primeira
+  // interseção de cada card para não duplicar a animação de entrada.
+  if ("IntersectionObserver" in window) {
+    const seen = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          if (!seen.has(entry.target)) {
+            seen.add(entry.target);
+            return;
+          }
+          const found = built.find((b) => b.card === entry.target);
+          if (found) found.api.replay();
+        });
+      },
+      { threshold: 0.4 },
+    );
+    built.forEach((b) => observer.observe(b.card));
+  }
 }
 
 function setupContactForm() {
-  const form = document.querySelector(".contact-form");
+  const form = document.querySelector("#contactForm");
   if (!form) return;
 
   const phoneInput = form.querySelector("#contactPhone");
@@ -1006,7 +1117,7 @@ function buildContactWhatsappUrl(form) {
 }
 
 function getSiteNavLinks() {
-  return [...siteNav.querySelectorAll('.site-nav-links a[href^="#"]')];
+  return [...siteNav.querySelectorAll('.lp-nav-links a[href^="#"]')];
 }
 
 function setActiveSiteNavLink(hash) {
@@ -7061,16 +7172,6 @@ function showToast(message) {
       menuBtn.setAttribute('aria-expanded', 'true');
     }
     document.body.style.overflow = 'hidden';
-  }
-
-  if (menuBtn) {
-    // Override do event listener existente para mobile
-    const origHandler = menuBtn.onclick;
-    menuBtn.addEventListener('click', function (e) {
-      if (window.innerWidth > 780) return;
-      e.stopPropagation();
-      nav.classList.contains('open') ? closeNav() : openNav();
-    }, true);
   }
 
   if (closeBtn) closeBtn.addEventListener('click', closeNav);

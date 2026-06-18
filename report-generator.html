@@ -76,7 +76,9 @@
     .type-card { border: 2px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .15s; text-align: center; }
     .type-card:hover { border-color: var(--brand); background: var(--brand-light); }
     .type-card.selected { border-color: var(--brand); background: var(--brand-light); }
-    .type-card .type-icon { font-size: 22px; margin-bottom: 6px; }
+    .type-card .type-icon { width: 42px; height: 42px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; background: var(--brand-light); border-radius: 11px; color: var(--brand); transition: background .15s; }
+    .type-card .type-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .type-card:hover .type-icon, .type-card.selected .type-icon { background: var(--white); }
     .type-card .type-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
     .type-card .type-specialist { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
@@ -211,62 +213,62 @@
       <div class="card-title"><span class="icon">📋</span> Qual tipo de relatório deseja gerar?</div>
       <div class="type-grid">
         <div class="type-card selected" data-type="financial" onclick="selectType(this)">
-          <div class="type-icon">💰</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v9"/><path d="M14.4 9.6c-.6-.8-1.6-1.2-2.6-1.2-1.5 0-2.6.8-2.6 2 0 2.7 5.2 1.4 5.2 4 0 1.2-1.1 2-2.6 2-1 0-2-.4-2.6-1.2"/></svg></div>
           <div class="type-name">Financeiro</div>
           <div class="type-specialist">Especialista Financeiro</div>
         </div>
         <div class="type-card" data-type="commercial" onclick="selectType(this)">
-          <div class="type-icon">📈</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 3.5 3 6-7"/><path d="M14 8h4.5v4.5"/></svg></div>
           <div class="type-name">Comercial</div>
           <div class="type-specialist">Especialista Comercial</div>
         </div>
         <div class="type-card" data-type="hr" onclick="selectType(this)">
-          <div class="type-icon">👥</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><path d="M16 6a3 3 0 0 1 0 5.6"/><path d="M17 14c2.3.5 4 2.4 4 5"/></svg></div>
           <div class="type-name">Recursos Humanos</div>
           <div class="type-specialist">Especialista em RH</div>
         </div>
         <div class="type-card" data-type="operational" onclick="selectType(this)">
-          <div class="type-icon">⚙️</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/><path d="M12 3v2.4M12 18.6V21M21 12h-2.4M5.4 12H3M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3 5.6 5.6"/></svg></div>
           <div class="type-name">Operacional</div>
           <div class="type-specialist">Especialista Operacional</div>
         </div>
         <div class="type-card" data-type="events" onclick="selectType(this)">
-          <div class="type-icon">🎫</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5V8a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v1.5a2 2 0 1 0 0 5V16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1.5a2 2 0 1 0 0-5z"/><path d="M14.5 8.5v7" stroke-dasharray="1.6 2"/></svg></div>
           <div class="type-name">Eventos</div>
           <div class="type-specialist">Especialista em Eventos</div>
         </div>
         <div class="type-card" data-type="marketing" onclick="selectType(this)">
-          <div class="type-icon">📣</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h2l3.5 3V6L7 9H5a1 1 0 0 0-1 1z"/><path d="M14 8.5a4.5 4.5 0 0 1 0 7"/></svg></div>
           <div class="type-name">Marketing</div>
           <div class="type-specialist">Especialista em Marketing</div>
         </div>
         <div class="type-card" data-type="customer_service" onclick="selectType(this)">
-          <div class="type-icon">🎧</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.6"/><rect x="17" y="13" width="4" height="6" rx="1.6"/><path d="M20 19a3 3 0 0 1-3 3h-2.5"/></svg></div>
           <div class="type-name">Atendimento</div>
           <div class="type-specialist">Especialista em Atendimento</div>
         </div>
         <div class="type-card" data-type="productivity" onclick="selectType(this)">
-          <div class="type-icon">🚀</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c2.8 1.6 4.2 4.4 4.2 7.7 0 2-.8 3.9-1.8 5.3H9.6C8.6 14.6 7.8 12.7 7.8 10.7 7.8 7.4 9.2 4.6 12 3z"/><circle cx="12" cy="9.8" r="1.6"/><path d="M9.6 16l-1.8 2.5M14.4 16l1.8 2.5"/></svg></div>
           <div class="type-name">Produtividade</div>
           <div class="type-specialist">Especialista em Produtividade</div>
         </div>
         <div class="type-card" data-type="engineering" onclick="selectType(this)">
-          <div class="type-icon">🏗️</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17.5h17"/><path d="M5 17.5v-2.5a7 7 0 0 1 14 0v2.5"/><path d="M10 6.8V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.8"/></svg></div>
           <div class="type-name">Engenharia</div>
           <div class="type-specialist">Especialista em Engenharia</div>
         </div>
         <div class="type-card" data-type="security" onclick="selectType(this)">
-          <div class="type-icon">🔒</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l7 2.8v5c0 4.4-3 7.4-7 8.8-4-1.4-7-4.4-7-8.8v-5l7-2.8z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></div>
           <div class="type-name">Segurança</div>
           <div class="type-specialist">Especialista em Segurança</div>
         </div>
         <div class="type-card" data-type="educational" onclick="selectType(this)">
-          <div class="type-icon">🎓</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 9L12 5l9.5 4-9.5 4-9.5-4z"/><path d="M6.5 11.2V15c0 1.4 2.5 2.6 5.5 2.6s5.5-1.2 5.5-2.6v-3.8"/><path d="M21.5 9v4.5"/></svg></div>
           <div class="type-name">Educacional</div>
           <div class="type-specialist">Especialista Educacional</div>
         </div>
         <div class="type-card" data-type="executive" onclick="selectType(this)">
-          <div class="type-icon">📊</div>
+          <div class="type-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><rect x="7.5" y="12" width="2.6" height="5"/><rect x="12" y="8.5" width="2.6" height="8.5"/><rect x="16.5" y="6" width="2.6" height="11"/></svg></div>
           <div class="type-name">Executivo</div>
           <div class="type-specialist">Analista Executivo</div>
         </div>

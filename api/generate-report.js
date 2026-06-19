@@ -71,19 +71,30 @@ const OBJECTIVE_LABELS = {
 };
 
 module.exports = async (req, res) => {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Controle de origem: por padrão só mesma origem; defina ALLOWED_ORIGINS (CSV) na Vercel p/ liberar outras.
+  const reqOrigin = req.headers.origin || '';
+  const reqHost = req.headers.host || '';
+  const allowList = (process.env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const sameOrigin = !reqOrigin || reqOrigin === `https://${reqHost}` || reqOrigin === `http://${reqHost}`;
+  const originAllowed = sameOrigin || allowList.includes(reqOrigin);
+  if (reqOrigin && originAllowed) res.setHeader('Access-Control-Allow-Origin', reqOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!originAllowed) return res.status(403).json({ error: 'Origem não autorizada.' });
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
   const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
   const { reportType = 'executive', objective = 'executive', period = '', audience = '', sources = [] } = req.body || {};
+
+  // Limite de payload (sources carregam base64 de PDFs/imagens) — evita abuso e custo excessivo.
+  const payloadChars = (sources || []).reduce((n, s) => n + ((s && s.data && s.data.length) || 0) + ((s && s.content && s.content.length) || 0), 0);
+  if (payloadChars > 6000000) return res.status(413).json({ error: 'Conteúdo muito grande para análise. Reduza o tamanho ou a quantidade de arquivos.' });
 
   const specialist = SPECIALIST_PROMPTS[reportType] || SPECIALIST_PROMPTS.executive;
   const objectiveLabel = OBJECTIVE_LABELS[objective] || 'Relatório Executivo';

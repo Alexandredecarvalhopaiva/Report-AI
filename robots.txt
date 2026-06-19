@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alexandredecarvalhopaiva.github.io/Report-AI/sitemap.xml
+Sitemap: https://report-ai-v6o5.vercel.app/sitemap.xml

@@ -22,6 +22,17 @@
   --lp-gutter: clamp(20px, 5vw, 48px);
   --lp-max: 1140px;
 
+  /* Escala de espaçamento vertical (ritmo + hierarquia) */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+  --space-2xl: 96px;
+  --space-section: clamp(56px, 8.5vw, 104px);
+  --space-section-head: clamp(28px, 4.5vw, 48px);
+  --space-grid: clamp(16px, 2.4vw, 24px);
+
   background: var(--lp-bg);
   color: var(--lp-ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -58,7 +69,7 @@
 }
 
 #publicSite .lp-section {
-  padding-block: clamp(64px, 9vw, 112px);
+  padding-block: var(--space-section);
 }
 
 #publicSite .lp-section + .lp-section {
@@ -314,7 +325,7 @@
 }
 
 #publicSite .lp-hero h1 {
-  margin: 0 0 18px;
+  margin: 0 0 var(--space-md);
   font-size: clamp(2rem, 4.6vw, 3.1rem);
   font-weight: 800;
   line-height: 1.08;
@@ -327,7 +338,7 @@
 }
 
 #publicSite .lp-hero-lead {
-  margin: 0 0 28px;
+  margin: 0 0 var(--space-lg);
   max-width: 54ch;
   font-size: clamp(1rem, 1.6vw, 1.12rem);
   color: var(--lp-muted);
@@ -336,8 +347,8 @@
 #publicSite .lp-hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 36px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
 }
 
 #publicSite .lp-hero-points {
@@ -763,13 +774,13 @@
 /* ── Grade "o que a IA encontra" ─────────────────────────────── */
 
 #publicSite .lp-section-head {
-  margin-bottom: clamp(32px, 5vw, 52px);
+  margin-bottom: var(--space-section-head);
 }
 
 #publicSite .lp-find-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--space-grid);
 }
 
 #publicSite .lp-find-card {
@@ -815,7 +826,7 @@
 #publicSite .lp-steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--space-grid);
   counter-reset: lp-step;
 }
 
@@ -860,7 +871,7 @@
 #publicSite .lp-anatomy-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--space-grid);
 }
 
 #publicSite .lp-anatomy-card {
@@ -1023,8 +1034,8 @@
 #publicSite .lp-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 26px;
+  gap: var(--space-sm);
+  padding: clamp(20px, 4vw, 26px);
   border: 1px solid var(--lp-line);
   border-radius: var(--lp-radius);
   background: var(--lp-surface);
@@ -1193,7 +1204,11 @@
   }
 
   #publicSite .lp-hero-grid {
-    gap: 40px;
+    gap: var(--space-lg);
+  }
+
+  #publicSite .lp-hero {
+    padding-bottom: var(--space-md);
   }
 }
 
@@ -1517,10 +1532,28 @@
 
 /* ── Score (medidor) ── */
 #publicSite .rai-score-body { display: flex; align-items: center; gap: 15px; }
-#publicSite .rai-gauge { position: relative; flex: 0 0 auto; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--lp-green) 0 var(--p), #e7dcc7 var(--p) 100%); }
-#publicSite .rai-gauge::before { content: ""; position: absolute; inset: 19%; border-radius: 50%; background: var(--lp-surface); }
-#publicSite .rai-gauge b { position: relative; z-index: 1; font-size: 1.15rem; font-weight: 800; color: var(--lp-ink); line-height: 1; }
-#publicSite .rai-gauge i { position: relative; z-index: 1; font-style: normal; font-size: 0.58rem; font-weight: 700; color: var(--lp-muted); }
+#publicSite .rai-gauge { position: relative; flex: 0 0 auto; width: 72px; height: 72px; display: grid; place-items: center; }
+#publicSite .rai-gauge svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+#publicSite .rai-gauge-track { fill: none; stroke: var(--lp-line); stroke-width: 8; }
+#publicSite .rai-gauge-arc { fill: none; stroke: var(--lp-green); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 182.2; stroke-dashoffset: 23.7; }
+#publicSite .rai-gauge-val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#publicSite .rai-gauge-val b { font-size: 1.1rem; font-weight: 800; color: var(--lp-ink); line-height: 1; }
+#publicSite .rai-gauge-val i { font-style: normal; font-size: 0.56rem; font-weight: 700; color: var(--lp-muted); }
+@keyframes raiGaugeFill { from { stroke-dashoffset: 182.2; } to { stroke-dashoffset: 23.7; } }
+
+/* Gráficos animam quando o card chega ao centro do carrossel (slot 0) */
+#publicSite .cf-card[data-slot="0"] .rai-line { animation: raiDraw 1.2s cubic-bezier(.22,.61,.36,1) both; }
+#publicSite .cf-card[data-slot="0"] .rai-dot { animation: raiDotPop .45s cubic-bezier(.2,.9,.3,1.5) .85s both; }
+#publicSite .cf-card[data-slot="0"] .rai-gauge-arc { animation: raiGaugeFill 1.15s cubic-bezier(.34,.1,.2,1) both; }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span { animation: raiGrow .6s cubic-bezier(.2,.8,.2,1) both; }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span:nth-child(2){ animation-delay:.06s }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span:nth-child(3){ animation-delay:.12s }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span:nth-child(4){ animation-delay:.18s }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span:nth-child(5){ animation-delay:.24s }
+#publicSite .cf-card[data-slot="0"] .rai-chart--bars span:nth-child(6){ animation-delay:.30s }
+#publicSite .cf-card[data-slot="0"] .rai-donut { animation: raiDonutIn .85s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes raiDonutIn { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes raiDotPop { from { transform: scale(0); } to { transform: scale(1); } }
 #publicSite .rai-score-meta { display: flex; flex-direction: column; gap: 5px; font-size: 0.72rem; font-weight: 600; color: var(--lp-muted); }
 #publicSite .rai-score-meta span { display: flex; align-items: center; gap: 7px; }
 #publicSite .rai-score-meta span::before { content: "✓"; color: var(--lp-green); font-weight: 800; font-size: 0.72rem; }
@@ -1609,7 +1642,12 @@
   #publicSite .rai-card:hover .rai-line,
   #publicSite .rai-card:hover .rai-dot,
   #publicSite .rai-card:hover .rai-chart--bars span,
-  #publicSite .rai-card:hover .rai-donut { animation: none; transition: none; }
+  #publicSite .rai-card:hover .rai-donut,
+  #publicSite .cf-card[data-slot="0"] .rai-line,
+  #publicSite .cf-card[data-slot="0"] .rai-dot,
+  #publicSite .cf-card[data-slot="0"] .rai-gauge-arc,
+  #publicSite .cf-card[data-slot="0"] .rai-chart--bars span,
+  #publicSite .cf-card[data-slot="0"] .rai-donut { animation: none; transition: none; }
 }
 
 /* ============== COVERFLOW (scoped #publicSite) ==============
@@ -1727,7 +1765,7 @@
 @media (max-width: 860px) {
   #publicSite .cf-glow { display: none; }
   #publicSite .rai-ticker { position: static; transform: none; margin: 0 0 16px; }
-  #publicSite .cf-stage { height: clamp(360px, 78vw, 440px); perspective: 900px; }
+  #publicSite .cf-stage { height: clamp(256px, 44vw, 280px); perspective: 900px; }
   #publicSite .cf-card { width: clamp(240px, 74vw, 320px); }
   /* show only center + immediate neighbors, shallower depth, no blur */
   #publicSite .cf-card { filter: none !important; }
@@ -1784,8 +1822,7 @@
 /* NOTE: after assemble JS REMOVES the [data-entrance] attr entirely -> delays vanish -> rotation has no lag */
 
 /* center chart redraw during entrance (chart anims are otherwise hover-only) */
-#publicSite .cf-card.cf-enter-draw .rai-line { animation: raiDraw 1.1s ease 0.15s both; }
-#publicSite .cf-card.cf-enter-draw .rai-chart--bars span { animation: raiGrow 0.55s cubic-bezier(0.2,0.8,0.2,1) 0.2s both; }
+/* (animação de entrada do card central agora vem das regras [data-slot="0"]) */
 
 /* copy + ticker compose in */
 @keyframes cfRiseIn { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }

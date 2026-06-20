@@ -141,28 +141,41 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
     parts.push({ inline_data: { mime_type: b.mimeType, data: b.data } });
   }
 
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const geminiBody = JSON.stringify({
+    system_instruction: { parts: [{ text: specialist.prompt }] },
+    contents: [{ role: 'user', parts }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 8192,
+      responseMimeType: 'application/json',
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  });
+
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: specialist.prompt }] },
-          contents: [{ role: 'user', parts }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 8192,
-            responseMimeType: 'application/json',
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
+    // Até 3 tentativas — 503 (sobrecarga) e 429 (limite) são transitórios no Gemini.
+    let response = null;
+    let lastStatus = 0;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey }, body: geminiBody }
+      );
+      if (response.ok) break;
+      lastStatus = response.status;
+      if ((response.status === 503 || response.status === 429) && attempt < 2) {
+        await sleep(900 * (attempt + 1));
+        continue;
       }
-    );
+      break;
+    }
 
     if (!response.ok) {
-      const err = await response.text();
-      return res.status(502).json({ error: `Gemini error: ${err}` });
+      if (lastStatus === 503) return res.status(503).json({ error: 'A IA está com alta demanda neste momento. Aguarde alguns segundos e tente gerar de novo.' });
+      if (lastStatus === 429) return res.status(429).json({ error: 'Muitas solicitações agora. Aguarde um instante e tente novamente.' });
+      if (lastStatus === 400 || lastStatus === 401 || lastStatus === 403) return res.status(502).json({ error: 'O serviço de IA está indisponível no momento. Tente novamente mais tarde.' });
+      return res.status(502).json({ error: 'Não foi possível gerar o relatório agora. Tente novamente em instantes.' });
     }
 
     const data = await response.json();
@@ -171,9 +184,10 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
     const text = ((cand && cand.content && cand.content.parts) || [])
       .map(p => p.text).filter(Boolean).join('');
     if (!text) {
-      const reason = (data.promptFeedback && data.promptFeedback.blockReason)
-        || finishReason || 'resposta vazia';
-      return res.status(502).json({ error: `Gemini não retornou conteúdo (${reason}).` });
+      if (data.promptFeedback && data.promptFeedback.blockReason) {
+        return res.status(422).json({ error: 'A IA não pôde analisar este conteúdo por políticas de segurança. Tente com outros dados.' });
+      }
+      return res.status(502).json({ error: 'A IA não retornou um resultado. Tente gerar novamente.' });
     }
 
     // Remove cercas de markdown (```json ... ```), caso a IA as inclua
@@ -183,9 +197,9 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
     try { content = JSON.parse(cleaned); }
     catch {
       if (finishReason === 'MAX_TOKENS') {
-        return res.status(502).json({ error: 'A resposta da IA excedeu o limite de tokens e veio incompleta. Reduza os dados enviados ou gere um relatório mais enxuto.' });
+        return res.status(502).json({ error: 'O relatório ficou grande demais e veio incompleto. Reduza os dados enviados e tente de novo.' });
       }
-      return res.status(502).json({ error: 'Gemini retornou um JSON inválido.' });
+      return res.status(502).json({ error: 'Não foi possível interpretar a resposta da IA. Tente gerar novamente.' });
     }
 
     return res.status(200).json({
@@ -199,6 +213,6 @@ Produza uma análise especializada completa. Responda SOMENTE com JSON válido n
       generated_at: new Date().toISOString(),
     });
   } catch (err) {
-    return res.status(500).json({ error: `Erro interno: ${err.message}` });
+    return res.status(502).json({ error: 'Não foi possível gerar o relatório agora. Tente novamente em instantes.' });
   }
 };

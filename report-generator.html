@@ -439,9 +439,7 @@
         <div class="vcheck-list">
           <div class="vcheck-item" id="vc-attached"><span class="vcheck-badge">○</span><span class="vcheck-text">Arquivo anexado</span></div>
           <div class="vcheck-item" id="vc-format"><span class="vcheck-badge">○</span><span class="vcheck-text">Formato aceito</span></div>
-          <div class="vcheck-item" id="vc-content"><span class="vcheck-badge">○</span><span class="vcheck-text">Conteúdo identificado</span></div>
-          <div class="vcheck-item" id="vc-mindata"><span class="vcheck-badge">○</span><span class="vcheck-text">Dados mínimos encontrados</span></div>
-          <div class="vcheck-item" id="vc-coherent"><span class="vcheck-badge">○</span><span class="vcheck-text">Coerência com o relatório</span></div>
+          <div class="vcheck-item" id="vc-content"><span class="vcheck-badge">○</span><span class="vcheck-text">Arquivo lido com sucesso</span></div>
           <div class="vcheck-item" id="vc-ready"><span class="vcheck-badge">○</span><span class="vcheck-text">Pronto para gerar</span></div>
         </div>
         <div class="vcheck-result" id="vcResult" role="status" aria-live="polite"></div>
@@ -777,7 +775,7 @@
   function resetValidationUI() {
     var card = document.getElementById('validationCard');
     if (card) card.style.display = 'none';
-    ['vc-attached','vc-format','vc-content','vc-mindata','vc-coherent','vc-ready'].forEach(function (id) { setCheck(id, 'pending'); });
+    ['vc-attached','vc-format','vc-content','vc-ready'].forEach(function (id) { setCheck(id, 'pending'); });
     var result = document.getElementById('vcResult');
     if (result) { result.className = 'vcheck-result'; result.innerHTML = ''; }
     var comp = document.getElementById('complementField');
@@ -797,67 +795,26 @@
     result.className = 'vcheck-result';
     result.innerHTML = '';
 
-    // 1) Checagens client-side (determinísticas, sem IA)
+    // Checagem TÉCNICA (determinística, sem IA): arquivo anexado + formato aceito + leitura OK.
     var loaded = uploadedFiles.filter(function (f) { return f.status === 'ok'; });
     var hasFile = uploadedFiles.length > 0;
     var formatOk = loaded.length > 0; // readFile já rejeita formatos não suportados/corrompidos/grandes
 
     setCheck('vc-attached', hasFile ? 'ok' : 'bad');
-    setCheck('vc-format', formatOk ? 'ok' : 'bad');
-    ['vc-content','vc-mindata','vc-coherent','vc-ready'].forEach(function (id) { setCheck(id, 'pending'); });
+    setCheck('vc-format', !hasFile ? 'pending' : (formatOk ? 'ok' : 'bad'));
+    setCheck('vc-content', !hasFile ? 'pending' : (formatOk ? 'ok' : 'bad'));
+    setCheck('vc-ready', 'pending');
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     if (!hasFile) { blockValidation('no_file', null); return; }
     if (!formatOk) { blockValidation('corrupted', null); return; }
 
-    // 2) Validação por IA
-    ['vc-content','vc-mindata','vc-coherent','vc-ready'].forEach(function (id) { setCheck(id, 'checking'); });
-    btn.disabled = true; btn.textContent = 'Validando arquivos…';
-
-    // Captura as fontes UMA vez — validação e geração usam exatamente o mesmo payload.
-    var srcs = buildSources(true);
-
-    var v;
-    try {
-      var res = await fetch('/api/validate-files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportType: selectedType,
-          objective: document.getElementById('objective').value,
-          sources: srcs
-        })
-      });
-      if (!res.ok) { var e = await res.json().catch(function () { return {}; }); throw new Error(e.error || ('HTTP ' + res.status)); }
-      v = await res.json();
-    } catch (err) {
-      btn.disabled = false; btn.textContent = GEN_BTN_LABEL;
-      ['vc-content','vc-mindata','vc-coherent','vc-ready'].forEach(function (id) { setCheck(id, 'pending'); });
-      var emsg = (err && err.message) ? err.message : '';
-      if (!emsg || /failed to fetch|networkerror|load failed/i.test(emsg)) emsg = 'Falha de conexão ao validar os arquivos. Tente novamente.';
-      showError(emsg);
-      return;
-    }
-
-    // 3) Atualiza o checklist com o resultado
-    var ck = v.checklist || {};
-    setCheck('vc-content', ck.content_identified ? 'ok' : 'bad');
-    setCheck('vc-mindata', ck.minimum_data ? 'ok' : 'bad');
-    setCheck('vc-coherent', ck.coherent ? 'ok' : 'bad');
-    setCheck('vc-ready', v.is_valid ? 'ok' : 'bad');
-
-    if (v.is_valid) {
-      document.getElementById('complementField').classList.remove('show');
-      result.className = 'vcheck-result good show';
-      result.innerHTML = '<strong>✓ ' + esc(VSTATUS_MSG.valid) + '</strong>'
-        + '<div>Confiança da leitura: ' + Math.round((v.confidence || 0) * 100) + '%. Gerando relatório…</div>';
-      btn.textContent = 'Gerando…';
-      setTimeout(function () { generateReport(srcs); }, 650);
-      return;
-    }
-
-    // 4) Bloqueio
-    blockValidation(v.status, v);
+    // Tudo certo tecnicamente → gera direto (sem análise de IA de conteúdo/coerência).
+    setCheck('vc-ready', 'ok');
+    result.className = 'vcheck-result good show';
+    result.innerHTML = '<strong>✓ Arquivos validados. Gerando relatório…</strong>';
+    btn.disabled = true; btn.textContent = 'Gerando…';
+    generateReport(buildSources(true));
   }
 
   function blockValidation(status, v) {

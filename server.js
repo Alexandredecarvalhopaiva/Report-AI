@@ -31,14 +31,18 @@ const MIME = {
   '.woff': 'font/woff',
 };
 
-// Carrega a função de API
-const apiHandler = require('./api/generate-report');
+// Funções de API disponíveis (whitelist — espelha os arquivos em /api).
+const API_HANDLERS = {
+  '/api/generate-report': require('./api/generate-report'),
+  '/api/validate-files': require('./api/validate-files'),
+};
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
-  // Rota da API
-  if (url.pathname === '/api/generate-report') {
+  // Rotas da API
+  const apiHandler = API_HANDLERS[url.pathname];
+  if (apiHandler) {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
@@ -47,7 +51,7 @@ const server = http.createServer(async (req, res) => {
       } catch {
         req.body = {};
       }
-      // Adapta a resposta nativa do Node à API estilo Vercel usada em api/generate-report.js
+      // Adapta a resposta nativa do Node à API estilo Vercel usada nas funções em /api
       res.status = (code) => { res.statusCode = code; return res; };
       res.json = (obj) => {
         if (!res.headersSent) res.setHeader('Content-Type', 'application/json; charset=utf-8');

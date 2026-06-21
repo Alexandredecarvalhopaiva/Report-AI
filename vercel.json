@@ -1,5 +1,6 @@
 {
   "functions": {
-    "api/generate-report.js": { "maxDuration": 30 }
+    "api/generate-report.js": { "maxDuration": 30 },
+    "api/validate-files.js": { "maxDuration": 30 }
   }
 }

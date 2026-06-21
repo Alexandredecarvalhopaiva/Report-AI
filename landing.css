@@ -1588,8 +1588,8 @@
 #publicSite .rai-ticker {
   position: absolute;
   top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 14px;
+  transform: none;
   z-index: 6;
   display: inline-flex;
   align-items: center;
@@ -1625,7 +1625,7 @@
 @media (max-width: 860px) {
   #publicSite .rai-dash { height: auto; overflow: visible; border-radius: 0; -webkit-mask-image: none; mask-image: none; }
   #publicSite .rai-glow { display: none; }
-  #publicSite .rai-ticker { position: static; transform: none; margin: 0 0 16px; }
+  #publicSite .rai-ticker { position: static; transform: none; display: flex; width: -moz-fit-content; width: fit-content; margin: 0 0 16px; }
   #publicSite .rai-cols { flex-direction: row; gap: 14px; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 16px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   #publicSite .rai-cols::-webkit-scrollbar { display: none; }
   #publicSite .rai-col, #publicSite .rai-track { display: contents; }
@@ -1765,7 +1765,7 @@
 /* ---- MOBILE (<=860px): swipeable, lighter, larger, no blur ---- */
 @media (max-width: 860px) {
   #publicSite .cf-glow { display: none; }
-  #publicSite .rai-ticker { position: static; transform: none; margin: 0 0 16px; }
+  #publicSite .rai-ticker { position: static; transform: none; display: flex; width: -moz-fit-content; width: fit-content; margin: 0 0 16px; }
   #publicSite .cf-stage { height: clamp(268px, 46vw, 300px); perspective: 900px; }
   #publicSite .cf-card { width: clamp(240px, 74vw, 320px); }
   /* show only center + immediate neighbors, shallower depth, no blur */

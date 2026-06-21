@@ -96,6 +96,10 @@ module.exports = async (req, res) => {
   const payloadChars = (sources || []).reduce((n, s) => n + ((s && s.data && s.data.length) || 0) + ((s && s.content && s.content.length) || 0), 0);
   if (payloadChars > 6000000) return res.status(413).json({ error: 'Conteúdo muito grande para análise. Reduza o tamanho ou a quantidade de arquivos.' });
 
+  // Defesa em profundidade: não emitir relatório sem nenhum dado real (mesmo que a validação do cliente seja burlada).
+  const usableSources = (sources || []).filter((s) => (s && s.data && s.mimeType) || (s && typeof s.content === 'string' && s.content.trim().length));
+  if (!usableSources.length) return res.status(400).json({ error: 'Nenhum arquivo com dados válidos foi enviado. Anexe um arquivo com informações para gerar o relatório.' });
+
   const specialist = SPECIALIST_PROMPTS[reportType] || SPECIALIST_PROMPTS.executive;
   const objectiveLabel = OBJECTIVE_LABELS[objective] || 'Relatório Executivo';
 
@@ -116,7 +120,7 @@ PERÍODO: ${period || 'Não informado'}
 ${sourcesText || (binarySources.length ? '(Documentos e imagens anexados abaixo para análise.)' : 'Nenhuma fonte enviada — faça uma análise geral com base no contexto.')}
 
 === INSTRUÇÃO ===
-Produza uma análise especializada completa. Responda SOMENTE com JSON válido no formato abaixo:
+Baseie-se SOMENTE nos dados fornecidos acima. NÃO invente números, nomes, datas ou fatos que não estejam nos dados — se alguma informação não constar, escreva "não informado" em vez de supor. Produza uma análise especializada completa. Responda SOMENTE com JSON válido no formato abaixo:
 {
   "title": "Título do relatório",
   "executive_summary": "Resumo executivo em 3-5 parágrafos",

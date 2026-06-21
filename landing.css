@@ -1587,27 +1587,51 @@
 /* ── Ticker "IA analisando" ── */
 #publicSite .rai-ticker {
   position: absolute;
-  top: 14px;
-  left: 14px;
+  top: 16px;
+  left: 16px;
   transform: none;
   z-index: 6;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  max-width: calc(100% - 24px);
-  padding: 7px 13px;
+  gap: 9px;
+  max-width: calc(100% - 32px);
+  padding: 7px 14px 7px 12px;
   border-radius: 999px;
-  background: rgba(38, 39, 31, 0.92);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 14px 32px -10px rgba(38, 39, 31, 0.55);
+  background: rgba(34, 35, 28, 0.94);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
+  box-shadow: 0 14px 32px -10px rgba(38, 39, 31, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(143, 198, 107, 0.10);
   color: #fff;
   font-size: clamp(0.62rem, 1.05vw, 0.74rem);
   font-weight: 650;
   white-space: nowrap;
   flex-wrap: nowrap;
+  overflow: hidden;            /* clipa o feixe de varredura à forma da pílula */
+  isolation: isolate;
 }
-#publicSite .rai-ticker-dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: #8fc66b; animation: raiPulse 1.9s ease-out infinite; }
+/* Feixe de "scan": uma faixa de luz atravessa a pílula devagar (a IA lendo os dados) */
+#publicSite .rai-ticker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.16) 50%, transparent 62%);
+  transform: translateX(-130%);
+  animation: raiScan 4.6s cubic-bezier(.4, 0, .2, 1) infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Equalizador "ao vivo" — 4 barras pulsando fora de fase (substitui o ponto) */
+#publicSite .rai-eq { flex: 0 0 auto; display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; }
+#publicSite .rai-eq i {
+  width: 2.5px; height: 100%; border-radius: 1.5px;
+  background: #8fc66b; transform: scaleY(.32); transform-origin: bottom;
+  box-shadow: 0 0 6px rgba(143, 198, 107, 0.55);
+  animation: raiEq 1.05s ease-in-out infinite;
+}
+#publicSite .rai-eq i:nth-child(1) { animation-delay: -.90s; }
+#publicSite .rai-eq i:nth-child(2) { animation-delay: -.30s; }
+#publicSite .rai-eq i:nth-child(3) { animation-delay: -.60s; }
+#publicSite .rai-eq i:nth-child(4) { animation-delay: -.15s; }
 #publicSite .rai-ticker-label { flex: 0 0 auto; white-space: nowrap; color: #cdbfa6; }
 #publicSite .rai-ticker-msgs { position: relative; display: inline-grid; }
 #publicSite .rai-ticker-msgs b { grid-area: 1 / 1; font-weight: 700; opacity: 0; white-space: nowrap; animation: raiMsg 16.8s linear infinite; }
@@ -1620,6 +1644,8 @@
 #publicSite .rai-ticker-msgs b:nth-child(7) { animation-delay: 14.4s; }
 @keyframes raiPulse { 0% { box-shadow: 0 0 0 0 rgba(143, 198, 107, 0.5); } 70% { box-shadow: 0 0 0 7px rgba(143, 198, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(143, 198, 107, 0); } }
 @keyframes raiMsg { 0% { opacity: 0; transform: translateY(5px); } 2% { opacity: 1; transform: translateY(0); } 12% { opacity: 1; transform: translateY(0); } 14.3% { opacity: 0; transform: translateY(-5px); } 100% { opacity: 0; } }
+@keyframes raiEq { 0%, 100% { transform: scaleY(.28); } 50% { transform: scaleY(1); } }
+@keyframes raiScan { 0% { transform: translateX(-130%); } 55%, 100% { transform: translateX(230%); } }
 
 /* ── Mobile: carrossel horizontal com swipe ── */
 @media (max-width: 860px) {
@@ -1636,7 +1662,8 @@
 /* ── Acessibilidade: reduzir movimento ── */
 @media (prefers-reduced-motion: reduce) {
   #publicSite .rai-track { animation: none !important; }
-  #publicSite .rai-ticker-dot { animation: none; }
+  #publicSite .rai-eq i { animation: none; transform: scaleY(.7); }
+  #publicSite .rai-ticker::after { display: none; }
   #publicSite .rai-ticker-msgs b { animation: none; }
   #publicSite .rai-ticker-msgs b:first-child { opacity: 1; }
   #publicSite .rai-card:hover .rai-line,

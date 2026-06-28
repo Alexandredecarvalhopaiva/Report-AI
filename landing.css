@@ -1179,25 +1179,28 @@
   color: var(--lp-accent);
 }
 
-#publicSite .lp-footer-linkedin {
+#publicSite .lp-footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+#publicSite .lp-footer-icon {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  border: 1px solid var(--lp-line);
-  border-radius: 999px;
-  font-weight: 600;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  justify-content: center;
+  color: var(--lp-muted);
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-#publicSite .lp-footer-linkedin:hover {
+#publicSite .lp-footer-icon:hover {
   color: var(--lp-accent);
-  border-color: var(--lp-accent);
-  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
 }
 
-#publicSite .lp-footer-linkedin svg {
-  flex-shrink: 0;
+#publicSite .lp-footer-icon svg {
+  display: block;
 }
 
 /* ── Responsivo: tablet ──────────────────────────────────────── */

@@ -1179,6 +1179,30 @@
   color: var(--lp-accent);
 }
 
+#publicSite .lp-footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+#publicSite .lp-footer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lp-muted);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+#publicSite .lp-footer-icon:hover {
+  color: var(--lp-accent);
+  transform: translateY(-1px);
+}
+
+#publicSite .lp-footer-icon svg {
+  display: block;
+}
+
 /* ── Responsivo: tablet ──────────────────────────────────────── */
 
 @media (max-width: 980px) {
